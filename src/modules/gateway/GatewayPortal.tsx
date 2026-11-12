@@ -114,7 +114,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({ onSelectPortal, la
                   onClick={() => openRegister('networking_marketplace')}
                   className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-400/20 transition-all transform group-hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>🚀 புதிய உறுப்பினர் பதிவு (Register with Razorpay ₹1,500 INR) ➔</span>
+                  <span>🚀 புதிய உறுப்பினர் பதிவு (Pay ₹1 RS Only) ➔</span>
                 </button>
               )}
               <button
@@ -223,7 +223,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({ onSelectPortal, la
                   onClick={() => openRegister('networking_marketplace')}
                   className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition cursor-pointer"
                 >
-                  🚀 பதிவு செய்க (₹1,500 INR மட்டும் தான்) ➔
+                  🚀 பதிவு செய்க (Pay ₹1 RS Only) ➔
                 </button>
               )}
               <button

@@ -26,15 +26,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 }) => {
   const isTa = lang === 'ta';
 
-  // Constants
+  // Constants - LOCKED TO ₹1 RS ONLY FOR LIVE TESTING
   const [paymentLink, setPaymentLink] = useState<string>('https://rzp.io/rzp/qsujcmuB');
-  const MEMBERSHIP_FEE_INR = 1500; // ₹1,500 INR standard
+  const MEMBERSHIP_FEE_INR = 1; // Strictly ₹1 RS ONLY
+  const paymentAmount = 1; // Strictly ₹1 RS ONLY
 
-  // Wizard State: 1 = Fast Profile Details, 2 = Pay ₹1 / ₹1500 INR, 3 = Confirmation
+  // Wizard State: 1 = Fast Profile Details, 2 = Pay ₹1 RS ONLY
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
-  const [paymentAmount, setPaymentAmount] = useState<number>(1); // Default to ₹1 INR for live testing!
 
   // File Input Refs for local system file uploads
   const ownerPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -186,12 +186,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       if (scriptLoaded && (window as any).Razorpay) {
         const options = {
           key: orderData.keyId || 'rzp_test_NBN_DEMO_KEY',
-          amount: activeAmount * 100, // paise (1 INR = 100 paise, 1500 INR = 150000 paise)
+          amount: 100, // Strictly 100 paise = ₹1.00 INR (FIRST 1 RS ONLY)
           currency: 'INR',
           name: 'NBN - Nuvea Business Network',
-          description: activeAmount === 1 
-            ? 'NBN லைவ் சோதனை கட்டணம் - ₹1 INR மட்டும்' 
-            : 'NBN வருடாந்திர உறுப்பினர் சேர்க்கை - ₹1,500 INR',
+          description: 'NBN லைவ் உறுப்பினர் பதிவு - ₹1 RS ONLY',
           image: formData.businessPhoto || formData.profilePhoto,
           order_id: orderData.id,
           prefill: {
@@ -216,7 +214,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         rzp.open();
       } else {
         // Open user's payment link in new tab, then complete registration
-        window.open(RAZORPAY_PAYMENT_LINK, '_blank');
+        window.open(paymentLink, '_blank');
         await finalizeRegistration(orderData.id || `order_rzp_${Date.now()}`, `pay_link_${Date.now()}`);
       }
     } catch (e: any) {
@@ -309,8 +307,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     ? (isTa ? 'NBN வணிகர் விரைவு பதிவு' : 'NBN Fast Business Onboarding')
                     : (isTa ? 'Razorpay பாதுகாப்பான கட்டணம்' : 'Razorpay Secure Payment')}
                 </h2>
-                <span className="px-2 py-0.5 rounded text-[10px] font-black bg-amber-400 text-slate-950">
-                  ₹1,500 INR ONLY
+                <span className="px-2 py-0.5 rounded text-[10px] font-black bg-amber-400 text-slate-950 uppercase">
+                  ₹1 RS ONLY PAY (100% LIVE TEST)
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -627,7 +625,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   onClick={handleProceedToPayment}
                   className="w-full py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>🚀 கட்டணம் செலுத்த செல்ல (Proceed to Pay ₹1,500 INR)</span>
+                  <span>🚀 கட்டணம் செலுத்த செல்ல (Proceed to Pay ₹1 RS ONLY)</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <p className="text-[11px] text-slate-500 text-center mt-2 font-medium">
@@ -665,43 +663,23 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 </button>
               </div>
 
-              {/* AMOUNT SELECTOR (FIRST TEST ₹1 INR AS REQUESTED) */}
-              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-400 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900">
-                    💳 கட்டணத் தொகையைத் தேர்வு செய்யவும் (Select Amount):
-                  </span>
-                  <span className="text-[10px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full">
-                    ⚡ LIVE TEST 1 INR READY
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentAmount(1)}
-                    className={`p-3 rounded-xl border text-center transition cursor-pointer ${
-                      paymentAmount === 1
-                        ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-md ring-2 ring-amber-300'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="text-xl font-black">₹1 INR</div>
-                    <div className="text-[10px] font-bold text-slate-700">⚡ லைவ் சோதனை (1 Rupee Test)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentAmount(1500)}
-                    className={`p-3 rounded-xl border text-center transition cursor-pointer ${
-                      paymentAmount === 1500
-                        ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-md ring-2 ring-amber-300'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="text-xl font-black">₹1,500 INR</div>
-                    <div className="text-[10px] font-bold text-slate-700">வருடாந்திர மெம்பர்ஷிப்</div>
-                  </button>
+              {/* LOCKED PAYMENT NOTICE: FIRST 1 RS ONLY PAY */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-400 flex items-center justify-between shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-black text-xl shadow-md">
+                    ₹1
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-slate-900 flex items-center gap-2">
+                      <span>கட்டணம்: ₹1.00 INR (1 RS ONLY)</span>
+                      <span className="text-[10px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                        LIVE TEST
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600 font-medium">
+                      முதல் கட்டமாக ₹1 மட்டும் செலுத்தி முழு ப்ரொஃபைலையும் சரிபார்க்கலாம்.
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -720,9 +698,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 <div className="space-y-2 text-xs text-slate-300">
                   <div className="flex justify-between">
                     <span>உறுப்பினர் சேர்க்கை கட்டணம் (100% Monopoly Seat):</span>
-                    <span className="font-bold text-white">
-                      ₹{paymentAmount === 1 ? '0.85' : '1,271.19'} INR
-                    </span>
+                    <span className="font-bold text-white">₹0.85 INR</span>
                   </div>
                   <div className="flex justify-between">
                     <span>நுவேவா ஸ்டுடியோ 4K வணிக விளம்பர வீடியோ தயாரிப்பு:</span>
@@ -730,16 +706,16 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
                   <div className="flex justify-between text-slate-400 text-[11px]">
                     <span>மத்திய சரக்கு சேவை வரி CGST (9%):</span>
-                    <span>₹{paymentAmount === 1 ? '0.08' : '114.40'} INR</span>
+                    <span>₹0.08 INR</span>
                   </div>
                   <div className="flex justify-between text-slate-400 text-[11px]">
                     <span>மாநில சரக்கு சேவை வரி SGST (9%):</span>
-                    <span>₹{paymentAmount === 1 ? '0.07' : '114.41'} INR</span>
+                    <span>₹0.07 INR</span>
                   </div>
                   <div className="flex justify-between pt-3 border-t border-slate-800 text-base font-black text-white">
                     <span>செலுத்த வேண்டிய மொத்தத் தொகை (Net Payable):</span>
                     <span className="text-amber-400 text-xl font-black">
-                      ₹{paymentAmount}.00 INR {paymentAmount === 1 ? '(லைவ் சோதனை)' : 'மட்டும் தான்'}
+                      ₹1.00 INR (1 RS ONLY)
                     </span>
                   </div>
                 </div>
@@ -769,7 +745,18 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
               {/* PAYMENT BUTTONS */}
               <div className="space-y-3">
-                {/* 1. Official Direct Razorpay Payment Link (Big Golden Button) */}
+                {/* 1. Official Direct Razorpay Popup / Checkout (Big Golden Button) */}
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handlePaymentAndEntry(false)}
+                  className="w-full py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <CreditCard className="w-5 h-5 text-slate-950" />
+                  <span>💳 Razorpay மூலம் ₹1 மட்டும் செலுத்தவும் (Pay ₹1 RS ONLY) ➔</span>
+                </button>
+
+                {/* 2. Razorpay Link Direct Button */}
                 <a
                   href={paymentLink}
                   target="_blank"
@@ -779,30 +766,19 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       handlePaymentAndEntry(false);
                     }, 1200);
                   }}
-                  className="w-full py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer no-underline text-center"
+                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs rounded-xl border border-slate-800 transition flex items-center justify-center gap-2 cursor-pointer no-underline text-center"
                 >
-                  <CreditCard className="w-5 h-5 text-slate-950" />
-                  <span>🔗 Razorpay லிங்க் மூலம் ₹{paymentAmount} INR செலுத்துக ➔</span>
+                  <span>🔗 Razorpay லிங்க் மூலம் ₹1 INR செலுத்த (Open Link in New Tab)</span>
                 </a>
-
-                {/* 2. Razorpay Direct Popup Checkout */}
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => handlePaymentAndEntry(false)}
-                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs rounded-xl border border-slate-800 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  <span>💳 Razorpay நேரடி பாப்-அப் மூலம் ₹{paymentAmount} INR செலுத்துக</span>
-                </button>
 
                 {/* 3. Instant Sandbox Simulation */}
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => handlePaymentAndEntry(true)}
-                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>⚡ உடனடி டெமோ கட்டணம் செலுத்தி ப்ரொஃபைலில் நுழைக (Simulate ₹{paymentAmount} INR)</span>
+                  <span>⚡ உடனடி டெமோ சோதனை - ₹1 செலுத்தியதாக உடனே உள்ளே செல்ல (Instant Demo)</span>
                 </button>
 
                 <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] text-slate-500 pt-1">

@@ -27,7 +27,7 @@ router.post('/verify', (req, res) => {
   }
 
   const payments = db.getTable('payments');
-  const paidAmount = Number(req.body.amount) || (mem ? mem.totalAmount : 1500);
+  const paidAmount = Number(req.body.amount) || (mem ? mem.totalAmount : 1);
   const newPayment = {
     id: `pay_${Date.now()}`,
     membershipId,
