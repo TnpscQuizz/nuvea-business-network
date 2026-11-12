@@ -1,0 +1,186 @@
+/* Commercial UI Custom Polish */
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.75rem;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.nav-tab:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.active-tab {
+  background-color: #eff6ff !important;
+  color: #0f3b7a !important;
+  border-color: #bfdbfe !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.card-commercial {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.card-commercial:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgba(15, 59, 122, 0.08), 0 8px 10px -6px rgba(15, 59, 122, 0.04);
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+/* Category grid pulse */
+@keyframes lockGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+}
+
+.locked-glow {
+  animation: lockGlow 3s infinite;
+}
+
+/* Hide scrollbar for clean horizontal scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Leaflet Custom Marker & Popup Styles */
+.custom-pin-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.custom-pin-marker:hover {
+  transform: scale(1.15) translateY(-4px);
+  z-index: 9999 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.2), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: normal;
+}
+.leaflet-popup-tip {
+  background: white;
+}
+
+/* Animated Connected Network Mesh Lines on Map */
+@keyframes flowNetworkLine {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -50;
+  }
+}
+
+path.animated-network-line {
+  stroke-dasharray: 8, 8;
+  animation: flowNetworkLine 2.5s linear infinite;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.75));
+}
+
+path.animated-network-line-blue {
+  stroke-dasharray: 6, 8;
+  animation: flowNetworkLine 3s linear infinite;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.7));
+}
+
+@keyframes pulseRadarRing {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.radar-hub-circle {
+  animation: pulseRadarRing 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+/* ========================================================
+   HIGH-CONTRAST CORPORATE TYPOGRAPHY & PROFESSIONAL POLISH
+   ======================================================== */
+html, body {
+  font-family: 'Inter', 'Plus Jakarta Sans', 'Noto Sans Tamil', system-ui, -apple-system, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+  font-feature-settings: 'cv02', 'cv04';
+}
+
+/* Search Bar Instant Focus & Glow */
+.search-glow:focus-within {
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25), 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+  border-color: #f59e0b;
+}
+
+/* Vacancy Pulse Tag */
+@keyframes urgentPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+}
+
+.urgent-vacancy-pulse {
+  animation: urgentPulse 2s infinite ease-in-out;
+}
+
+/* Chapter Director Avatar with Verified Ring */
+.director-avatar-ring {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #f59e0b, 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Landmark tag badge */
+.landmark-pill {
+  transition: all 0.15s ease-in-out;
+}
+.landmark-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px -2px rgba(15, 23, 42, 0.08);
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "harur",
+    "districtId": "dharmapuri",
+    "nameTa": "ஹரூர்",
+    "nameEn": "Harur",
+    "forumNameTa": "ஹரூர் ரோயல் பிசினஸ் சாப்டர்",
+    "forumNameEn": "Harur Royal Chapter",
+    "totalSeats": 100,
+    "weeklyMeetingDay": "Saturday",
+    "weeklyMeetingTime": "07:30 AM",
+    "meetingLink": "https://meet.google.com/nbn-harur-sat",
+    "active": true
+  },
+  {
+    "id": "palacode",
+    "districtId": "dharmapuri",
+    "nameTa": "பாலக்கோடு",
+    "nameEn": "Palacode",
+    "forumNameTa": "பாலக்கோடு கிரவுன் சேம்பர்",
+    "forumNameEn": "Palacode Crown Chamber",
+    "totalSeats": 100,
+    "weeklyMeetingDay": "Saturday",
+    "weeklyMeetingTime": "08:00 AM",
+    "meetingLink": "https://meet.google.com/nbn-palacode-sat",
+    "active": true
+  },
+  {
+    "id": "karimangalam",
+    "districtId": "dharmapuri",
+    "nameTa": "காரிமங்கலம்",
+    "nameEn": "Karimangalam",
+    "forumNameTa": "காரிமங்கலம் டைட்டன்ஸ் ஃபோரம்",
+    "forumNameEn": "Karimangalam Titans",
+    "totalSeats": 100,
+    "weeklyMeetingDay": "Friday",
+    "weeklyMeetingTime": "07:00 PM",
+    "meetingLink": "https://meet.google.com/nbn-karimangalam-fri",
+    "active": true
+  },
+  {
+    "id": "dharmapuri_town",
+    "districtId": "dharmapuri",
+    "nameTa": "தருமபுரி டவுன்",
+    "nameEn": "Dharmapuri Town",
+    "forumNameTa": "தருமபுரி சென்ட்ரல் அப்பெக்ஸ்",
+    "forumNameEn": "Dharmapuri Central Apex",
+    "totalSeats": 100,
+    "weeklyMeetingDay": "Saturday",
+    "weeklyMeetingTime": "07:00 AM",
+    "meetingLink": "https://meet.google.com/nbn-dharmapuri-sat",
+    "active": true
+  },
+  {
+    "id": "pennagaram",
+    "districtId": "dharmapuri",
+    "nameTa": "பென்னாகரம்",
+    "nameEn": "Pennagaram",
+    "forumNameTa": "பென்னாகரம் விக்டரி கிளப்",
+    "forumNameEn": "Pennagaram Victory Club",
+    "totalSeats": 100,
+    "weeklyMeetingDay": "Friday",
+    "weeklyMeetingTime": "08:00 PM",
+    "meetingLink": "https://meet.google.com/nbn-pennagaram-fri",
+    "active": true
+  }
+]

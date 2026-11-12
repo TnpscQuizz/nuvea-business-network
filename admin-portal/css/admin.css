@@ -1,0 +1,28 @@
+/* NBN Admin Portal Dedicated Stylesheet */
+.admin-tab {
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.admin-tab:hover {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+.admin-tab.active-tab {
+  background-color: #fbbf24;
+  color: #0f172a;
+}
+
+/* Custom Scrollbar for tables and panels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

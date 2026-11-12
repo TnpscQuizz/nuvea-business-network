@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBN Admin Portal | Nuvea Business Network Central Governance</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Tailwind CSS CDN & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              500: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+              950: '#082f49',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- TOP ADMIN BAR -->
+  <header class="bg-slate-950 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Sub-Project Title -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5 hover:opacity-90 transition">
+          <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xl shadow-md">
+            N
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-black text-lg text-white tracking-tight">NBN <span class="text-amber-400">ADMIN CONSOLE</span></span>
+              <span class="bg-amber-400/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded border border-amber-400/30 uppercase">Super Admin</span>
+            </div>
+            <p class="text-[11px] text-slate-400 font-medium">Nuvea Business Network • Central Governance Console</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Switch to Other Portals & User Profile -->
+      <div class="flex items-center gap-3">
+        <!-- Portal Quick Switcher Dropdown/Links -->
+        <div class="hidden md:flex items-center gap-1.5 text-xs bg-slate-900 p-1 rounded-xl border border-slate-800">
+          <a href="/" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition">🌐 Website</a>
+          <a href="/business" class="px-2.5 py-1 text-slate-300 hover:text-amber-300 rounded-lg hover:bg-slate-800 transition">🏢 Business Portal</a>
+          <a href="/user" class="px-2.5 py-1 text-slate-300 hover:text-blue-300 rounded-lg hover:bg-slate-800 transition">👤 User Portal</a>
+        </div>
+
+        <!-- Active Admin Badge -->
+        <div class="flex items-center gap-2.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">
+          <div class="w-7 h-7 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs">
+            C
+          </div>
+          <div class="text-left hidden sm:block">
+            <div class="text-xs font-black text-white leading-none">Chandru</div>
+            <div class="text-[10px] text-amber-400 font-bold">Super Admin</div>
+          </div>
+        </div>
+
+        <!-- Language Switcher -->
+        <button onclick="adminApp.toggleLanguage()" id="langBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl font-bold border border-slate-700 transition">
+          தமிழ் / EN
+        </button>
+      </div>
+
+    </div>
+
+    <!-- SUB-NAVIGATION BAR (6 MASTER ADMIN MODULES) -->
+    <div class="bg-slate-900 border-t border-slate-800/80 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-2 no-scrollbar text-xs font-bold text-slate-300">
+        <button onclick="adminApp.setTab('overview')" id="nav-overview" class="admin-tab active-tab">
+          📊 கண்ணோட்டம் (Overview)
+        </button>
+        <button onclick="adminApp.setTab('users')" id="nav-users" class="admin-tab">
+          👥 பயனர்கள் & பதிவுகள் (User Management)
+        </button>
+        <button onclick="adminApp.setTab('chapters')" id="nav-chapters" class="admin-tab">
+          🏛️ சாப்டர்கள் & சீட்கள் (Chapters & Monopoly)
+        </button>
+        <button onclick="adminApp.setTab('marketplace')" id="nav-marketplace" class="admin-tab">
+          🛒 மார்க்கெட்பிளேஸ் கட்டுப்பாடு (Marketplace Hub)
+        </button>
+        <button onclick="adminApp.setTab('discipline')" id="nav-discipline" class="admin-tab">
+          ⚖️ ஒழுங்கு & கூட்டங்கள் (Discipline & Strikes)
+        </button>
+        <button onclick="adminApp.setTab('settings')" id="nav-settings" class="admin-tab">
+          ⚙️ கணினி அமைப்புகள் (System Settings)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN ADMIN APP CONTAINER -->
+  <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+    <div id="admin-content" class="space-y-6">
+      <!-- Injected dynamically by admin-app.js -->
+      <div class="text-center py-20 text-slate-500 font-bold">
+        <div class="animate-spin w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-3"></div>
+        NBN Admin Console தரவுகள் ஏற்றப்படுகின்றன...
+      </div>
+    </div>
+  </main>
+
+  <!-- REUSABLE ADMIN MODAL CONTAINER -->
+  <div id="admin-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div id="admin-modal-content" class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <!-- Injected modal content -->
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 text-slate-400 text-xs py-4 border-t border-slate-800 text-center">
+    NBN Admin Sub-Project • Nuvea Business Network Enterprise Console • Powered by Nuvea Studio
+  </footer>
+
+  <script src="/admin/js/admin-app.js"></script>
+</body>
+</html>

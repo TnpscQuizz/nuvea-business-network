@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBN Customer Portal | Nuvea Business Marketplace & Consumer Hub</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Tailwind CSS CDN & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/user/css/user.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              500: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+              950: '#082f49',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+  <!-- TOP CUSTOMER HEADER -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5 hover:opacity-90 transition">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-xl shadow-md">
+            N
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-black text-lg text-white tracking-tight">NBN <span class="text-emerald-400">CUSTOMER PORTAL</span></span>
+              <span class="bg-emerald-400/20 text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-400/30 uppercase">Option C: Buyer / User</span>
+            </div>
+            <p class="text-[11px] text-slate-400 font-medium">தருமபுரி & சேலம் மண்டல நேரடி நுகர்வோர் மற்றும் வர்த்தக சந்தை</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Switch to Other Portals & Cart -->
+      <div class="flex items-center gap-3">
+        <!-- Portal Quick Links -->
+        <div class="hidden lg:flex items-center gap-1.5 text-xs bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <a href="/" class="px-2.5 py-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">🌐 Website</a>
+          <a href="/business" class="px-2.5 py-1 text-slate-400 hover:text-amber-300 rounded-lg hover:bg-slate-800 transition">🏢 Business Portal</a>
+          <a href="/admin" class="px-2.5 py-1 text-slate-400 hover:text-rose-300 rounded-lg hover:bg-slate-800 transition">🛡️ Admin</a>
+        </div>
+
+        <!-- Post Requirement Quick Button -->
+        <button onclick="userApp.openPostRequirementModal()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black rounded-xl transition shadow-xs">
+          <span>📝 தேவை சமர்ப்பி</span>
+        </button>
+
+        <!-- Cart Button with Count Badge -->
+        <button onclick="userApp.setTab('cart')" class="relative flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-slate-700 text-xs font-bold text-white transition">
+          <span>🛒 கார்ட்</span>
+          <span id="cartCountBadge" class="bg-emerald-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+
+        <!-- Active Customer Profile Pill -->
+        <div class="flex items-center gap-2 bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700">
+          <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs">
+            K
+          </div>
+          <div class="text-left hidden sm:block">
+            <div class="text-xs font-black text-white leading-none">கார்த்திக்</div>
+            <div class="text-[10px] text-emerald-400 font-bold">வாடிக்கையாளர்</div>
+          </div>
+        </div>
+
+        <!-- Language Switcher -->
+        <button onclick="userApp.toggleLanguage()" id="langBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl font-bold border border-slate-700 transition">
+          தமிழ் / EN
+        </button>
+      </div>
+
+    </div>
+
+    <!-- SUB-NAVIGATION BAR (6 CUSTOMER MODULES) -->
+    <div class="bg-slate-950 border-t border-slate-800/80 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-2 no-scrollbar text-xs font-bold text-slate-300">
+        <button onclick="userApp.setTab('browse')" id="nav-browse" class="user-tab active-tab">
+          🔍 சந்தை தேடல் (Marketplace)
+        </button>
+        <button onclick="userApp.setTab('post')" id="nav-post" class="user-tab">
+          📝 தேவை சமர்ப்பி (Post Req)
+        </button>
+        <button onclick="userApp.setTab('bids')" id="nav-bids" class="user-tab">
+          📋 கொட்டேஷன்கள் & ஒப்பீடு (Bids)
+        </button>
+        <button onclick="userApp.setTab('cart')" id="nav-cart" class="user-tab">
+          🛒 கார்ட் & செக்அவுட் (Cart)
+        </button>
+        <button onclick="userApp.setTab('orders')" id="nav-orders" class="user-tab">
+          📦 என் ஆர்டர்கள் (My Orders)
+        </button>
+        <button onclick="userApp.setTab('upgrade')" id="nav-upgrade" class="user-tab">
+          🚀 வணிகராக மாற (Upgrade)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CUSTOMER APP CONTAINER -->
+  <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+    <div id="user-content" class="space-y-6">
+      <!-- Injected dynamically by user-app.js -->
+      <div class="text-center py-20 text-slate-500 font-bold">
+        <div class="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+        வாடிக்கையாளர் போர்டல் ஏற்றப்படுகிறது...
+      </div>
+    </div>
+  </main>
+
+  <!-- REUSABLE USER MODAL CONTAINER -->
+  <div id="user-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div id="user-modal-content" class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+      <!-- Injected modal content -->
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-4 border-t border-slate-800 text-center">
+    NBN User / Customer Sub-Project • Nuvea Business Marketplace • Powered by Nuvea Studio
+  </footer>
+
+  <script src="/user/js/user-app.js"></script>
+</body>
+</html>

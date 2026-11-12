@@ -1,0 +1,35 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Flutter build and tools
+flutter_nbn_app/build/
+flutter_nbn_app/.dart_tool/
+flutter_nbn_app/.idea/
+flutter_nbn_app/*.iml
+
+# Environment variables
+.env
+.env.local
+.env.*.local

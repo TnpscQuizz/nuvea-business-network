@@ -1,0 +1,28 @@
+/* NBN Business Owner Portal Stylesheet */
+.biz-tab {
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.biz-tab:hover {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+.biz-tab.active-tab {
+  background-color: #fbbf24;
+  color: #0f172a;
+}
+
+/* Custom Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

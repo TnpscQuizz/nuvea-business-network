@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ta" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f3b7a">
+  <title>Nuvea Business Network (NBN) | தாலுகா பிசினஸ் நெட்வொர்க் & B2B டைரக்டரி</title>
+  
+  <!-- Premium Enterprise Fonts (Inter & Plus Jakarta Sans + Noto Sans Tamil) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN for instant, zero-build commercial reliability -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+              800: '#1e3a8a',
+              900: '#0f3b7a',
+              950: '#082552',
+            },
+            gold: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309'
+            }
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"Plus Jakarta Sans"', '"Noto Sans Tamil"', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/custom.css">
+  <!-- Leaflet CSS & JS for Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Clean Top Corporate Bar -->
+  <div class="bg-slate-950 text-white text-xs py-2 px-4 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-bold tracking-wide text-slate-200">
+          NBN • NUVEA BUSINESS NETWORK • <span class="text-amber-400 font-extrabold">CONNECT • REFER • GROW</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Language Switcher -->
+        <div class="flex items-center bg-slate-900 rounded-lg p-0.5 border border-slate-800 text-[11px] font-bold">
+          <button onclick="app.toggleLang('ta')" id="lang-ta-btn" class="px-2.5 py-0.5 rounded bg-amber-400 text-slate-950">தமிழ்</button>
+          <button onclick="app.toggleLang('en')" id="lang-en-btn" class="px-2.5 py-0.5 rounded text-slate-300 hover:text-white">English</button>
+        </div>
+
+        <a href="tel:7548820641" class="hidden sm:inline-flex items-center gap-1.5 text-amber-300 hover:text-amber-200 font-bold">
+          <span>📞</span>
+          <span>7548820641 (Nuvea Studio)</span>
+        </a>
+
+        <!-- Auth & Profile Navigation -->
+        <div id="headerAuthContainer" class="flex items-center gap-2">
+          <button onclick="app.openLoginModal()" class="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+            <span id="authBtnLabel">உள்நுழைக / பதிவு</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Enterprise Corporate Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Corporate Brand Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="app.setTab(app.currentUser ? (app.currentUser.role === 'customer' ? 'customer' : (app.currentUser.role === 'super_admin' ? 'admin' : 'member')) : 'welcome')">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-brand-950 flex items-center justify-center text-white shadow-md ring-2 ring-amber-400/40">
+            <span class="font-black text-2xl text-amber-400 tracking-tight">N</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl font-black text-slate-900 tracking-tight">Nuvea <span class="text-amber-600">Business Network</span></span>
+              <span class="bg-slate-900 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded-md border border-slate-800">NBN</span>
+            </div>
+            <p class="text-xs text-slate-500 font-bold hidden sm:block">CONNECT • REFER • GROW • Powered by Nuvea Studio</p>
+          </div>
+        </div>
+
+        <!-- Clean Navigation Tabs (Enterprise Suite) -->
+        <nav class="hidden xl:flex items-center space-x-1 font-semibold text-xs">
+          <button id="tab-welcome" onclick="app.setTab('welcome')" class="nav-tab">
+            <span>✨ Onboarding (தொடங்கு)</span>
+          </button>
+
+          <button id="tab-home" onclick="app.setTab('home')" class="nav-tab active-tab">
+            <span>🏠 Home</span>
+          </button>
+
+          <button id="tab-chapters" onclick="app.setTab('chapters')" class="nav-tab">
+            <span>🏛️ Chapters & Seats (சாப்டர்கள் & சீட்கள்)</span>
+          </button>
+
+          <button id="tab-categories" onclick="app.setTab('categories')" class="nav-tab">
+            <span>🔒 Category Exclusivity (தொழில் உரிமை)</span>
+          </button>
+
+          <button id="tab-consumer" onclick="app.setTab('consumer')" class="nav-tab">
+            <span>👥 Verified Businesses (கஸ்டமர் தேடல்)</span>
+          </button>
+
+          <button id="tab-map" onclick="app.setTab('map')" class="nav-tab">
+            <span>🗺️ மேப் (Live Map)</span>
+          </button>
+
+          <button id="tab-marketplace" onclick="app.setTab('marketplace')" class="nav-tab">
+            <span>🛒 NBN Marketplace (சந்தை)</span>
+          </button>
+
+          <button id="tab-customer" onclick="app.setTab('customer')" class="nav-tab">
+            <span>👤 வாடிக்கையாளர்</span>
+          </button>
+
+          <button id="tab-elevation" onclick="app.setTab('elevation')" class="nav-tab">
+            <span>🏆 லீடர்போர்டு</span>
+          </button>
+
+          <button id="tab-certificate" onclick="app.setTab('certificate')" class="nav-tab">
+            <span>📜 சான்றிதழ்</span>
+          </button>
+
+          <button id="tab-opportunities" onclick="app.setTab('opportunities')" class="nav-tab">
+            <span>🚀 வாய்ப்புகள்</span>
+          </button>
+        </nav>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center gap-2">
+          <!-- Dedicated Sub-Projects Portal Switcher -->
+          <div class="hidden lg:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-[11px] font-bold">
+            <a href="/admin" class="px-2.5 py-1 text-slate-700 hover:text-slate-950 hover:bg-white rounded-lg transition">🛡️ Admin</a>
+            <a href="/business" class="px-2.5 py-1 text-slate-700 hover:text-amber-700 hover:bg-white rounded-lg transition">🏢 Business</a>
+            <a href="/user" class="px-2.5 py-1 text-slate-700 hover:text-emerald-700 hover:bg-white rounded-lg transition">👤 Customer</a>
+          </div>
+
+          <button onclick="app.openRequirementModal()" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-black text-slate-900 bg-amber-400 hover:bg-amber-300 rounded-xl shadow-xs transition">
+            <span>🛒 தேவை சமர்ப்பி (Post Req)</span>
+          </button>
+
+          <button onclick="app.openApplyModal()" class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-black text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl shadow-xs transition border border-slate-300">
+            <span>📝 உறுப்பினர் விண்ணப்பம்</span>
+          </button>
+
+          <button onclick="app.openGuestModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm transition">
+            <span>🎟️ பார்வையாளர் பதிவு</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Bar -->
+      <nav class="xl:hidden flex items-center justify-around border-t border-slate-100 py-2 text-xs font-bold text-slate-600 bg-white overflow-x-auto no-scrollbar">
+        <button onclick="app.setTab('home')" id="m-tab-home" class="flex flex-col items-center gap-0.5 text-brand-900 px-2 shrink-0">
+          <span class="text-xs">🏠</span>
+          <span class="text-[10px]">Home</span>
+        </button>
+        <button onclick="app.setTab('chapters')" id="m-tab-chapters" class="flex flex-col items-center gap-0.5 text-slate-400 px-2 shrink-0">
+          <span class="text-xs">🏛️</span>
+          <span class="text-[10px]">Chapters</span>
+        </button>
+        <button onclick="app.setTab('categories')" id="m-tab-categories" class="flex flex-col items-center gap-0.5 text-slate-400 px-2 shrink-0">
+          <span class="text-xs">🔒</span>
+          <span class="text-[10px]">Exclusivity</span>
+        </button>
+        <button onclick="app.setTab('consumer')" id="m-tab-consumer" class="flex flex-col items-center gap-0.5 text-slate-400 px-2 shrink-0">
+          <span class="text-xs">👥</span>
+          <span class="text-[10px]">Businesses</span>
+        </button>
+        <button onclick="app.setTab('map')" id="m-tab-map" class="flex flex-col items-center gap-0.5 text-slate-400 px-2 shrink-0">
+          <span class="text-xs">🗺️</span>
+          <span class="text-[10px]">Map</span>
+        </button>
+        <button onclick="app.setTab('marketplace')" id="m-tab-marketplace" class="flex flex-col items-center gap-0.5 text-slate-400 px-2 shrink-0">
+          <span class="text-xs">🛒</span>
+          <span class="text-[10px]">Market</span>
+        </button>
+        <button onclick="app.setTab('customer')" id="m-tab-customer" class="flex flex-col items-center gap-0.5 text-slate-400 px-2 shrink-0">
+          <span class="text-xs">👤</span>
+          <span class="text-[10px]">Customer</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Dynamic Content Container -->
+  <main id="app-content" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Populated by JavaScript -->
+  </main>
+
+  <!-- Modals Container -->
+  <div id="modal-container"></div>
+
+  <!-- Audio Chime Generator using Web Audio API -->
+  <script>
+    window.playChime = function(type = 'success') {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (type === 'success') {
+          const freqs = [523.25, 659.25, 783.99, 1046.50];
+          freqs.forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.value = f;
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.08 + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.08);
+            osc.stop(audioCtx.currentTime + i * 0.08 + 0.6);
+          });
+        } else if (type === 'warning') {
+          [440, 440].forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = f;
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime + i * 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.2 + 0.15);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.2);
+            osc.stop(audioCtx.currentTime + i * 0.2 + 0.15);
+          });
+        }
+      } catch (e) {
+        console.log('Audio not supported or allowed', e);
+      }
+    };
+  </script>
+
+  <!-- Commercial Trust Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-10 text-slate-600 text-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-lg bg-brand-900 text-amber-400 font-extrabold flex items-center justify-center text-lg">N</div>
+            <span class="text-xl font-black text-brand-950">Nuvea Business Network (NBN)</span>
+          </div>
+          <p class="text-slate-500 text-xs sm:text-sm max-w-md leading-relaxed mb-4">
+            தமிழ்நாட்டின் முன்னணி தாலுகா அளவிலான டிஜிட்டல் பிசினஸ் சாப்டர்ஸ். தருமபுரி மற்றும் சேலம் மாவட்டத்தின் தலைசிறந்த வர்த்தகர்களை ஒருங்கிணைக்கும் அதிகாரப்பூர்வ பிளாட்பார்ம்.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs font-semibold">
+            <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200">🔒 100% எக்ஸ்க்ளூசிவ் மோனோபோலி</span>
+            <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200">🎥 4K சினிமாடிக் ப்ரொமோஷன்</span>
+            <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200">🤝 B2B கட்டாய லீட் சிஸ்டம்</span>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">வடிவமைப்பு & மேலாண்மை</h4>
+          <p class="font-semibold text-slate-800">நுவேவா ஸ்டுடியோ (Nuvea Studio)</p>
+          <p class="text-xs text-slate-500 mt-1">Digital Marketing, 4K Video Production & Brand Growth Agency</p>
+          <p class="text-xs text-slate-600 mt-2"><strong>நிறுவனர்:</strong> சந்திரா (Chandru)</p>
+          <p class="text-xs text-slate-600"><strong>தொடர்புக்கு:</strong> 7548820641</p>
+          <p class="text-xs text-slate-600"><strong>Instagram:</strong> @nuvea_studio</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">முக்கிய தாலுகாக்கள்</h4>
+          <ul class="space-y-1.5 text-xs text-slate-600">
+            <li><a href="javascript:void(0)" onclick="app.changeTaluk('harur')" class="hover:text-brand-600">ஹரூர் சாப்டர் (Harur Chapter)</a></li>
+            <li><a href="javascript:void(0)" onclick="app.changeTaluk('palacode')" class="hover:text-brand-600">பாலக்கோடு சாப்டர் (Palacode Chapter)</a></li>
+            <li><a href="javascript:void(0)" onclick="app.changeTaluk('karimangalam')" class="hover:text-brand-600">காரிமங்கலம் சாப்டர் (Karimangalam)</a></li>
+            <li><a href="javascript:void(0)" onclick="app.changeTaluk('dharmapuri_town')" class="hover:text-brand-600">தருமபுரி சென்ட்ரல் அப்பெக்ஸ்</a></li>
+            <li><a href="javascript:void(0)" onclick="app.changeTaluk('pennagaram')" class="hover:text-brand-600">பென்னாகரம் சாப்டர்</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div>© 2026 Nuvea Business Network (NBN). All rights reserved. Powered by Nuvea Studio.</div>
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            SSL 256-Bit பாதுகாக்கப்பட்டது
+          </span>
+          <span>ISO 9001:2015 சான்றிதழ் அங்கீகாரம்</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Scripts -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
