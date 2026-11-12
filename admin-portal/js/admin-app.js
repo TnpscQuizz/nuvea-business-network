@@ -71,124 +71,469 @@ class NBNAdminApp {
     }
   }
 
-  // 1. OVERVIEW
+  // 1. OVERVIEW (Matches exact designer screenshot)
   renderOverview() {
-    const members = this.db.members || [];
-    const chapters = this.db.chapters || [];
-    const users = this.db.users || [];
-    const requirements = this.db.marketplaceRequirements || [];
-    const orders = this.db.marketplaceOrders || [];
-
-    const totalGmv = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-    const totalTax = orders.reduce((sum, o) => sum + (o.taxAmount || 0), 0);
-
-    const isTa = this.lang === 'ta';
+    const chaptersCount = (this.db && this.db.chapters ? this.db.chapters.length : 25);
+    const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
     return `
-      <!-- TOP OVERVIEW HERO -->
-      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-brand-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-black uppercase mb-2 border border-amber-400/30">
-              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              <span>மத்திய நிர்வாக கன்சோல் (Master Governance)</span>
-            </div>
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              NBN மண்டல தலைமை நிர்வாகக் கட்டுப்பாட்டகம்
-            </h1>
-            <p class="text-xs sm:text-sm text-slate-300 font-medium mt-1">
-              தருமபுரி & சேலம் மண்டலத்தின் 11 சாப்டர்கள், 100 தொழில் பிரிவுகள் மற்றும் சந்தை மேலாண்மை
-            </p>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button onclick="adminApp.exportData()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition flex items-center gap-2 shadow-xs">
-              <span>📥 Export State JSON</span>
-            </button>
-            <button onclick="adminApp.openAddChapterModal()" class="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black rounded-xl shadow-md transition flex items-center gap-1.5">
-              <span>+ புதிய சாப்டர் துவங்கு</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- MASTER METRICS CARDS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div class="space-y-6 max-w-7xl mx-auto">
         
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
+        <!-- PAGE TITLE & TOP ACTION ROW -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div class="text-[11px] font-black text-slate-400 uppercase tracking-wider">மொத்த உறுப்பினர்கள்</div>
-            <div class="text-3xl font-black text-slate-900 mt-1">${members.length}</div>
-            <div class="text-xs text-emerald-600 font-bold mt-1">✓ 100% சரிபார்க்கப்பட்டவர்கள்</div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">NBN Control Centre</h1>
+            <p class="text-xs text-slate-500 font-medium">Central Administration Dashboard</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold">
-            🏛️
+
+          <div class="flex items-center gap-3 flex-wrap">
+            <!-- LIVE SYSTEM STATUS PILL -->
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Live System</span>
+            </div>
+
+            <!-- LAST UPDATED CLOCK -->
+            <div class="flex items-center gap-2 text-xs text-slate-400 font-medium bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <span>Last Updated: ${dateStr}</span>
+              <button onclick="adminApp.render()" class="text-slate-400 hover:text-slate-700 cursor-pointer" title="Refresh">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </button>
+            </div>
+
+            <!-- EXPORT REPORT BUTTON -->
+            <button onclick="adminApp.exportData()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>Export Report</span>
+            </button>
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <div class="text-[11px] font-black text-slate-400 uppercase tracking-wider">செயலில் உள்ள சாப்டர்கள்</div>
-            <div class="text-3xl font-black text-slate-900 mt-1">${chapters.length}</div>
-            <div class="text-xs text-brand-600 font-bold mt-1">தருமபுரி & சேலம் மண்டலம்</div>
+        <!-- 10 METRICS GRID (2 Rows of 5 Cards) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          
+          <!-- 1. Total Members -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Total Members</div>
+              <div class="text-2xl font-black text-slate-900">1,250</div>
+              <div class="text-[10px] font-bold text-blue-600">↑ 12%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+              👥
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold">
-            🗺️
+
+          <!-- 2. Active Networking -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Active Networking</div>
+              <div class="text-2xl font-black text-slate-900">856</div>
+              <div class="text-[10px] font-bold text-emerald-600">↑ 14%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+              🔗
+            </div>
           </div>
+
+          <!-- 3. Marketplace Sellers -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Marketplace Sellers</div>
+              <div class="text-2xl font-black text-slate-900">342</div>
+              <div class="text-[10px] font-bold text-purple-600">↑ 10%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+              🏬
+            </div>
+          </div>
+
+          <!-- 4. Customers -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Customers</div>
+              <div class="text-2xl font-black text-slate-900">1,480</div>
+              <div class="text-[10px] font-bold text-amber-600">↑ 16%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
+              👤
+            </div>
+          </div>
+
+          <!-- 5. Pending Approvals -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Pending Approvals</div>
+              <div class="text-2xl font-black text-slate-900">36</div>
+              <div class="text-[10px] font-bold text-teal-600">↓ 8%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl shrink-0">
+              ✓
+            </div>
+          </div>
+
+          <!-- 6. Active Chapters -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Active Chapters</div>
+              <div class="text-2xl font-black text-slate-900">${chaptersCount}</div>
+              <div class="text-[10px] font-bold text-emerald-600">↑ 5%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+              🧭
+            </div>
+          </div>
+
+          <!-- 7. Business Listings -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Business Listings</div>
+              <div class="text-2xl font-black text-slate-900">2,840</div>
+              <div class="text-[10px] font-bold text-blue-600">↑ 18%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+              🏢
+            </div>
+          </div>
+
+          <!-- 8. Open Requirements -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Open Requirements</div>
+              <div class="text-2xl font-black text-slate-900">148</div>
+              <div class="text-[10px] font-bold text-amber-600">↑ 20%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
+              📋
+            </div>
+          </div>
+
+          <!-- 9. Active Quotations -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Active Quotations</div>
+              <div class="text-2xl font-black text-slate-900">326</div>
+              <div class="text-[10px] font-bold text-indigo-600">↑ 15%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0">
+              📄
+            </div>
+          </div>
+
+          <!-- 10. Completed Orders -->
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+            <div class="space-y-1">
+              <div class="text-[11px] font-bold text-slate-500">Completed Orders</div>
+              <div class="text-2xl font-black text-slate-900">412</div>
+              <div class="text-[10px] font-bold text-emerald-600">↑ 22%</div>
+            </div>
+            <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+              🛍️
+            </div>
+          </div>
+
         </div>
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <div class="text-[11px] font-black text-slate-400 uppercase tracking-wider">மார்க்கெட்பிளேஸ் தேவைகள்</div>
-            <div class="text-3xl font-black text-slate-900 mt-1">${requirements.length}</div>
-            <div class="text-xs text-amber-600 font-bold mt-1">${orders.length} ஆர்டர்கள் முடிவடைந்துள்ளன</div>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl font-bold">
-            🛒
-          </div>
-        </div>
+        <!-- MIDDLE ROW: 3 ANALYTICS & CHARTS CARDS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          
+          <!-- 1. MEMBER GROWTH TREND -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">📈 Member Growth Trend</h3>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 rounded-lg px-2 py-1">6 Months</span>
+            </div>
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <div class="text-[11px] font-black text-slate-400 uppercase tracking-wider">மொத்த வணிகம் (GMV)</div>
-            <div class="text-3xl font-black text-emerald-600 mt-1">₹${totalGmv.toLocaleString('en-IN')}</div>
-            <div class="text-xs text-slate-500 font-bold mt-1">₹${totalTax.toLocaleString('en-IN')} (18% GST வரி)</div>
+            <!-- SVG LINE CHART -->
+            <div class="relative pt-4 pb-2">
+              <div class="absolute top-3 left-[56%] -translate-x-1/2 bg-slate-900 text-white rounded-lg px-2.5 py-1 text-[10px] font-bold shadow-lg z-10 pointer-events-none">
+                <div>Apr</div>
+                <div class="text-amber-400 font-black">1,120 Members</div>
+              </div>
+
+              <svg viewBox="0 0 360 170" class="w-full h-44 overflow-visible">
+                <defs>
+                  <linearGradient id="svgBlueArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
+                  </linearGradient>
+                </defs>
+                <line x1="30" y1="20" x2="350" y2="20" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="30" y1="60" x2="350" y2="60" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="30" y1="100" x2="350" y2="100" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="30" y1="140" x2="350" y2="140" stroke="#f1f5f9" stroke-width="1" />
+
+                <text x="5" y="24" fill="#94a3b8" font-size="9" font-weight="700">1.5K</text>
+                <text x="12" y="64" fill="#94a3b8" font-size="9" font-weight="700">1K</text>
+                <text x="7" y="104" fill="#94a3b8" font-size="9" font-weight="700">500</text>
+                <text x="18" y="144" fill="#94a3b8" font-size="9" font-weight="700">0</text>
+
+                <path d="M 40 120 Q 95 100 150 90 T 210 70 T 270 60 T 340 45 L 340 140 L 40 140 Z" fill="url(#svgBlueArea)" />
+                <path d="M 40 120 Q 95 100 150 90 T 210 70 T 270 60 T 340 45" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" />
+
+                <circle cx="40" cy="120" r="3.5" fill="#2563eb" />
+                <circle cx="100" cy="100" r="3.5" fill="#2563eb" />
+                <circle cx="160" cy="90" r="3.5" fill="#2563eb" />
+                <circle cx="220" cy="70" r="5" fill="#2563eb" stroke="#ffffff" stroke-width="2" />
+                <circle cx="280" cy="60" r="3.5" fill="#2563eb" />
+                <circle cx="340" cy="45" r="3.5" fill="#2563eb" />
+
+                <text x="35" y="160" fill="#64748b" font-size="9" font-weight="700">Jan</text>
+                <text x="95" y="160" fill="#64748b" font-size="9" font-weight="700">Feb</text>
+                <text x="155" y="160" fill="#64748b" font-size="9" font-weight="700">Mar</text>
+                <text x="215" y="160" fill="#64748b" font-size="9" font-weight="700">Apr</text>
+                <text x="275" y="160" fill="#64748b" font-size="9" font-weight="700">May</text>
+                <text x="335" y="160" fill="#64748b" font-size="9" font-weight="700">Jun</text>
+              </svg>
+            </div>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold">
-            💰
+
+          <!-- 2. REVENUE OVERVIEW (INR Strictly) -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">📊 Revenue Overview</h3>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 rounded-lg px-2 py-1">6 Months</span>
+            </div>
+
+            <!-- SVG BAR CHART -->
+            <div class="pt-4 pb-2">
+              <svg viewBox="0 0 360 170" class="w-full h-44 overflow-visible">
+                <line x1="35" y1="20" x2="350" y2="20" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="35" y1="60" x2="350" y2="60" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="35" y1="100" x2="350" y2="100" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="35" y1="140" x2="350" y2="140" stroke="#f1f5f9" stroke-width="1" />
+
+                <text x="5" y="24" fill="#94a3b8" font-size="9" font-weight="700">₹15L</text>
+                <text x="5" y="64" fill="#94a3b8" font-size="9" font-weight="700">₹10L</text>
+                <text x="9" y="104" fill="#94a3b8" font-size="9" font-weight="700">₹5L</text>
+                <text x="18" y="144" fill="#94a3b8" font-size="9" font-weight="700">₹0</text>
+
+                <rect x="52" y="85" width="26" height="55" rx="5" fill="#10b981" />
+                <rect x="105" y="55" width="26" height="85" rx="5" fill="#10b981" />
+                <rect x="158" y="70" width="26" height="70" rx="5" fill="#10b981" />
+                <rect x="211" y="65" width="26" height="75" rx="5" fill="#10b981" />
+                <rect x="264" y="38" width="26" height="102" rx="5" fill="#10b981" />
+                <rect x="317" y="30" width="26" height="110" rx="5" fill="#10b981" />
+
+                <text x="56" y="160" fill="#64748b" font-size="9" font-weight="700">Jan</text>
+                <text x="109" y="160" fill="#64748b" font-size="9" font-weight="700">Feb</text>
+                <text x="162" y="160" fill="#64748b" font-size="9" font-weight="700">Mar</text>
+                <text x="215" y="160" fill="#64748b" font-size="9" font-weight="700">Apr</text>
+                <text x="268" y="160" fill="#64748b" font-size="9" font-weight="700">May</text>
+                <text x="321" y="160" fill="#64748b" font-size="9" font-weight="700">Jun</text>
+              </svg>
+            </div>
           </div>
-        </div>
 
-      </div>
+          <!-- 3. CHAPTER PERFORMANCE -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs flex flex-col justify-between space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">🍩 Chapter Performance</h3>
+            </div>
 
-      <!-- CHAPTER OCCUPANCY QUICK GLANCE -->
-      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 class="text-base font-black text-slate-900">🏛️ சாப்டர்கள் & சீட் காலியிட நிலவரம் (Chapter Occupancy)</h3>
-          <button onclick="adminApp.setTab('chapters')" class="text-xs text-brand-600 hover:underline font-bold">அனைத்து சாப்டர்கள் காண்க ➔</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          ${chapters.slice(0, 6).map(c => {
-            const occ = members.filter(m => m.chapterId === c.id).length;
-            const pct = Math.min(100, Math.round((occ / 100) * 100));
-            return `
-              <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300 transition">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-black text-slate-900">${c.nameTa || c.name}</span>
-                  <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">${c.talukId || 'Regional'}</span>
-                </div>
-                <div class="flex items-baseline justify-between mt-3 text-xs">
-                  <span class="text-slate-500">நிரப்பப்பட்ட சீட்கள்:</span>
-                  <span class="font-black text-slate-900">${occ} / 100</span>
-                </div>
-                <div class="w-full bg-slate-200 h-2 rounded-full mt-1.5 overflow-hidden">
-                  <div class="bg-amber-500 h-full rounded-full" style="width: ${Math.max(5, pct)}%"></div>
+            <div class="flex items-center justify-around py-2">
+              <div class="relative w-32 h-32 flex items-center justify-center">
+                <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+                  <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" stroke-width="12" />
+                  <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10b981" stroke-width="12" stroke-dasharray="143 238" stroke-dashoffset="0" />
+                  <circle cx="50" cy="50" r="38" fill="transparent" stroke="#3b82f6" stroke-width="12" stroke-dasharray="60 238" stroke-dashoffset="-143" />
+                  <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f59e0b" stroke-width="12" stroke-dasharray="35 238" stroke-dashoffset="-203" />
+                </svg>
+                <div class="absolute text-center">
+                  <div class="text-xl font-black text-slate-900 leading-none">25</div>
+                  <div class="text-[10px] text-slate-400 font-bold mt-0.5">Chapters</div>
                 </div>
               </div>
-            `;
-          }).join('')}
+
+              <div class="space-y-2 text-xs font-bold text-slate-700">
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Top Performing</span></div>
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span>Active</span></div>
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>Needs Attention</span></div>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex justify-end">
+              <button onclick="adminApp.setTab('chapters')" class="text-xs font-bold text-slate-900 hover:text-indigo-600 flex items-center gap-1 cursor-pointer">
+                <span>View Details ➔</span>
+              </button>
+            </div>
+          </div>
+
         </div>
+
+        <!-- LOWER ROW: 3 CARDS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          
+          <!-- 1. DISTRICT-WISE PERFORMANCE -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">🗺️ District-Wise Business Performance</h3>
+            <div class="flex items-center gap-4">
+              <div class="w-36 h-40 shrink-0 relative flex items-center justify-center bg-slate-50 rounded-2xl p-2 border border-slate-100">
+                <svg viewBox="0 0 100 120" class="w-full h-full">
+                  <path d="M 55 10 L 75 18 L 85 30 L 70 38 L 55 25 Z" fill="#10b981" />
+                  <path d="M 20 45 L 42 40 L 45 65 L 25 70 L 15 55 Z" fill="#f59e0b" />
+                  <path d="M 45 28 L 68 35 L 60 55 L 42 45 Z" fill="#3b82f6" />
+                  <path d="M 42 55 L 65 52 L 60 78 L 40 75 Z" fill="#8b5cf6" />
+                  <path d="M 28 72 L 58 75 L 55 105 L 35 115 L 25 90 Z" fill="#6366f1" />
+                </svg>
+              </div>
+
+              <div class="flex-1 space-y-2 text-xs font-bold text-slate-700">
+                <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span>Chennai</span></div><span class="font-black">28.5%</span></div>
+                <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>Coimbatore</span></div><span class="font-black">22.3%</span></div>
+                <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span>Madurai</span></div><span class="font-black">18.7%</span></div>
+                <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span>Salem</span></div><span class="font-black">16.1%</span></div>
+                <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span>Others</span></div><span class="font-black">14.4%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. RECENT ACTIVITY -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">⚡ Recent Platform Activity</h3>
+              <button onclick="adminApp.setTab('users')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">View All ➔</button>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2.5">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover shrink-0" />
+                  <div><div class="font-bold text-slate-900">New business registered</div><div class="text-[11px] text-slate-500">Ramesh Traders – Chennai</div></div>
+                </div>
+                <span class="text-[10px] text-slate-400">2 min ago</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2.5">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover shrink-0" />
+                  <div><div class="font-bold text-slate-900">New order placed</div><div class="text-[11px] text-emerald-600 font-bold">₹48,500 – City Supplies</div></div>
+                </div>
+                <span class="text-[10px] text-slate-400">5 min ago</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2.5">
+                  <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover shrink-0" />
+                  <div><div class="font-bold text-slate-900">New referral</div><div class="text-[11px] text-slate-500">Suresh → Kumar</div></div>
+                </div>
+                <span class="text-[10px] text-slate-400">8 min ago</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2.5">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" class="w-7 h-7 rounded-full object-cover shrink-0" />
+                  <div><div class="font-bold text-slate-900">Chapter meeting scheduled</div><div class="text-[11px] text-slate-500">Dharmapuri Chapter</div></div>
+                </div>
+                <span class="text-[10px] text-slate-400">12 min ago</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. PENDING ADMIN TASKS -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">📋 Pending Admin Tasks</h3>
+                <span class="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">12</span>
+              </div>
+              <button onclick="adminApp.setTab('users')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">View All ➔</button>
+            </div>
+
+            <div class="space-y-2.5 text-xs font-medium text-slate-700">
+              <div onclick="adminApp.setTab('users')" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">👤</span>
+                <span class="flex-grow">Approve 18 new business registrations</span>
+              </div>
+              <div onclick="adminApp.setTab('marketplace')" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">📋</span>
+                <span class="flex-grow">Review 7 customer requirements</span>
+              </div>
+              <div onclick="adminApp.setTab('marketplace')" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">🏪</span>
+                <span class="flex-grow">Verify 5 marketplace sellers</span>
+              </div>
+              <div onclick="adminApp.setTab('marketplace')" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">⚖️</span>
+                <span class="flex-grow">Resolve 3 disputes</span>
+              </div>
+              <div onclick="adminApp.setTab('chapters')" class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">🗳️</span>
+                <span class="flex-grow">Confirm 2 chapter elections</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BOTTOM ROW: SYSTEM ALERTS, QUICK ACTIONS, TOP CHAPTERS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          
+          <!-- 1. SYSTEM ALERTS -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">⚠️ System Alerts</h3>
+              <button class="text-xs font-bold text-indigo-600 hover:text-indigo-800">View All ➔</button>
+            </div>
+            <div class="space-y-3 text-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span><span class="text-slate-700 font-medium">Database backup completed successfully</span></div>
+                <span class="text-[10px] text-slate-400">2 hours ago</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span><span class="text-slate-700 font-medium">High activity in Chennai chapter</span></div>
+                <span class="text-[10px] text-slate-400">3 hours ago</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span><span class="text-slate-700 font-medium">Payment gateway response delay</span></div>
+                <span class="text-[10px] text-slate-400">4 hours ago</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. QUICK ACTIONS -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">⚡ Quick Actions</h3>
+            <div class="grid grid-cols-4 gap-2.5">
+              <button onclick="adminApp.setTab('users')" class="p-3 rounded-xl bg-blue-50/80 hover:bg-blue-100/80 text-blue-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center">
+                <span class="text-lg">👤</span><span class="text-[10px] font-black leading-tight">Add Member</span>
+              </button>
+              <button onclick="adminApp.openAddChapterModal()" class="p-3 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center">
+                <span class="text-lg">🧭</span><span class="text-[10px] font-black leading-tight">Create Chapter</span>
+              </button>
+              <button onclick="adminApp.setTab('users')" class="p-3 rounded-xl bg-purple-50/80 hover:bg-purple-100/80 text-purple-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center">
+                <span class="text-lg">✓</span><span class="text-[10px] font-black leading-tight">Approve Business</span>
+              </button>
+              <button onclick="adminApp.exportData()" class="p-3 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 text-amber-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center">
+                <span class="text-lg">📊</span><span class="text-[10px] font-black leading-tight">View Reports</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. TOP CHAPTERS BY BUSINESS VALUE -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wide">🏆 Top Chapters by Business Value</h3>
+              <button onclick="adminApp.setTab('chapters')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">View All ➔</button>
+            </div>
+            <div class="space-y-3 text-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5"><span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-black text-[10px] flex items-center justify-center">1</span><span class="font-bold text-slate-800">Chennai Chapter</span></div>
+                <span class="font-black text-slate-900">₹12.5L</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5"><span class="w-5 h-5 rounded-full bg-slate-100 text-slate-800 font-black text-[10px] flex items-center justify-center">2</span><span class="font-bold text-slate-800">Coimbatore Chapter</span></div>
+                <span class="font-black text-slate-900">₹10.8L</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5"><span class="w-5 h-5 rounded-full bg-amber-50 text-amber-700 font-black text-[10px] flex items-center justify-center">3</span><span class="font-bold text-slate-800">Madurai Chapter</span></div>
+                <span class="font-black text-slate-900">₹8.7L</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     `;
   }

@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NBN Admin Portal | Nuvea Business Network Central Governance</title>
+  <title>NBN Control Centre | Nuvea Business Network Central Governance</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <!-- Tailwind CSS CDN & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/admin/css/admin.css">
   <script>
     tailwind.config = {
       theme: {
@@ -18,102 +17,248 @@
             brand: {
               50: '#f8fafc',
               100: '#f1f5f9',
-              500: '#0284c7',
-              700: '#0369a1',
-              900: '#0c4a6e',
-              950: '#082f49',
+              600: '#4f46e5',
+              900: '#0b0f19',
+              950: '#070a12',
             }
           }
         }
       }
     }
   </script>
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    .dark-sidebar::-webkit-scrollbar-thumb { background: #334155; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+<body class="bg-[#f8fafc] text-slate-800 antialiased h-screen flex font-sans overflow-hidden">
 
-  <!-- TOP ADMIN BAR -->
-  <header class="bg-slate-950 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <!-- ======================================================== -->
+  <!-- 1. LEFT SIDEBAR (Dark Navy Slate)                        -->
+  <!-- ======================================================== -->
+  <aside class="w-64 bg-[#0b0f19] text-slate-300 flex flex-col shrink-0 border-r border-slate-800/80 select-none overflow-y-auto dark-sidebar">
+    
+    <!-- BRAND LOGO HEADER -->
+    <div class="p-5 flex items-center gap-3 border-b border-slate-800/60">
+      <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 shadow-inner">
+        <svg viewBox="0 0 100 100" class="w-7 h-7">
+          <circle cx="50" cy="50" r="28" fill="none" stroke="#334155" stroke-width="2.5" stroke-dasharray="3 3" />
+          <circle cx="50" cy="50" r="8" fill="#ffffff" />
+          <circle cx="50" cy="22" r="7" fill="#06b6d4" />
+          <circle cx="74" cy="36" r="7" fill="#ec4899" />
+          <circle cx="74" cy="64" r="7" fill="#f59e0b" />
+          <circle cx="50" cy="78" r="7" fill="#10b981" />
+          <circle cx="26" cy="64" r="7" fill="#8b5cf6" />
+          <circle cx="26" cy="36" r="7" fill="#3b82f6" />
+        </svg>
+      </div>
+      <div>
+        <div class="text-xl font-black text-white tracking-wider leading-none">NBN</div>
+        <div class="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">Nuvea Business Network</div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION SECTIONS -->
+    <div class="flex-1 py-4 px-3 space-y-6 text-xs font-semibold overflow-y-auto">
       
-      <!-- Brand & Sub-Project Title -->
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2.5 hover:opacity-90 transition">
-          <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xl shadow-md">
-            N
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-black text-lg text-white tracking-tight">NBN <span class="text-amber-400">ADMIN CONSOLE</span></span>
-              <span class="bg-amber-400/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded border border-amber-400/30 uppercase">Super Admin</span>
-            </div>
-            <p class="text-[11px] text-slate-400 font-medium">Nuvea Business Network • Central Governance Console</p>
-          </div>
+      <!-- ACTIVE DASHBOARD ITEM -->
+      <div>
+        <button onclick="adminApp.setTab('overview')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left cursor-pointer bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/30">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          <span class="text-sm font-bold">Dashboard</span>
+        </button>
+      </div>
+
+      <!-- NETWORK MANAGEMENT -->
+      <div class="space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
+          Network Management
+        </div>
+        <button onclick="adminApp.setTab('users')" id="nav-users" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>👥</span><span>Members</span>
+        </button>
+        <button onclick="adminApp.setTab('chapters')" id="nav-chapters" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🧭</span><span>Chapters</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🌐</span><span>Geography</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🔗</span><span>Referrals</span>
+        </button>
+        <button onclick="adminApp.setTab('discipline')" id="nav-discipline" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📅</span><span>Meetings & Attendance</span>
+        </button>
+      </div>
+
+      <!-- MARKETPLACE MANAGEMENT -->
+      <div class="space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
+          Marketplace Management
+        </div>
+        <button onclick="adminApp.setTab('marketplace')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🏬</span><span>Business Listings</span>
+        </button>
+        <button onclick="adminApp.setTab('marketplace')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📋</span><span>Customer Requirements</span>
+        </button>
+        <button onclick="adminApp.setTab('marketplace')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📄</span><span>Quotations</span>
+        </button>
+        <button onclick="adminApp.setTab('marketplace')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🛍️</span><span>Orders & Transactions</span>
+        </button>
+        <button onclick="adminApp.setTab('marketplace')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>⭐</span><span>Reviews & Disputes</span>
+        </button>
+      </div>
+
+      <!-- GROWTH & CRM -->
+      <div class="space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
+          Growth & CRM
+        </div>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📈</span><span>Leads</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📞</span><span>Follow-ups</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📊</span><span>Performance Analytics</span>
+        </button>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
+          Finance
+        </div>
+        <button onclick="adminApp.setTab('settings')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>💳</span><span>Membership Plans</span>
+        </button>
+        <button onclick="adminApp.setTab('settings')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>👛</span><span>Payments</span>
+        </button>
+        <button onclick="adminApp.setTab('settings')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🧾</span><span>Invoices & Refunds</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>📉</span><span>Revenue Reports</span>
+        </button>
+      </div>
+
+      <!-- PLATFORM CONTROL -->
+      <div class="space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
+          Platform Control
+        </div>
+        <button onclick="adminApp.setTab('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>⚙️</span><span>Settings</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🔔</span><span>Notifications</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🛡️</span><span>Audit Logs</span>
+        </button>
+        <button onclick="adminApp.setTab('overview')" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition text-left cursor-pointer">
+          <span>🔒</span><span>Security & Backup</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR FOOTER CARD -->
+    <div class="p-3 border-t border-slate-800/80">
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950/50 to-slate-900 rounded-2xl p-3 border border-indigo-900/40 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0">
+          🚀
+        </div>
+        <div class="flex-grow min-w-0">
+          <div class="text-xs font-black text-white truncate">NBN v2.0.0</div>
+          <div class="text-[10px] text-slate-400 truncate">Build for Business Growth</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ======================================================== -->
+  <!-- 2. MAIN CONTENT AREA (Light SaaS Grey / Off-white)       -->
+  <!-- ======================================================== -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f8fafc]">
+    
+    <!-- TOP BAR -->
+    <header class="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between shrink-0 z-10 shadow-xs">
+      
+      <!-- SEARCH INPUT -->
+      <div class="relative flex items-center">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search members, businesses, chapters..."
+          id="adminSearchInput"
+          oninput="adminApp.handleSearch(this.value)"
+          class="w-72 sm:w-96 pl-10 pr-4 py-2 bg-slate-100/80 hover:bg-slate-100 focus:bg-white text-xs font-medium text-slate-800 rounded-xl border border-transparent focus:border-indigo-400 focus:outline-none transition"
+        />
+      </div>
+
+      <!-- TOP RIGHT PROFILE & CONTROLS -->
+      <div class="flex items-center gap-4">
+        
+        <!-- RETURN TO PLATFORM BUTTON -->
+        <a href="/" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          <span>Return to Site</span>
         </a>
-      </div>
 
-      <!-- Quick Switch to Other Portals & User Profile -->
-      <div class="flex items-center gap-3">
-        <!-- Portal Quick Switcher Dropdown/Links -->
-        <div class="hidden md:flex items-center gap-1.5 text-xs bg-slate-900 p-1 rounded-xl border border-slate-800">
-          <a href="/" class="px-2.5 py-1 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition">🌐 Website</a>
-          <a href="/business" class="px-2.5 py-1 text-slate-300 hover:text-amber-300 rounded-lg hover:bg-slate-800 transition">🏢 Business Portal</a>
-          <a href="/user" class="px-2.5 py-1 text-slate-300 hover:text-blue-300 rounded-lg hover:bg-slate-800 transition">👤 User Portal</a>
+        <!-- NOTIFICATION BELL -->
+        <div class="relative cursor-pointer p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center ring-2 ring-white">
+            5
+          </span>
         </div>
 
-        <!-- Active Admin Badge -->
-        <div class="flex items-center gap-2.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">
-          <div class="w-7 h-7 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs">
-            C
+        <div class="h-6 w-px bg-slate-200"></div>
+
+        <!-- SUPER ADMIN PROFILE PILL -->
+        <div class="flex items-center gap-3 pl-1 cursor-pointer">
+          <img
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+            alt="Super Admin Avatar"
+            class="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/20"
+          />
+          <div class="hidden sm:block text-left">
+            <div class="text-xs font-bold text-slate-900 leading-tight">Super Admin</div>
+            <div class="text-[10px] text-slate-400 font-medium">NBN HQ</div>
           </div>
-          <div class="text-left hidden sm:block">
-            <div class="text-xs font-black text-white leading-none">Chandru</div>
-            <div class="text-[10px] text-amber-400 font-bold">Super Admin</div>
-          </div>
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
         </div>
 
-        <!-- Language Switcher -->
-        <button onclick="adminApp.toggleLanguage()" id="langBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1.5 rounded-xl font-bold border border-slate-700 transition">
-          தமிழ் / EN
-        </button>
       </div>
+    </header>
 
-    </div>
+    <!-- SCROLLABLE DASHBOARD VIEW CONTAINER -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-6" id="admin-content">
+      <!-- Injected dynamically by admin-app.js or defaults to exact design mockup -->
+    </main>
 
-    <!-- SUB-NAVIGATION BAR (6 MASTER ADMIN MODULES) -->
-    <div class="bg-slate-900 border-t border-slate-800/80 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-2 no-scrollbar text-xs font-bold text-slate-300">
-        <button onclick="adminApp.setTab('overview')" id="nav-overview" class="admin-tab active-tab">
-          📊 கண்ணோட்டம் (Overview)
-        </button>
-        <button onclick="adminApp.setTab('users')" id="nav-users" class="admin-tab">
-          👥 பயனர்கள் & பதிவுகள் (User Management)
-        </button>
-        <button onclick="adminApp.setTab('chapters')" id="nav-chapters" class="admin-tab">
-          🏛️ சாப்டர்கள் & சீட்கள் (Chapters & Monopoly)
-        </button>
-        <button onclick="adminApp.setTab('marketplace')" id="nav-marketplace" class="admin-tab">
-          🛒 மார்க்கெட்பிளேஸ் கட்டுப்பாடு (Marketplace Hub)
-        </button>
-        <button onclick="adminApp.setTab('discipline')" id="nav-discipline" class="admin-tab">
-          ⚖️ ஒழுங்கு & கூட்டங்கள் (Discipline & Strikes)
-        </button>
-        <button onclick="adminApp.setTab('settings')" id="nav-settings" class="admin-tab">
-          ⚙️ கணினி அமைப்புகள் (System Settings)
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN ADMIN APP CONTAINER -->
-  <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
-    <div id="admin-content" class="space-y-6">
-      <!-- Injected dynamically by admin-app.js -->
-      <div class="text-center py-20 text-slate-500 font-bold">
-        <div class="animate-spin w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full mx-auto mb-3"></div>
-        NBN Admin Console தரவுகள் ஏற்றப்படுகின்றன...
-      </div>
-    </div>
-  </main>
+  </div>
 
   <!-- REUSABLE ADMIN MODAL CONTAINER -->
   <div id="admin-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs hidden items-center justify-center p-4">
@@ -121,11 +266,6 @@
       <!-- Injected modal content -->
     </div>
   </div>
-
-  <!-- FOOTER -->
-  <footer class="bg-slate-950 text-slate-400 text-xs py-4 border-t border-slate-800 text-center">
-    NBN Admin Sub-Project • Nuvea Business Network Enterprise Console • Powered by Nuvea Studio
-  </footer>
 
   <script src="/admin/js/admin-app.js"></script>
 </body>

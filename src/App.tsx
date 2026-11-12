@@ -104,6 +104,18 @@ export function App() {
     );
   }
 
+  // Full-Screen Dedicated Admin Control Centre (matching exact designer layout)
+  if (activePortal === 'admin') {
+    return (
+      <AdminPortal
+        state={state}
+        updateState={(s) => setState(s)}
+        lang={lang}
+        onExitPortal={(portal) => setActivePortal(portal || 'gateway')}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
