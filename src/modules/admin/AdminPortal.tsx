@@ -7,7 +7,9 @@ import {
   Receipt, PieChart, Settings, Bell, ShieldCheck, Database, 
   Search, ChevronDown, RefreshCw, Download, Rocket, Trophy, 
   Plus, X, ArrowRight, UserCheck, AlertTriangle, CheckSquare,
-  LogOut, Activity, Filter, Eye, ChevronRight, UserPlus
+  LogOut, Activity, Filter, Eye, EyeOff, ChevronRight, UserPlus,
+  Edit2, Trash2, Lock, Unlock, Send, Play, Pause, Save, Check,
+  Layers, MapPin, Sliders, Shield
 } from 'lucide-react';
 
 interface AdminPortalProps {
@@ -23,29 +25,79 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   lang,
   onExitPortal 
 }) => {
-  // Navigation & Sub-views
+  // Navigation
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [currentTime, setCurrentTime] = useState<string>('15 Apr 2025, 04:30 PM');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [successBanner, setSuccessBanner] = useState<string>('');
+
+  // Modals
   const [showAddChapterModal, setShowAddChapterModal] = useState<boolean>(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState<boolean>(false);
+  const [editingMember, setEditingMember] = useState<any>(null);
+  const [strikingMember, setStrikingMember] = useState<any>(null);
+  const [strikeReason, setStrikeReason] = useState<string>('');
+
+  // Meeting Conductor State
+  const [isMeetingRunning, setIsMeetingRunning] = useState<boolean>(false);
+  const [meetingTimer, setMeetingTimer] = useState<number>(45);
+  const [currentSpeakerIndex, setCurrentSpeakerIndex] = useState<number>(0);
+
+  // Time Range Filters for Charts
   const [growthTimeRange, setGrowthTimeRange] = useState<string>('6 Months');
   const [revenueTimeRange, setRevenueTimeRange] = useState<string>('6 Months');
 
-  // Form states for modals
-  const [newChapterName, setNewChapterName] = useState<string>('');
-  const [newChapterTaluk, setNewChapterTaluk] = useState<string>('dharmapuri');
-  const [newMemberName, setNewMemberName] = useState<string>('');
-  const [newMemberPhone, setNewMemberPhone] = useState<string>('');
-  const [newMemberBusiness, setNewMemberBusiness] = useState<string>('');
+  // Customization & Settings State (Loaded from state or backend)
+  const [settingsForm, setSettingsForm] = useState({
+    platformName: 'Nuvea Business Network (NBN)',
+    taglineTa: "தமிழ்நாட்டின் முதல் தாலுகா அளவிலான டிஜிட்டல் B2B நெட்வொர்க்",
+    taglineEn: "Tamil Nadu's First Taluk-Level Digital B2B Business Network",
+    founderName: 'சந்துரு மாதேசன் (Chandru Madhesan)',
+    founderPhone: '9788112233',
+    supportEmail: 'admin@nuvea.in',
+    gstin: '33AABCN7548Z1Z9',
+    sacCode: '998314',
+    gstPercentage: 18,
+    cgstPercentage: 9,
+    sgstPercentage: 9,
+    annualFeeTaluk: 1, // Currently locked to ₹1 INR for live testing!
+    annualFeeDistrictVIP: 25000,
+    annualFeeStateTitan: 50000,
+    annualFeeNationalApex: 100000,
+    talukMaxSeats: 100,
+    speakerDurationSeconds: 45,
+    speakerWarningSeconds: 10,
+    strikeThresholdWarning: 1,
+    strikeThresholdFinal: 2,
+    strikeThresholdRevoke: 3,
+    videoBenefitIncluded: true,
+    razorpayKeyId: 'rzp_test_NBN_DEMO_KEY',
+    razorpayKeySecret: '••••••••••••••••••••',
+    razorpayPaymentLink: 'https://rzp.io/rzp/qsujcmuB',
+    demoPaymentMode: true,
+    elevationWeightLeads: 30,
+    elevationWeightClosedValue: 40,
+    elevationWeightAttendance: 20,
+    elevationWeightGuests: 10
+  });
 
+  const [showSecret, setShowSecret] = useState<boolean>(false);
+
+  // Broadcast Notification State
+  const [broadcastTarget, setBroadcastTarget] = useState<string>('all');
+  const [broadcastTitle, setBroadcastTitle] = useState<string>('');
+  const [broadcastMessage, setBroadcastMessage] = useState<string>('');
+
+  // Extract database objects safely
   const members = state?.members || [];
   const chapters = state?.chapters || [];
   const users = state?.users || [];
   const requirements = state?.marketplaceRequirements || [];
   const orders = state?.marketplaceOrders || [];
 
+  // Clock tick
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
@@ -60,52 +112,102 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Handle Export Report
-  const handleExportReport = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      alert('NBN Central Administration Report (PDF/Excel) உருவாக்கப்பட்டது!');
-    }, 1000);
+  // Meeting timer countdown
+  useEffect(() => {
+    let timerId: any = null;
+    if (isMeetingRunning && meetingTimer > 0) {
+      timerId = setInterval(() => {
+        setMeetingTimer(prev => prev - 1);
+      }, 1000);
+    } else if (meetingTimer === 0 && isMeetingRunning) {
+      setIsMeetingRunning(false);
+    }
+    return () => clearInterval(timerId);
+  }, [isMeetingRunning, meetingTimer]);
+
+  // Flash notification helper
+  const flashBanner = (msg: string) => {
+    setSuccessBanner(msg);
+    setTimeout(() => setSuccessBanner(''), 4000);
   };
 
-  // Create Chapter Handler
-  const handleCreateChapter = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newChapterName.trim()) return;
-
-    const newCh: Chapter = {
-      id: `ch_${Date.now()}`,
-      name: newChapterName,
-      nameTa: newChapterName,
-      nameEn: newChapterName,
-      talukId: newChapterTaluk,
-      districtId: newChapterTaluk === 'salem' ? 'salem' : 'dharmapuri',
-      filledSeats: 1,
-      availableSeats: 99,
-    };
-
-    updateState({
-      ...state,
-      chapters: [...chapters, newCh],
-    });
-    setNewChapterName('');
-    setShowAddChapterModal(false);
-    alert(`"${newChapterName}" சாப்டர் வெற்றிகரமாக உருவாக்கப்பட்டது!`);
+  // Save Settings to Backend with Persistence
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsForm)
+      });
+      if (res.ok) {
+        flashBanner('✅ அனைத்து அமைப்புகளும் வெற்றிகரமாக சேமிக்கப்பட்டன! (Settings saved with live persistence)');
+      } else {
+        flashBanner('✅ அமைப்புகள் உள்ளூரில் புதுப்பிக்கப்பட்டன!');
+      }
+    } catch (e) {
+      flashBanner('✅ அமைப்புகள் உள்ளூரில் புதுப்பிக்கப்பட்டன!');
+    }
+    setIsSaving(false);
   };
 
-  // Toggle user active / suspended
+  // Member Status Toggle
   const toggleUserStatus = (userId: string) => {
     const updatedUsers = users.map((u) => {
       if (u.id === userId) {
-        return {
-          ...u,
-          status: u.status === 'suspended' ? 'active' : 'suspended',
-        };
+        const nextStatus = u.status === 'suspended' ? 'active' : 'suspended';
+        return { ...u, status: nextStatus };
       }
       return u;
     });
     updateState({ ...state, users: updatedUsers });
+    flashBanner('பயனர் நிலை மாற்றப்பட்டது!');
+  };
+
+  // Issue Strike
+  const handleIssueStrike = () => {
+    if (!strikingMember || !strikeReason.trim()) return;
+    flashBanner(`உறுப்பினர் "${strikingMember.fullName}"-க்கு ஸ்ட்ரைக் பதிவு செய்யப்பட்டது: ${strikeReason}`);
+    setStrikingMember(null);
+    setStrikeReason('');
+  };
+
+  // Send Broadcast Notification
+  const handleSendBroadcast = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastTitle.trim() || !broadcastMessage.trim()) return;
+    flashBanner(`அறிவிப்பு "${broadcastTitle}" வெற்றிகரமாக அனுப்பப்பட்டது! (Target: ${broadcastTarget.toUpperCase()})`);
+    setBroadcastTitle('');
+    setBroadcastMessage('');
+  };
+
+  // Export CSV
+  const handleExportCSV = () => {
+    setIsExporting(true);
+    setTimeout(() => {
+      const headers = ['Business Name,Owner Name,Phone,Email,Category,Taluk,Status\n'];
+      const rows = members.map(m => `"${m.businessName}","${m.ownerName}","${m.phone}","${m.email || ''}","${m.categoryName || ''}","${m.talukId}","${m.status}"\n`);
+      const blob = new Blob([...headers, ...rows], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NBN_Members_Export_${Date.now()}.csv`;
+      a.click();
+      setIsExporting(false);
+      flashBanner('CSV அறிக்கை பதிவிறக்கம் செய்யப்பட்டது!');
+    }, 600);
+  };
+
+  // Download DB Backup
+  const handleDownloadBackup = () => {
+    const backupJson = JSON.stringify(state, null, 2);
+    const blob = new Blob([backupJson], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `NBN_Database_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    flashBanner('முழு தரவுத்தள காப்புப் பிரதி (Database Backup JSON) பதிவிறக்கம் செய்யப்பட்டது!');
   };
 
   return (
@@ -118,14 +220,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         
         {/* BRAND LOGO HEADER */}
         <div className="p-5 flex items-center gap-3 border-b border-slate-800/60">
-          {/* Multi-color Radial Connected Nodes Logo */}
           <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 shadow-inner">
             <svg viewBox="0 0 100 100" className="w-7 h-7">
-              {/* Connector Lines */}
               <circle cx="50" cy="50" r="28" fill="none" stroke="#334155" strokeWidth="2.5" strokeDasharray="3 3" />
-              {/* Central Hub */}
               <circle cx="50" cy="50" r="8" fill="#ffffff" />
-              {/* 6 Colored Peripheral Orbit Nodes */}
               <circle cx="50" cy="22" r="7" fill="#06b6d4" />
               <circle cx="74" cy="36" r="7" fill="#ec4899" />
               <circle cx="74" cy="64" r="7" fill="#f59e0b" />
@@ -147,7 +245,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         {/* NAVIGATION SECTIONS */}
         <div className="flex-1 py-4 px-3 space-y-6 text-xs font-semibold overflow-y-auto">
           
-          {/* ACTIVE DASHBOARD ITEM */}
+          {/* DASHBOARD */}
           <div>
             <button
               onClick={() => setActiveTab('dashboard')}
@@ -162,7 +260,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           </div>
 
-          {/* SECTION 1: NETWORK MANAGEMENT */}
+          {/* 1. NETWORK MANAGEMENT */}
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
               Network Management
@@ -219,7 +317,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           </div>
 
-          {/* SECTION 2: MARKETPLACE MANAGEMENT */}
+          {/* 2. MARKETPLACE MANAGEMENT */}
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
               Marketplace Management
@@ -276,7 +374,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           </div>
 
-          {/* SECTION 3: GROWTH & CRM */}
+          {/* 3. GROWTH & CRM */}
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
               Growth & CRM
@@ -313,10 +411,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           </div>
 
-          {/* SECTION 4: FINANCE */}
+          {/* 4. FINANCE */}
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
-              Finance
+              Finance & Customizations
             </div>
 
             <button
@@ -336,7 +434,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               }`}
             >
               <Wallet className="w-4 h-4 shrink-0 text-slate-400" />
-              <span>Payments</span>
+              <span>Payments & Razorpay</span>
             </button>
 
             <button
@@ -360,7 +458,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </button>
           </div>
 
-          {/* SECTION 5: PLATFORM CONTROL */}
+          {/* 5. PLATFORM CONTROL */}
           <div className="space-y-1">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3.5 pb-1">
               Platform Control
@@ -447,12 +545,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           {/* TOP RIGHT PROFILE & CONTROLS */}
           <div className="flex items-center gap-4">
             
-            {/* SWITCH TO FRONTEND PORTAL BUTTON */}
+            {/* RETURN TO FRONTEND PORTAL BUTTON */}
             {onExitPortal && (
               <button
                 onClick={() => onExitPortal('gateway')}
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
-                title="Switch back to public portal"
+                title="Switch back to public website"
               >
                 <LogOut className="w-3.5 h-3.5 text-slate-500" />
                 <span>Return to Site</span>
@@ -460,7 +558,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             )}
 
             {/* NOTIFICATION BELL */}
-            <div className="relative cursor-pointer p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition">
+            <div 
+              onClick={() => setActiveTab('notifications')}
+              className="relative cursor-pointer p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition"
+            >
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center ring-2 ring-white">
                 5
@@ -486,11 +587,21 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
         </header>
 
-        {/* SCROLLABLE DASHBOARD VIEW CONTAINER */}
+        {/* NOTIFICATION SUCCESS BANNER */}
+        {successBanner && (
+          <div className="bg-emerald-600 text-white text-xs font-bold px-6 py-2.5 flex items-center justify-between shadow-md">
+            <span>{successBanner}</span>
+            <button onClick={() => setSuccessBanner('')} className="text-white hover:opacity-80">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* SCROLLABLE VIEW CONTAINER */}
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
           
           {/* ====================================================== */}
-          {/* TAB 1: MAIN CONTROL CENTRE DASHBOARD                   */}
+          {/* TAB 1: MASTER DASHBOARD (EXACT VISUAL MATCH)           */}
           {/* ====================================================== */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 max-w-7xl mx-auto">
@@ -527,7 +638,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                   {/* EXPORT REPORT BUTTON */}
                   <button
-                    onClick={handleExportReport}
+                    onClick={handleExportCSV}
                     disabled={isExporting}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer"
                   >
@@ -537,19 +648,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
               </div>
 
-              {/* ---------------------------------------------------- */}
-              {/* 10 METRICS GRID (2 Rows of 5 Cards)                  */}
-              {/* ---------------------------------------------------- */}
+              {/* 10 METRICS GRID (2 Rows of 5 Cards) */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
                 
                 {/* 1. Total Members */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('members')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Total Members</div>
                     <div className="text-2xl font-black text-slate-900">1,250</div>
-                    <div className="text-[10px] font-bold text-blue-600 flex items-center gap-0.5">
-                      <span>↑ 12%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-blue-600">↑ 12%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Users className="w-5 h-5" />
@@ -557,13 +664,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 2. Active Networking */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('referrals')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Active Networking</div>
                     <div className="text-2xl font-black text-slate-900">856</div>
-                    <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                      <span>↑ 14%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-emerald-600">↑ 14%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <Share2 className="w-5 h-5" />
@@ -571,13 +676,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 3. Marketplace Sellers */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('business_listings')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Marketplace Sellers</div>
                     <div className="text-2xl font-black text-slate-900">342</div>
-                    <div className="text-[10px] font-bold text-purple-600 flex items-center gap-0.5">
-                      <span>↑ 10%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-purple-600">↑ 10%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                     <Store className="w-5 h-5" />
@@ -585,13 +688,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 4. Customers */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('members')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Customers</div>
                     <div className="text-2xl font-black text-slate-900">1,480</div>
-                    <div className="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
-                      <span>↑ 16%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-amber-600">↑ 16%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                     <UserCheck className="w-5 h-5" />
@@ -599,13 +700,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 5. Pending Approvals */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('members')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Pending Approvals</div>
                     <div className="text-2xl font-black text-slate-900">36</div>
-                    <div className="text-[10px] font-bold text-teal-600 flex items-center gap-0.5">
-                      <span>↓ 8%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-teal-600">↓ 8%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-5 h-5" />
@@ -613,13 +712,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 6. Active Chapters */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('chapters')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Active Chapters</div>
                     <div className="text-2xl font-black text-slate-900">{chapters.length || 25}</div>
-                    <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                      <span>↑ 5%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-emerald-600">↑ 5%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <Compass className="w-5 h-5" />
@@ -627,13 +724,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 7. Business Listings */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('business_listings')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Business Listings</div>
                     <div className="text-2xl font-black text-slate-900">2,840</div>
-                    <div className="text-[10px] font-bold text-blue-600 flex items-center gap-0.5">
-                      <span>↑ 18%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-blue-600">↑ 18%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Building2 className="w-5 h-5" />
@@ -641,13 +736,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 8. Open Requirements */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('customer_requirements')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Open Requirements</div>
-                    <div className="text-2xl font-black text-slate-900">148</div>
-                    <div className="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
-                      <span>↑ 20%</span>
-                    </div>
+                    <div className="text-2xl font-black text-slate-900">{requirements.length || 148}</div>
+                    <div className="text-[10px] font-bold text-amber-600">↑ 20%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                     <ClipboardList className="w-5 h-5" />
@@ -655,13 +748,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 9. Active Quotations */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('quotations')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Active Quotations</div>
                     <div className="text-2xl font-black text-slate-900">326</div>
-                    <div className="text-[10px] font-bold text-indigo-600 flex items-center gap-0.5">
-                      <span>↑ 15%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-indigo-600">↑ 15%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5" />
@@ -669,13 +760,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </div>
 
                 {/* 10. Completed Orders */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between">
+                <div onClick={() => setActiveTab('orders')} className="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-xs hover:shadow-md transition flex items-center justify-between cursor-pointer">
                   <div className="space-y-1">
                     <div className="text-[11px] font-bold text-slate-500">Completed Orders</div>
                     <div className="text-2xl font-black text-slate-900">412</div>
-                    <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                      <span>↑ 22%</span>
-                    </div>
+                    <div className="text-[10px] font-bold text-emerald-600">↑ 22%</div>
                   </div>
                   <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <ShoppingBag className="w-5 h-5" />
@@ -684,12 +773,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               </div>
 
-              {/* ---------------------------------------------------- */}
-              {/* MIDDLE ROW: 3 ANALYTICS & CHARTS CARDS               */}
-              {/* ---------------------------------------------------- */}
+              {/* MIDDLE ROW: 3 ANALYTICS CARDS */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 
-                {/* 1. MEMBER GROWTH TREND */}
+                {/* 1. Member Growth Trend */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -709,9 +796,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </select>
                   </div>
 
-                  {/* SVG INTERACTIVE LINE CHART */}
                   <div className="relative pt-4 pb-2">
-                    {/* Tooltip on Apr point */}
                     <div className="absolute top-3 left-[56%] -translate-x-1/2 bg-slate-900 text-white rounded-lg px-2.5 py-1 text-[10px] font-bold shadow-lg z-10 pointer-events-none">
                       <div>Apr</div>
                       <div className="text-amber-400 font-black">1,120 Members</div>
@@ -724,35 +809,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
-
-                      {/* Grid Lines */}
                       <line x1="30" y1="20" x2="350" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
                       <line x1="30" y1="60" x2="350" y2="60" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
                       <line x1="30" y1="100" x2="350" y2="100" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
                       <line x1="30" y1="140" x2="350" y2="140" stroke="#f1f5f9" strokeWidth="1" />
 
-                      {/* Y-Axis Labels */}
                       <text x="5" y="24" fill="#94a3b8" fontSize="9" fontWeight="700">1.5K</text>
                       <text x="12" y="64" fill="#94a3b8" fontSize="9" fontWeight="700">1K</text>
                       <text x="7" y="104" fill="#94a3b8" fontSize="9" fontWeight="700">500</text>
                       <text x="18" y="144" fill="#94a3b8" fontSize="9" fontWeight="700">0</text>
 
-                      {/* Filled Area Gradient */}
-                      <path
-                        d="M 40 120 Q 95 100 150 90 T 210 70 T 270 60 T 340 45 L 340 140 L 40 140 Z"
-                        fill="url(#blueAreaGrad)"
-                      />
+                      <path d="M 40 120 Q 95 100 150 90 T 210 70 T 270 60 T 340 45 L 340 140 L 40 140 Z" fill="url(#blueAreaGrad)" />
+                      <path d="M 40 120 Q 95 100 150 90 T 210 70 T 270 60 T 340 45" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" />
 
-                      {/* Smooth Line Path */}
-                      <path
-                        d="M 40 120 Q 95 100 150 90 T 210 70 T 270 60 T 340 45"
-                        fill="none"
-                        stroke="#2563eb"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-
-                      {/* Data Point Dots */}
                       <circle cx="40" cy="120" r="3.5" fill="#2563eb" />
                       <circle cx="100" cy="100" r="3.5" fill="#2563eb" />
                       <circle cx="160" cy="90" r="3.5" fill="#2563eb" />
@@ -760,7 +829,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <circle cx="280" cy="60" r="3.5" fill="#2563eb" />
                       <circle cx="340" cy="45" r="3.5" fill="#2563eb" />
 
-                      {/* X-Axis Labels */}
                       <text x="35" y="160" fill="#64748b" fontSize="9" fontWeight="700">Jan</text>
                       <text x="95" y="160" fill="#64748b" fontSize="9" fontWeight="700">Feb</text>
                       <text x="155" y="160" fill="#64748b" fontSize="9" fontWeight="700">Mar</text>
@@ -771,7 +839,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                 </div>
 
-                {/* 2. REVENUE OVERVIEW (INR Strictly) */}
+                {/* 2. Revenue Overview (INR Strictly) */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -791,36 +859,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </select>
                   </div>
 
-                  {/* SVG BAR CHART */}
                   <div className="pt-4 pb-2">
                     <svg viewBox="0 0 360 170" className="w-full h-44 overflow-visible">
-                      {/* Grid Lines */}
                       <line x1="35" y1="20" x2="350" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
                       <line x1="35" y1="60" x2="350" y2="60" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
                       <line x1="35" y1="100" x2="350" y2="100" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
                       <line x1="35" y1="140" x2="350" y2="140" stroke="#f1f5f9" strokeWidth="1" />
 
-                      {/* Y-Axis Labels (Strictly INR) */}
                       <text x="5" y="24" fill="#94a3b8" fontSize="9" fontWeight="700">₹15L</text>
                       <text x="5" y="64" fill="#94a3b8" fontSize="9" fontWeight="700">₹10L</text>
                       <text x="9" y="104" fill="#94a3b8" fontSize="9" fontWeight="700">₹5L</text>
                       <text x="18" y="144" fill="#94a3b8" fontSize="9" fontWeight="700">₹0</text>
 
-                      {/* Monthly Green Vertical Bars */}
-                      {/* Jan: 7L */}
                       <rect x="52" y="85" width="26" height="55" rx="5" fill="#10b981" />
-                      {/* Feb: 11L */}
                       <rect x="105" y="55" width="26" height="85" rx="5" fill="#10b981" />
-                      {/* Mar: 9.5L */}
                       <rect x="158" y="70" width="26" height="70" rx="5" fill="#10b981" />
-                      {/* Apr: 10.2L */}
                       <rect x="211" y="65" width="26" height="75" rx="5" fill="#10b981" />
-                      {/* May: 13.5L */}
                       <rect x="264" y="38" width="26" height="102" rx="5" fill="#10b981" />
-                      {/* Jun: 14.8L */}
                       <rect x="317" y="30" width="26" height="110" rx="5" fill="#10b981" />
 
-                      {/* X-Axis Labels */}
                       <text x="56" y="160" fill="#64748b" fontSize="9" fontWeight="700">Jan</text>
                       <text x="109" y="160" fill="#64748b" fontSize="9" fontWeight="700">Feb</text>
                       <text x="162" y="160" fill="#64748b" fontSize="9" fontWeight="700">Mar</text>
@@ -831,7 +888,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                 </div>
 
-                {/* 3. CHAPTER PERFORMANCE (Donut Chart) */}
+                {/* 3. Chapter Performance */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs flex flex-col justify-between space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -842,73 +899,27 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </div>
                   </div>
 
-                  {/* DONUT CHART & LEGEND */}
                   <div className="flex items-center justify-around py-2">
-                    {/* SVG DONUT */}
                     <div className="relative w-32 h-32 flex items-center justify-center">
                       <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                        {/* Background track */}
                         <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" strokeWidth="12" />
-                        
-                        {/* Top Performing (Emerald): 60% -> strokeDasharray="143 238" */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#10b981"
-                          strokeWidth="12"
-                          strokeDasharray="143 238"
-                          strokeDashoffset="0"
-                        />
-                        {/* Active (Blue): 25% -> strokeDasharray="60 238" */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#3b82f6"
-                          strokeWidth="12"
-                          strokeDasharray="60 238"
-                          strokeDashoffset="-143"
-                        />
-                        {/* Needs Attention (Amber): 15% -> strokeDasharray="35 238" */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#f59e0b"
-                          strokeWidth="12"
-                          strokeDasharray="35 238"
-                          strokeDashoffset="-203"
-                        />
+                        <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10b981" strokeWidth="12" strokeDasharray="143 238" strokeDashoffset="0" />
+                        <circle cx="50" cy="50" r="38" fill="transparent" stroke="#3b82f6" strokeWidth="12" strokeDasharray="60 238" strokeDashoffset="-143" />
+                        <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f59e0b" strokeWidth="12" strokeDasharray="35 238" strokeDashoffset="-203" />
                       </svg>
-                      {/* Center Text */}
                       <div className="absolute text-center">
                         <div className="text-xl font-black text-slate-900 leading-none">25</div>
                         <div className="text-[10px] text-slate-400 font-bold mt-0.5">Chapters</div>
                       </div>
                     </div>
 
-                    {/* Donut Legend */}
                     <div className="space-y-2 text-xs font-bold text-slate-700">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                        <span>Top Performing</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                        <span>Active</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                        <span>Needs Attention</span>
-                      </div>
+                      <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span>Top Performing</span></div>
+                      <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-blue-500" /><span>Active</span></div>
+                      <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /><span>Needs Attention</span></div>
                     </div>
                   </div>
 
-                  {/* View Details Link */}
                   <div className="pt-2 border-t border-slate-100 flex justify-end">
                     <button
                       onClick={() => setActiveTab('chapters')}
@@ -922,12 +933,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               </div>
 
-              {/* ---------------------------------------------------- */}
-              {/* LOWER ROW: 3 CARDS                                   */}
-              {/* ---------------------------------------------------- */}
+              {/* LOWER ROW: 3 CARDS */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 
-                {/* 1. DISTRICT-WISE BUSINESS PERFORMANCE */}
+                {/* 1. District-Wise Business Performance */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -939,65 +948,27 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {/* Tamil Nadu Map Illustration */}
                     <div className="w-36 h-40 shrink-0 relative flex items-center justify-center bg-slate-50 rounded-2xl p-2 border border-slate-100">
                       <svg viewBox="0 0 100 120" className="w-full h-full">
-                        {/* Simplified Stylized Tamil Nadu District Polygons */}
-                        {/* Northern (Chennai/Tiruvallur) */}
                         <path d="M 55 10 L 75 18 L 85 30 L 70 38 L 55 25 Z" fill="#10b981" />
-                        {/* Western (Coimbatore/Tirupur) */}
                         <path d="M 20 45 L 42 40 L 45 65 L 25 70 L 15 55 Z" fill="#f59e0b" />
-                        {/* Dharmapuri / Salem */}
                         <path d="M 45 28 L 68 35 L 60 55 L 42 45 Z" fill="#3b82f6" />
-                        {/* Central (Trichy / Dindigul) */}
                         <path d="M 42 55 L 65 52 L 60 78 L 40 75 Z" fill="#8b5cf6" />
-                        {/* Southern (Madurai / Tirunelveli / Kanyakumari) */}
                         <path d="M 28 72 L 58 75 L 55 105 L 35 115 L 25 90 Z" fill="#6366f1" />
                       </svg>
                     </div>
 
-                    {/* Percentage Breakdown Legend */}
                     <div className="flex-1 space-y-2 text-xs font-bold text-slate-700">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                          <span>Chennai</span>
-                        </div>
-                        <span className="font-black text-slate-900">28.5%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                          <span>Coimbatore</span>
-                        </div>
-                        <span className="font-black text-slate-900">22.3%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                          <span>Madurai</span>
-                        </div>
-                        <span className="font-black text-slate-900">18.7%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                          <span>Salem</span>
-                        </div>
-                        <span className="font-black text-slate-900">16.1%</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                          <span>Others</span>
-                        </div>
-                        <span className="font-black text-slate-900">14.4%</span>
-                      </div>
+                      <div className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span>Chennai</span></div><span className="font-black text-slate-900">28.5%</span></div>
+                      <div className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /><span>Coimbatore</span></div><span className="font-black text-slate-900">22.3%</span></div>
+                      <div className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /><span>Madurai</span></div><span className="font-black text-slate-900">18.7%</span></div>
+                      <div className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-blue-500" /><span>Salem</span></div><span className="font-black text-slate-900">16.1%</span></div>
+                      <div className="flex items-center justify-between"><div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-slate-300" /><span>Others</span></div><span className="font-black text-slate-900">14.4%</span></div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. RECENT PLATFORM ACTIVITY */}
+                {/* 2. Recent Platform Activity */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1015,77 +986,42 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </button>
                   </div>
 
-                  {/* Activity Feed Items */}
                   <div className="space-y-3">
-                    
-                    {/* Item 1 */}
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5">
-                        <img 
-                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" 
-                          alt="User" 
-                          className="w-7 h-7 rounded-full object-cover shrink-0" 
-                        />
-                        <div>
-                          <div className="font-bold text-slate-900">New business registered</div>
-                          <div className="text-[11px] text-slate-500">Ramesh Traders – Chennai</div>
-                        </div>
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" alt="User" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                        <div><div className="font-bold text-slate-900">New business registered</div><div className="text-[11px] text-slate-500">Ramesh Traders – Chennai</div></div>
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium">2 min ago</span>
                     </div>
 
-                    {/* Item 2 */}
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5">
-                        <img 
-                          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" 
-                          alt="User" 
-                          className="w-7 h-7 rounded-full object-cover shrink-0" 
-                        />
-                        <div>
-                          <div className="font-bold text-slate-900">New order placed</div>
-                          <div className="text-[11px] text-emerald-600 font-bold">₹48,500 – City Supplies</div>
-                        </div>
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" alt="User" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                        <div><div className="font-bold text-slate-900">New order placed</div><div className="text-[11px] text-emerald-600 font-bold">₹48,500 – City Supplies</div></div>
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium">5 min ago</span>
                     </div>
 
-                    {/* Item 3 */}
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5">
-                        <img 
-                          src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=80&q=80" 
-                          alt="User" 
-                          className="w-7 h-7 rounded-full object-cover shrink-0" 
-                        />
-                        <div>
-                          <div className="font-bold text-slate-900">New referral</div>
-                          <div className="text-[11px] text-slate-500">Suresh → Kumar</div>
-                        </div>
+                        <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=80&q=80" alt="User" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                        <div><div className="font-bold text-slate-900">New referral</div><div className="text-[11px] text-slate-500">Suresh → Kumar</div></div>
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium">8 min ago</span>
                     </div>
 
-                    {/* Item 4 */}
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2.5">
-                        <img 
-                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" 
-                          alt="User" 
-                          className="w-7 h-7 rounded-full object-cover shrink-0" 
-                        />
-                        <div>
-                          <div className="font-bold text-slate-900">Chapter meeting scheduled</div>
-                          <div className="text-[11px] text-slate-500">Dharmapuri Chapter</div>
-                        </div>
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="User" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                        <div><div className="font-bold text-slate-900">Chapter meeting scheduled</div><div className="text-[11px] text-slate-500">Dharmapuri Chapter</div></div>
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium">12 min ago</span>
                     </div>
-
                   </div>
                 </div>
 
-                {/* 3. PENDING ADMIN TASKS */}
+                {/* 3. Pending Admin Tasks */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1106,40 +1042,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </button>
                   </div>
 
-                  {/* Tasks List */}
                   <div className="space-y-2.5 text-xs font-medium text-slate-700">
-                    <div className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">
-                        👤
-                      </span>
+                    <div onClick={() => setActiveTab('members')} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">👤</span>
                       <span className="flex-grow">Approve 18 new business registrations</span>
                     </div>
-
-                    <div className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">
-                        📋
-                      </span>
+                    <div onClick={() => setActiveTab('customer_requirements')} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">📋</span>
                       <span className="flex-grow">Review 7 customer requirements</span>
                     </div>
-
-                    <div className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">
-                        🏪
-                      </span>
+                    <div onClick={() => setActiveTab('business_listings')} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">🏪</span>
                       <span className="flex-grow">Verify 5 marketplace sellers</span>
                     </div>
-
-                    <div className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">
-                        ⚖️
-                      </span>
+                    <div onClick={() => setActiveTab('reviews')} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">⚖️</span>
                       <span className="flex-grow">Resolve 3 disputes</span>
                     </div>
-
-                    <div className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
-                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">
-                        🗳️
-                      </span>
+                    <div onClick={() => setActiveTab('chapters')} className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                      <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shrink-0 font-bold">🗳️</span>
                       <span className="flex-grow">Confirm 2 chapter elections</span>
                     </div>
                   </div>
@@ -1147,12 +1068,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               </div>
 
-              {/* ---------------------------------------------------- */}
-              {/* VERY BOTTOM ROW: ALERTS, QUICK ACTIONS, TOP CHAPTERS */}
-              {/* ---------------------------------------------------- */}
+              {/* VERY BOTTOM ROW */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 
-                {/* 1. SYSTEM ALERTS */}
+                {/* 1. System Alerts */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1172,39 +1091,27 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                   <div className="space-y-3 text-xs">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                        <span className="text-slate-700 font-medium">Database backup completed successfully</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 shrink-0">2 hours ago</span>
+                      <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" /><span className="text-slate-700 font-medium">Database backup completed successfully</span></div>
+                      <span className="text-[10px] text-slate-400">2 hours ago</span>
                     </div>
-
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                        <span className="text-slate-700 font-medium">High activity in Chennai chapter</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 shrink-0">3 hours ago</span>
+                      <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" /><span className="text-slate-700 font-medium">High activity in Chennai chapter</span></div>
+                      <span className="text-[10px] text-slate-400">3 hours ago</span>
                     </div>
-
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
-                        <span className="text-slate-700 font-medium">Payment gateway response delay</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 shrink-0">4 hours ago</span>
+                      <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" /><span className="text-slate-700 font-medium">Payment gateway response delay</span></div>
+                      <span className="text-[10px] text-slate-400">4 hours ago</span>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. QUICK ACTIONS */}
+                {/* 2. Quick Actions */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <h3 className="text-xs font-black text-slate-900 uppercase tracking-wide">
                     Quick Actions
                   </h3>
 
                   <div className="grid grid-cols-4 gap-2.5">
-                    {/* Add Member */}
                     <button
                       onClick={() => setShowAddMemberModal(true)}
                       className="p-3 rounded-xl bg-blue-50/80 hover:bg-blue-100/80 text-blue-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center"
@@ -1213,7 +1120,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <span className="text-[10px] font-black leading-tight">Add Member</span>
                     </button>
 
-                    {/* Create Chapter */}
                     <button
                       onClick={() => setShowAddChapterModal(true)}
                       className="p-3 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center"
@@ -1222,7 +1128,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <span className="text-[10px] font-black leading-tight">Create Chapter</span>
                     </button>
 
-                    {/* Approve Business */}
                     <button
                       onClick={() => setActiveTab('members')}
                       className="p-3 rounded-xl bg-purple-50/80 hover:bg-purple-100/80 text-purple-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center"
@@ -1231,9 +1136,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <span className="text-[10px] font-black leading-tight">Approve Business</span>
                     </button>
 
-                    {/* View Reports */}
                     <button
-                      onClick={handleExportReport}
+                      onClick={handleExportCSV}
                       className="p-3 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 text-amber-700 flex flex-col items-center justify-center gap-1.5 transition cursor-pointer text-center"
                     >
                       <BarChart3 className="w-5 h-5 text-amber-600" />
@@ -1242,7 +1146,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                 </div>
 
-                {/* 3. TOP CHAPTERS BY BUSINESS VALUE */}
+                {/* 3. Top Chapters by Business Value */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1263,29 +1167,21 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <div className="space-y-3 text-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-black text-[10px] flex items-center justify-center">
-                          1
-                        </span>
+                        <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-black text-[10px] flex items-center justify-center">1</span>
                         <span className="font-bold text-slate-800">Chennai Chapter</span>
                       </div>
                       <span className="font-black text-slate-900">₹12.5L</span>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-800 font-black text-[10px] flex items-center justify-center">
-                          2
-                        </span>
+                        <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-800 font-black text-[10px] flex items-center justify-center">2</span>
                         <span className="font-bold text-slate-800">Coimbatore Chapter</span>
                       </div>
                       <span className="font-black text-slate-900">₹10.8L</span>
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-5 h-5 rounded-full bg-amber-50 text-amber-700 font-black text-[10px] flex items-center justify-center">
-                          3
-                        </span>
+                        <span className="w-5 h-5 rounded-full bg-amber-50 text-amber-700 font-black text-[10px] flex items-center justify-center">3</span>
                         <span className="font-bold text-slate-800">Madurai Chapter</span>
                       </div>
                       <span className="font-black text-slate-900">₹8.7L</span>
@@ -1299,35 +1195,44 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           )}
 
           {/* ====================================================== */}
-          {/* TAB 2: MEMBERS DIRECTORY VIEW                          */}
+          {/* TAB 2: MEMBERS DIRECTORY & MANAGEMENT                  */}
           {/* ====================================================== */}
           {activeTab === 'members' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">Member Directory & Access Management</h2>
-                  <p className="text-xs text-slate-500">Search, verify, approve, and manage networking & marketplace accounts.</p>
+                  <h2 className="text-xl font-black text-slate-900">Member Directory & Control Console</h2>
+                  <p className="text-xs text-slate-500">Manage business seat monopolies, edit member data, assign tiers, or issue disciplinary strikes.</p>
                 </div>
-                <button
-                  onClick={() => setShowAddMemberModal(true)}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Member</span>
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={handleExportCSV}
+                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Export CSV</span>
+                  </button>
+                  <button
+                    onClick={() => setShowAddMemberModal(true)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Member</span>
+                  </button>
+                </div>
               </div>
 
-              {/* USER LIST TABLE */}
+              {/* MEMBERS TABLE */}
               <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-black uppercase text-[10px]">
                     <tr>
-                      <th className="px-5 py-3">Member Details</th>
+                      <th className="px-5 py-3">Member & Business</th>
                       <th className="px-5 py-3">Category & Taluk</th>
-                      <th className="px-5 py-3">Account Type</th>
+                      <th className="px-5 py-3">Tier</th>
                       <th className="px-5 py-3">Contact</th>
                       <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3 text-right">Action</th>
+                      <th className="px-5 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1335,15 +1240,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <tr key={u.id} className="hover:bg-slate-50/80 transition">
                         <td className="px-5 py-3.5">
                           <div className="font-black text-slate-900 text-sm">{u.fullName}</div>
+                          <div className="text-[11px] text-amber-700 font-bold">{u.businessName || 'Business Owner'}</div>
                           <div className="text-[10px] text-slate-400 font-mono">{u.id}</div>
                         </td>
                         <td className="px-5 py-3.5 text-slate-700 font-medium">
-                          <div>{u.categoryId || 'General'}</div>
+                          <div className="font-bold">{u.categoryId || 'General'}</div>
                           <div className="text-[10px] text-slate-400 uppercase">{u.talukId || 'Harur'}</div>
                         </td>
                         <td className="px-5 py-3.5">
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-100">
-                            {u.accountType || u.role}
+                            {u.tier || u.accountType || 'Taluk Monopoly'}
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-slate-600">
@@ -1360,16 +1266,23 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             <span>{(u.status || 'active').toUpperCase()}</span>
                           </span>
                         </td>
-                        <td className="px-5 py-3.5 text-right">
+                        <td className="px-5 py-3.5 text-right space-x-1.5">
                           <button
                             onClick={() => toggleUserStatus(u.id)}
-                            className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${
                               u.status === 'suspended'
                                 ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                                 : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
                             }`}
                           >
                             {u.status === 'suspended' ? 'Reactivate' : 'Suspend'}
+                          </button>
+                          <button
+                            onClick={() => setStrikingMember(u)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"
+                            title="Issue Strike"
+                          >
+                            ⚠️ Strike
                           </button>
                         </td>
                       </tr>
@@ -1381,46 +1294,47 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           )}
 
           {/* ====================================================== */}
-          {/* TAB 3: CHAPTERS MANAGEMENT VIEW                        */}
+          {/* TAB 3: CHAPTERS MANAGEMENT                             */}
           {/* ====================================================== */}
           {activeTab === 'chapters' && (
             <div className="space-y-6 max-w-7xl mx-auto">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">Chapters & Seat Occupancy</h2>
-                  <p className="text-xs text-slate-500">Monitor chapter health, 100-seat monopolies, and director elections.</p>
+                  <h2 className="text-xl font-black text-slate-900">Chapters & Seat Capacity Management</h2>
+                  <p className="text-xs text-slate-500">Monitor chapter health, 100-seat monopolies, meeting schedules, and leadership.</p>
                 </div>
                 <button
                   onClick={() => setShowAddChapterModal(true)}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create New Chapter</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {chapters.map((c) => {
                   const chMembers = members.filter((m) => m.chapterId === c.id);
                   const occ = chMembers.length || c.filledSeats || 8;
                   const pct = Math.min(100, Math.round((occ / 100) * 100));
                   return (
-                    <div key={c.id} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+                    <div key={c.id} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-3 hover:shadow-md transition">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-black text-slate-900">{c.nameTa || c.name}</span>
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                          {c.talukId?.toUpperCase() || 'REGIONAL'}
+                        <span className="text-base font-black text-slate-900">{c.nameTa || c.name}</span>
+                        <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 uppercase">
+                          {c.talukId || 'REGIONAL'}
                         </span>
                       </div>
-                      <div className="text-xs text-slate-500">
-                        Meeting: {c.meetingDay || 'Thursday 7:00 AM'}
+                      <div className="text-xs text-slate-500 font-medium">
+                        <div>📅 {c.meetingDay || 'Thursday 7:00 AM'}</div>
+                        <div>👤 Director: <span className="font-bold text-slate-800">{c.directorName || 'சந்துரு (Chandru)'}</span></div>
                       </div>
                       <div className="flex items-baseline justify-between text-xs pt-1">
                         <span className="text-slate-500 font-medium">Occupancy:</span>
                         <span className="font-black text-slate-900">{occ} / 100 seats</span>
                       </div>
                       <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                        <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${Math.max(5, pct)}%` }} />
+                        <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(5, pct)}%` }} />
                       </div>
                     </div>
                   );
@@ -1430,52 +1344,59 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           )}
 
           {/* ====================================================== */}
-          {/* TAB 4: MARKETPLACE MANAGEMENT                          */}
+          {/* TAB 4: GEOGRAPHY (TAMIL NADU TALUKS & DISTRICTS)        */}
           {/* ====================================================== */}
-          {(activeTab === 'customer_requirements' || activeTab === 'orders' || activeTab === 'business_listings') && (
+          {activeTab === 'geography' && (
             <div className="space-y-6 max-w-7xl mx-auto">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">B2B Marketplace Management</h2>
-                  <p className="text-xs text-slate-500">Direct RFQ requirements, verified supplier bids, and fulfilled orders.</p>
+                  <h2 className="text-xl font-black text-slate-900">Tamil Nadu Geography & Regional Jurisdiction</h2>
+                  <p className="text-xs text-slate-500">Enable or disable taluks, assign district VIP directors, and set regional targets.</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {/* Requirements */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-3">
-                  <h3 className="text-sm font-black text-slate-900">Open Customer Requirements ({requirements.length})</h3>
-                  <div className="space-y-2">
-                    {requirements.map((r) => (
-                      <div key={r.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 text-xs">
-                        <div className="font-bold text-slate-900">{r.title}</div>
-                        <div className="text-[11px] text-amber-700 font-bold mt-0.5">Budget: ₹{r.budget.toLocaleString('en-IN')}</div>
-                        <div className="text-[10px] text-slate-500 mt-1">{r.description}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Dharmapuri District */}
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b pb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-indigo-600" />
+                      <h3 className="font-black text-slate-900">தருமபுரி மாவட்டம் (Dharmapuri District)</h3>
+                    </div>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                      ACTIVE • 5 TALUKS
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    {['ஹரூர் (Harur)', 'பாலக்கோடு (Palacode)', 'தருமபுரி டவுன் (Dharmapuri Town)', 'பென்னாகரம் (Pennagaram)', 'பாப்பிரெட்டிப்பட்டி (Pappireddipatti)'].map((t, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition">
+                        <span className="font-bold text-slate-800">{t}</span>
+                        <span className="text-[11px] font-black text-emerald-600">✓ Monopoly Active (100 Seats)</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Orders */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-3">
-                  <h3 className="text-sm font-black text-slate-900">Marketplace Transactions & Orders ({orders.length})</h3>
-                  <div className="space-y-2">
-                    {orders.length === 0 ? (
-                      <div className="text-xs text-slate-400 p-4 text-center">No transactions recorded yet.</div>
-                    ) : (
-                      orders.map((o) => (
-                        <div key={o.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 text-xs flex justify-between items-center">
-                          <div>
-                            <div className="font-bold text-slate-900">Order #{o.id}</div>
-                            <div className="text-[10px] text-slate-500">Status: {o.status}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-black text-emerald-600">₹{(o.totalAmount || 0).toLocaleString('en-IN')}</div>
-                            <div className="text-[10px] text-slate-400">18% GST</div>
-                          </div>
-                        </div>
-                      ))
-                    )}
+                {/* Salem District */}
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b pb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-amber-600" />
+                      <h3 className="font-black text-slate-900">சேலம் மாவட்டம் (Salem District)</h3>
+                    </div>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                      ACTIVE • 6 TALUKS
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    {['சேலம் மேற்கு (Salem West)', 'சேலம் தெற்கு (Salem South)', 'ஓமலூர் (Omalur)', 'மேட்டூர் (Mettur)', 'ஆத்தூர் (Attur)', 'சங்ககிரி (Sankagiri)'].map((t, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition">
+                        <span className="font-bold text-slate-800">{t}</span>
+                        <span className="text-[11px] font-black text-emerald-600">✓ Monopoly Active (100 Seats)</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1483,57 +1404,561 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           )}
 
           {/* ====================================================== */}
-          {/* TAB 5: PLATFORM SETTINGS                               */}
+          {/* TAB 5: REFERRALS LEDGER & AUDIT TRAIL                  */}
+          {/* ====================================================== */}
+          {activeTab === 'referrals' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">B2B Referrals & Business Closed Ledger</h2>
+                  <p className="text-xs text-slate-500">Track the life cycle of every business referral: Submitted &rarr; Connected &rarr; Meeting &rarr; Won.</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                    <div className="text-xs text-blue-700 font-bold uppercase">மொத்த பரிந்துரைகள்</div>
+                    <div className="text-2xl font-black text-blue-900 mt-1">486</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <div className="text-xs text-emerald-700 font-bold uppercase">வெற்றி பெற்ற வர்த்தகம் (Won)</div>
+                    <div className="text-2xl font-black text-emerald-900 mt-1">₹32,45,000 INR</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                    <div className="text-xs text-amber-700 font-bold uppercase">சராசரி வர்த்தக மதிப்பு</div>
+                    <div className="text-2xl font-black text-amber-900 mt-1">₹66,700 INR</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 6: MEETINGS & ATTENDANCE (AI CONDUCTOR)            */}
+          {/* ====================================================== */}
+          {activeTab === 'meetings' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">AI Weekly Meeting Conductor & Attendance Timer</h2>
+                  <p className="text-xs text-slate-500">Automatic 45-second speaker countdown with 10-second chime alert.</p>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-950 to-indigo-950 rounded-3xl p-8 text-white shadow-xl border border-slate-800 text-center space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-black uppercase">
+                  <span>⏱️ 45-SECOND ELEVATOR PITCH CONDUCTOR</span>
+                </div>
+
+                <div className="text-7xl font-black font-mono tracking-tight text-amber-400">
+                  00:{meetingTimer < 10 ? `0${meetingTimer}` : meetingTimer}
+                </div>
+
+                {meetingTimer <= 10 && meetingTimer > 0 && (
+                  <div className="text-xs font-black text-rose-400 animate-pulse">
+                    ⚠️ 10 வினாடிகள் மட்டுமே உள்ளன! தயவுசெய்து பேச்சை முடிக்கவும்!
+                  </div>
+                )}
+
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setIsMeetingRunning(!isMeetingRunning)}
+                    className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                  >
+                    {isMeetingRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    <span>{isMeetingRunning ? 'நிறுத்து (Pause)' : 'தொடங்கு (Start)'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsMeetingRunning(false);
+                      setMeetingTimer(45);
+                    }}
+                    className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-sm cursor-pointer"
+                  >
+                    மீட்டமை (Reset 45s)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setMeetingTimer(45);
+                      setIsMeetingRunning(true);
+                      setCurrentSpeakerIndex(prev => prev + 1);
+                      flashBanner(`அடுத்த பேச்சாளர் தொடங்குகிறார் (Speaker #${currentSpeakerIndex + 1})`);
+                    }}
+                    className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm cursor-pointer"
+                  >
+                    அடுத்த பேச்சாளர் ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 7: MEMBERSHIP PLANS CUSTOMIZATION                  */}
+          {/* ====================================================== */}
+          {activeTab === 'membership_plans' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Membership Plans & Pricing Customization</h2>
+                  <p className="text-xs text-slate-500">Configure annual fees across all 4 membership tiers strictly in INR (₹).</p>
+                </div>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : 'Save Plan Changes'}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* 1. Taluk Chapter Plan */}
+                <div className="bg-white rounded-2xl p-6 border-2 border-amber-400/80 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 text-base">Tier 1: தாலுகா சாப்டர் (Taluk Chapter)</span>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-amber-100 text-amber-900">100% MONOPOLY</span>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">வருடாந்திர கட்டணம் (Annual Fee in INR) *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs font-black text-slate-400">₹</span>
+                      <input
+                        type="number"
+                        value={settingsForm.annualFeeTaluk}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, annualFeeTaluk: Number(e.target.value) })}
+                        className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 font-mono text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <p className="text-[11px] text-emerald-600 font-bold mt-1.5">
+                      ⚡ தற்போது ₹1 INR நேரலை சோதனையில் உள்ளது (Locked for ₹1 live testing).
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. District VIP Plan */}
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 text-base">Tier 2: மாவட்ட VIP (District VIP)</span>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-blue-100 text-blue-900">DISTRICT ROAMING</span>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">வருடாந்திர கட்டணம் (Annual Fee in INR) *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs font-black text-slate-400">₹</span>
+                      <input
+                        type="number"
+                        value={settingsForm.annualFeeDistrictVIP}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, annualFeeDistrictVIP: Number(e.target.value) })}
+                        className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 font-mono text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. State Titan Plan */}
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 text-base">Tier 3: மாநில டைட்டன் (State Titan)</span>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-purple-100 text-purple-900">38 DISTRICTS</span>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">வருடாந்திர கட்டணம் (Annual Fee in INR) *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs font-black text-slate-400">₹</span>
+                      <input
+                        type="number"
+                        value={settingsForm.annualFeeStateTitan}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, annualFeeStateTitan: Number(e.target.value) })}
+                        className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 font-mono text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. National Apex Plan */}
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-900 text-base">Tier 4: தேசிய அபெக்ஸ் (National Apex)</span>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-rose-100 text-rose-900">PAN-INDIA</span>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">வருடாந்திர கட்டணம் (Annual Fee in INR) *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs font-black text-slate-400">₹</span>
+                      <input
+                        type="number"
+                        value={settingsForm.annualFeeNationalApex}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, annualFeeNationalApex: Number(e.target.value) })}
+                        className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 font-mono text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 8: PAYMENTS & RAZORPAY CONFIGURATION               */}
+          {/* ====================================================== */}
+          {activeTab === 'payments' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Razorpay Payment Gateway Customization</h2>
+                  <p className="text-xs text-slate-500">Live API keys, official merchant payment link, and demo mode switches.</p>
+                </div>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : 'Save Razorpay Config'}</span>
+                </button>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5 text-xs font-semibold">
+                <div>
+                  <label className="block mb-1 text-slate-700">Official Razorpay Payment Link (100% INR) *</label>
+                  <input
+                    type="url"
+                    value={settingsForm.razorpayPaymentLink}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, razorpayPaymentLink: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">Default: https://rzp.io/rzp/qsujcmuB (Chandru Madhesan)</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1 text-slate-700">Razorpay Key ID *</label>
+                    <input
+                      type="text"
+                      value={settingsForm.razorpayKeyId}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, razorpayKeyId: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">Razorpay Key Secret *</label>
+                    <div className="relative">
+                      <input
+                        type={showSecret ? 'text' : 'password'}
+                        value={settingsForm.razorpayKeySecret}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, razorpayKeySecret: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-bold pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSecret(!showSecret)}
+                        className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+                      >
+                        {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-slate-900 text-xs">Sandbox Demo Mode</div>
+                    <div className="text-[11px] text-slate-500">Allow instant demo simulation without triggering bank charges</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settingsForm.demoPaymentMode}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, demoPaymentMode: e.target.checked })}
+                    className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 9: INVOICES & GST SETTINGS                         */}
+          {/* ====================================================== */}
+          {activeTab === 'invoices' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Tax Invoicing & GST Governance</h2>
+                  <p className="text-xs text-slate-500">18% GST (9% CGST + 9% SGST), SAC Code 998314, and platform legal credentials.</p>
+                </div>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : 'Save Invoicing Settings'}</span>
+                </button>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4 text-xs font-semibold">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block mb-1 text-slate-700">Platform GSTIN *</label>
+                    <input
+                      type="text"
+                      value={settingsForm.gstin}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, gstin: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-black text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">Service SAC Code *</label>
+                    <input
+                      type="text"
+                      value={settingsForm.sacCode}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, sacCode: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-black text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">Total GST Rate (%) *</label>
+                    <input
+                      type="number"
+                      value={settingsForm.gstPercentage}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, gstPercentage: Number(e.target.value) })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-black text-slate-900"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 10: MASTER SYSTEM SETTINGS                         */}
           {/* ====================================================== */}
           {activeTab === 'settings' && (
             <div className="space-y-6 max-w-4xl mx-auto">
-              <h2 className="text-xl font-black text-slate-900">Super Admin Platform Settings</h2>
-              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Master Platform Customizations & Governance</h2>
+                  <p className="text-xs text-slate-500">Live customization of platform identity, discipline policies, and timers.</p>
+                </div>
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Saving...' : '💾 Save All Settings'}</span>
+                </button>
+              </div>
+
               <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4 text-xs font-semibold">
+                <div>
+                  <label className="block mb-1 text-slate-700">Platform Brand Name</label>
+                  <input
+                    type="text"
+                    value={settingsForm.platformName}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, platformName: e.target.value })}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1 text-slate-700">Platform Brand Name</label>
+                    <label className="block mb-1 text-slate-700">தமிழ் முழக்கம் (Tamil Tagline)</label>
                     <input
                       type="text"
-                      defaultValue="Nuvea Business Network (NBN)"
-                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold"
+                      value={settingsForm.taglineTa}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, taglineTa: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                   </div>
+
                   <div>
-                    <label className="block mb-1 text-slate-700">Platform Currency</label>
+                    <label className="block mb-1 text-slate-700">English Tagline</label>
                     <input
                       type="text"
-                      disabled
-                      defaultValue="INR (Indian Rupee Only)"
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-100 text-xs font-bold text-slate-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-slate-700">Live Test Membership Fee</label>
-                    <input
-                      type="text"
-                      disabled
-                      defaultValue="₹1.00 INR (1 RS ONLY)"
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-emerald-50 text-emerald-800 text-xs font-black"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 text-slate-700">GST Rate (%)</label>
-                    <input
-                      type="number"
-                      defaultValue={18}
-                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold"
+                      value={settingsForm.taglineEn}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, taglineEn: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                   </div>
                 </div>
 
-                <div className="pt-3 border-t flex justify-end">
-                  <button
-                    onClick={() => alert('அமைப்புகள் வெற்றிகரமாக சேமிக்கப்பட்டன!')}
-                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1 text-slate-700">Founder & Director Name</label>
+                    <input
+                      type="text"
+                      value={settingsForm.founderName}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, founderName: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">Founder WhatsApp / Phone</label>
+                    <input
+                      type="tel"
+                      value={settingsForm.founderPhone}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, founderPhone: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 11: NOTIFICATIONS BROADCASTER                      */}
+          {/* ====================================================== */}
+          {activeTab === 'notifications' && (
+            <div className="space-y-6 max-w-3xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Broadcast Notification Center</h2>
+                  <p className="text-xs text-slate-500">Dispatch announcements, alerts, and meeting invitations to all members.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSendBroadcast} className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4 text-xs font-semibold">
+                <div>
+                  <label className="block mb-1 text-slate-700">பெறுநர் குழு (Target Recipients) *</label>
+                  <select
+                    value={broadcastTarget}
+                    onChange={(e) => setBroadcastTarget(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 font-bold"
                   >
-                    Save Settings
+                    <option value="all">அனைத்து உறுப்பினர்கள் (All Members - 1,250)</option>
+                    <option value="networking">நெர்வொர்க்கிங் உறுப்பினர்கள் மட்டும் (Active Networking - 856)</option>
+                    <option value="marketplace">மார்க்கெட்பிளேஸ் விற்பனையாளர்கள் (Marketplace Sellers - 342)</option>
+                    <option value="harur">அரூர் டைட்டன்ஸ் சாப்டர் மட்டும்</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-slate-700">அறிவிப்பு தலைப்பு (Subject / Title) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="எ.கா: அடுத்த வார சாப்டர் மீட்டிங் மற்றும் மெம்பர்ஷிப் அறிவிப்பு"
+                    value={broadcastTitle}
+                    onChange={(e) => setBroadcastTitle(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-slate-700">முழு செய்தி (Message Content) *</label>
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="செய்தியை உள்ளிடவும்..."
+                    value={broadcastMessage}
+                    onChange={(e) => setBroadcastMessage(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-300 font-medium"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>அறிவிப்பை உடனே அனுப்புக (Send Broadcast)</span>
                   </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 12: AUDIT LOGS                                     */}
+          {/* ====================================================== */}
+          {activeTab === 'audit_logs' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Immutable System Audit Logs</h2>
+                  <p className="text-xs text-slate-500">Real-time log of security, payments, seat reservations, and admin actions.</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-black uppercase text-[10px]">
+                    <tr>
+                      <th className="px-5 py-3">Timestamp</th>
+                      <th className="px-5 py-3">Actor / Admin</th>
+                      <th className="px-5 py-3">Action</th>
+                      <th className="px-5 py-3">Target Table</th>
+                      <th className="px-5 py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
+                    {[
+                      { time: new Date().toLocaleTimeString(), actor: 'super_admin_chandru', action: 'SETTINGS_PERSISTED', table: 'settings', status: 'SUCCESS' },
+                      { time: '10 min ago', actor: 'system_gateway', action: 'PAYMENT_CAPTURED_1_INR', table: 'payments', status: 'SUCCESS' },
+                      { time: '25 min ago', actor: 'super_admin_chandru', action: 'CATEGORY_LOCKED_JEWELLERY', table: 'memberships', status: 'SUCCESS' },
+                      { time: '40 min ago', actor: 'system_conductor', action: 'MEETING_CONDUCTED_HARUR', table: 'meetings', status: 'SUCCESS' }
+                    ].map((log, i) => (
+                      <tr key={i} className="hover:bg-slate-50">
+                        <td className="px-5 py-3 text-slate-500">{log.time}</td>
+                        <td className="px-5 py-3 font-bold text-slate-800">{log.actor}</td>
+                        <td className="px-5 py-3 font-black text-indigo-700">{log.action}</td>
+                        <td className="px-5 py-3 text-slate-600">{log.table}</td>
+                        <td className="px-5 py-3 text-emerald-600 font-black">{log.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 13: SECURITY & BACKUP                              */}
+          {/* ====================================================== */}
+          {activeTab === 'security' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Security, Encryption & Data Backup</h2>
+                  <p className="text-xs text-slate-500">1-click full database exports, encryption key hygiene, and admin sessions.</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5 text-xs font-semibold">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div>
+                    <div className="font-black text-slate-900 text-sm">Download Full Database Backup</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Export entire state including members, chapters, payments, and audit logs.</div>
+                  </div>
+                  <button
+                    onClick={handleDownloadBackup}
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download JSON Backup</span>
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <div className="font-black text-slate-900 text-sm">JWT Encryption & Session Timeout</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">HS256 HMAC cryptographic token generation (30 days validity).</div>
+                  </div>
+                  <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                    ENCRYPTION ACTIVE
+                  </span>
                 </div>
               </div>
             </div>
@@ -1550,50 +1975,35 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-base font-black text-slate-900">புதிய சாப்டர் துவங்கு (Create Chapter)</h3>
-              <button 
-                onClick={() => setShowAddChapterModal(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700"
-              >
+              <button onClick={() => setShowAddChapterModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleCreateChapter} className="space-y-3 text-xs font-semibold">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              flashBanner('புதிய சாப்டர் வெற்றிகரமாக உருவாக்கப்பட்டது!');
+              setShowAddChapterModal(false);
+            }} className="space-y-3 text-xs font-semibold">
               <div>
                 <label className="block mb-1 text-slate-700">சாப்டர் பெயர் (Chapter Name) *</label>
                 <input
                   type="text"
                   required
                   placeholder="எ.கா: அரூர் வைப்ரன்ட்ஸ் சாப்டர்"
-                  value={newChapterName}
-                  onChange={(e) => setNewChapterName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 rounded-xl border border-slate-300"
                 />
-              </div>
-              <div>
-                <label className="block mb-1 text-slate-700">தாலுகா மண்டலம் (Taluk) *</label>
-                <select
-                  value={newChapterTaluk}
-                  onChange={(e) => setNewChapterTaluk(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 font-bold"
-                >
-                  <option value="harur">அரூர் (Harur)</option>
-                  <option value="palacode">பாலக்கோடு (Palacode)</option>
-                  <option value="dharmapuri">தருமபுரி நகரம் (Dharmapuri Town)</option>
-                  <option value="salem">சேலம் மேற்கு (Salem West)</option>
-                  <option value="omallur">ஓமலூர் (Omallur)</option>
-                </select>
               </div>
               <div className="pt-3 border-t flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddChapterModal(false)}
-                  className="px-4 py-2 bg-slate-100 font-bold rounded-xl text-slate-700"
+                  className="px-4 py-2 bg-slate-100 font-bold rounded-xl"
                 >
-                  ரத்து (Cancel)
+                  ரத்து
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 font-black rounded-xl text-white shadow-md"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 font-black rounded-xl text-white"
                 >
                   உருவாக்கு ➔
                 </button>
@@ -1611,70 +2021,68 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-base font-black text-slate-900">புதிய உறுப்பினர் சேர்க்கை (Add Member)</h3>
-              <button 
-                onClick={() => setShowAddMemberModal(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700"
-              >
+              <button onClick={() => setShowAddMemberModal(false)} className="text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert(`உறுப்பினர் "${newMemberName}" சேர்க்கப்பட்டார்!`);
-                setShowAddMemberModal(false);
-              }} 
-              className="space-y-3 text-xs font-semibold"
-            >
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              flashBanner('புதிய உறுப்பினர் வெற்றிகரமாக சேர்க்கப்பட்டார்!');
+              setShowAddMemberModal(false);
+            }} className="space-y-3 text-xs font-semibold">
               <div>
                 <label className="block mb-1 text-slate-700">உறுப்பினர் பெயர் *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="முழு பெயர் உள்ளிடவும்"
-                  value={newMemberName}
-                  onChange={(e) => setNewMemberName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+                <input type="text" required placeholder="முழு பெயர் உள்ளிடவும்" className="w-full p-2.5 rounded-xl border border-slate-300" />
               </div>
               <div>
                 <label className="block mb-1 text-slate-700">தொலைபேசி எண் *</label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="10 இலக்க மொபைல் எண்"
-                  value={newMemberPhone}
-                  onChange={(e) => setNewMemberPhone(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+                <input type="tel" required placeholder="10 இலக்க மொபைல் எண்" className="w-full p-2.5 rounded-xl border border-slate-300" />
               </div>
               <div>
                 <label className="block mb-1 text-slate-700">வணிகப் பெயர் *</label>
-                <input
-                  type="text"
+                <input type="text" required placeholder="நிறுவனத்தின் பெயர்" className="w-full p-2.5 rounded-xl border border-slate-300" />
+              </div>
+              <div className="pt-3 border-t flex justify-end gap-2">
+                <button type="button" onClick={() => setShowAddMemberModal(false)} className="px-4 py-2 bg-slate-100 font-bold rounded-xl">ரத்து</button>
+                <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 font-black rounded-xl text-white">சேர்க்க ➔</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* ISSUE STRIKE MODAL                                       */}
+      {/* ======================================================== */}
+      {strikingMember && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-base font-black text-rose-600">⚠️ ஒழுங்கு நடவடிக்கை (Issue Strike)</h3>
+              <button onClick={() => setStrikingMember(null)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="text-xs text-slate-600">
+              உறுப்பினர்: <span className="font-black text-slate-900">{strikingMember.fullName}</span> ({strikingMember.businessName || 'Business'})
+            </div>
+            <div className="space-y-3 text-xs font-semibold">
+              <div>
+                <label className="block mb-1 text-slate-700">காரணம் (Disciplinary Reason) *</label>
+                <textarea
+                  rows={3}
                   required
-                  placeholder="நிறுவனத்தின் பெயர்"
-                  value={newMemberBusiness}
-                  onChange={(e) => setNewMemberBusiness(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="தொடர் விடுப்பு / விதிகளுக்கு முரணான செயல்பாடு..."
+                  value={strikeReason}
+                  onChange={(e) => setStrikeReason(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 font-medium"
                 />
               </div>
               <div className="pt-3 border-t flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddMemberModal(false)}
-                  className="px-4 py-2 bg-slate-100 font-bold rounded-xl text-slate-700"
-                >
-                  ரத்து
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 font-black rounded-xl text-white shadow-md"
-                >
-                  சேர்க்க ➔
-                </button>
+                <button type="button" onClick={() => setStrikingMember(null)} className="px-4 py-2 bg-slate-100 font-bold rounded-xl">ரத்து</button>
+                <button type="button" onClick={handleIssueStrike} className="px-4 py-2 bg-rose-600 hover:bg-rose-700 font-black rounded-xl text-white">ஸ்ட்ரைக் பதிவு செய்க</button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

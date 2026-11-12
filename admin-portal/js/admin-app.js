@@ -30,9 +30,15 @@ class NBNAdminApp {
 
   setTab(tab) {
     this.currentTab = tab;
-    document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('active-tab'));
-    const btn = document.getElementById(`nav-${tab}`);
-    if (btn) btn.classList.add('active-tab');
+    document.querySelectorAll('#nav-dashboard, [id^="nav-"]').forEach(el => {
+      el.classList.remove('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/30');
+      el.classList.add('text-slate-400');
+    });
+    const btn = document.getElementById(`nav-${tab}`) || (tab === 'overview' ? document.getElementById('nav-dashboard') : null);
+    if (btn) {
+      btn.classList.remove('text-slate-400');
+      btn.classList.add('bg-indigo-600', 'text-white', 'font-bold', 'shadow-lg', 'shadow-indigo-600/30');
+    }
     this.render();
   }
 
@@ -49,21 +55,39 @@ class NBNAdminApp {
 
     switch (this.currentTab) {
       case 'overview':
+      case 'dashboard':
         container.innerHTML = this.renderOverview();
         break;
       case 'users':
+      case 'members':
         container.innerHTML = this.renderUsers();
         break;
       case 'chapters':
         container.innerHTML = this.renderChapters();
         break;
       case 'marketplace':
+      case 'business_listings':
+      case 'customer_requirements':
+      case 'quotations':
+      case 'orders':
+      case 'reviews':
         container.innerHTML = this.renderMarketplace();
         break;
       case 'discipline':
+      case 'meetings':
+      case 'referrals':
         container.innerHTML = this.renderDiscipline();
         break;
       case 'settings':
+      case 'membership_plans':
+      case 'payments':
+      case 'invoices':
+      case 'revenue_reports':
+      case 'security':
+      case 'geography':
+      case 'leads':
+      case 'notifications':
+      case 'audit_logs':
         container.innerHTML = this.renderSettings();
         break;
       default:
