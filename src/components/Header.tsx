@@ -51,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
         <nav className="hidden md:flex items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 text-xs font-bold">
           <button
             onClick={() => setActivePortal('gateway')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
               activePortal === 'gateway'
                 ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -63,10 +63,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setActivePortal('business')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
               activePortal === 'business'
-                ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
-                : 'text-slate-300 hover:text-amber-300 hover:bg-slate-800'
+                ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/30'
+                : 'text-slate-300 hover:text-purple-300 hover:bg-slate-800'
             }`}
           >
             <Building2 className="w-3.5 h-3.5" />
@@ -75,10 +75,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setActivePortal('user')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
               activePortal === 'user'
-                ? 'bg-emerald-500 text-white font-black shadow-xs'
-                : 'text-slate-300 hover:text-emerald-300 hover:bg-slate-800'
+                ? 'bg-indigo-600 text-white font-black shadow-md shadow-indigo-600/30'
+                : 'text-slate-300 hover:text-indigo-300 hover:bg-slate-800'
             }`}
           >
             <User className="w-3.5 h-3.5" />
@@ -87,9 +87,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => setActivePortal('admin')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl transition cursor-pointer ${
               activePortal === 'admin'
-                ? 'bg-rose-600 text-white font-black shadow-xs'
+                ? 'bg-rose-600 text-white font-black shadow-md shadow-rose-600/30'
                 : 'text-slate-300 hover:text-rose-300 hover:bg-slate-800'
             }`}
           >
@@ -103,21 +103,21 @@ export const Header: React.FC<HeaderProps> = ({
           {openRegister && (
             <button
               onClick={() => openRegister('networking_marketplace')}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black shadow-md shadow-amber-400/20 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl text-xs font-black shadow-md shadow-amber-400/20 transition cursor-pointer"
             >
-              <span>🚀</span>
+              <span>✏️</span>
               <span className="hidden sm:inline">{lang === 'ta' ? 'பதிவு செய்க' : 'Register'}</span>
             </button>
           )}
 
           <button
             onClick={openCart}
-            className="relative flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 text-xs font-bold transition shadow-xs"
+            className="relative flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-xl border border-slate-800 text-xs font-bold transition shadow-xs cursor-pointer"
           >
-            <ShoppingCart className="w-4 h-4 text-emerald-400" />
-            <span className="hidden sm:inline">கார்ட்</span>
+            <ShoppingCart className="w-4 h-4 text-slate-300" />
+            <span className="hidden sm:inline">{lang === 'ta' ? 'கார்ட்' : 'Cart'}</span>
             {cartCount > 0 && (
-              <span className="bg-emerald-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              <span className="bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">
                 {cartCount}
               </span>
             )}
@@ -125,10 +125,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={toggleLang}
-            className="flex items-center gap-1 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl border border-slate-800 text-xs font-bold transition"
+            className="flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl border border-slate-800 text-xs font-bold transition cursor-pointer"
           >
-            <Globe className="w-3.5 h-3.5 text-amber-400" />
-            <span>{lang === 'ta' ? 'தமிழ்' : 'EN'}</span>
+            <Globe className="w-3.5 h-3.5 text-slate-400" />
+            <span>{lang === 'ta' ? 'தமிழ் ⌄' : 'EN ⌄'}</span>
           </button>
         </div>
 
