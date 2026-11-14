@@ -80,10 +80,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     elevationWeightLeads: 30,
     elevationWeightClosedValue: 40,
     elevationWeightAttendance: 20,
-    elevationWeightGuests: 10
+    elevationWeightGuests: 10,
+    chapterMaxMembers: 30, // Admin decided: 30 members max per chapter
+    enableChapterChat: true,
+    strictCategoryExclusivity: true
   });
 
   const [showSecret, setShowSecret] = useState<boolean>(false);
+
+  // Hostinger Remote MySQL State
+  const [hostingerConfig, setHostingerConfig] = useState({
+    host: '',
+    port: 3306,
+    user: '',
+    password: '',
+    database: '',
+    enabled: false
+  });
+  const [hostingerStatus, setHostingerStatus] = useState<string>('');
+  const [isTestingHostinger, setIsTestingHostinger] = useState<boolean>(false);
+  const [isSyncingHostinger, setIsSyncingHostinger] = useState<boolean>(false);
 
   // Broadcast Notification State
   const [broadcastTarget, setBroadcastTarget] = useState<string>('all');
@@ -149,6 +165,73 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       flashBanner('✅ அமைப்புகள் உள்ளூரில் புதுப்பிக்கப்பட்டன!');
     }
     setIsSaving(false);
+  };
+
+  // Load Hostinger Remote MySQL Config
+  useEffect(() => {
+    fetch('/api/admin/hostinger-config')
+      .then(res => res.json())
+      .then(cfg => {
+        if (cfg) setHostingerConfig(cfg);
+      })
+      .catch(err => console.error('Error fetching hostinger config:', err));
+  }, []);
+
+  const handleSaveHostingerConfig = async () => {
+    try {
+      const res = await fetch('/api/admin/hostinger-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hostingerConfig)
+      });
+      const data = await res.json();
+      flashBanner('✅ Hostinger MySQL அமைப்புகள் சேமிக்கப்பட்டன!');
+    } catch (err: any) {
+      flashBanner('❌ சேமிப்பதில் பிழை: ' + err.message);
+    }
+  };
+
+  const handleTestHostinger = async () => {
+    setIsTestingHostinger(true);
+    setHostingerStatus('Connecting to Hostinger Remote MySQL...');
+    try {
+      const res = await fetch('/api/admin/hostinger-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hostingerConfig)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHostingerStatus('✅ Hostinger MySQL இணைப்பு வெற்றி! (Connected)');
+        flashBanner('✅ Hostinger MySQL Remote Database Connected Successfully!');
+      } else {
+        setHostingerStatus(`❌ இணைப்பு தோல்வி: ${data.error}`);
+      }
+    } catch (err: any) {
+      setHostingerStatus(`❌ இணைப்பு தோல்வி: ${err.message}`);
+    } finally {
+      setIsTestingHostinger(false);
+    }
+  };
+
+  const handleSyncAllHostinger = async () => {
+    setIsSyncingHostinger(true);
+    try {
+      const res = await fetch('/api/admin/hostinger-sync-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        flashBanner(`✅ ${data.message || 'அனைத்து வணிகர்களும் Hostinger MySQL-ல் ஒத்திசைக்கப்பட்டனர்!'}`);
+      } else {
+        flashBanner(`❌ ஒத்திசைவு தோல்வி: ${data.error}`);
+      }
+    } catch (err: any) {
+      flashBanner(`❌ ஒத்திசைவு தோல்வி: ${err.message}`);
+    } finally {
+      setIsSyncingHostinger(false);
+    }
   };
 
   // Member Status Toggle
@@ -1301,7 +1384,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-black text-slate-900">Chapters & Seat Capacity Management</h2>
-                  <p className="text-xs text-slate-500">Monitor chapter health, 100-seat monopolies, meeting schedules, and leadership.</p>
+                  <p className="text-xs text-slate-500">Monitor chapter health, 30-member monopoly limits, meeting schedules, and leadership.</p>
                 </div>
                 <button
                   onClick={() => setShowAddChapterModal(true)}
@@ -1312,11 +1395,82 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
               </div>
 
+              {/* ADMIN CHAPTER CAPACITY & GOVERNANCE CONTROL */}
+              <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-purple-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-black">⚙️ சாப்டர் உறுப்பினர் உச்ச வரம்பு & விதிகளின் கட்டுப்பாடு</span>
+                      <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                        Admin Controlled
+                      </span>
+                    </div>
+                    <p className="text-xs text-purple-200 mt-0.5">
+                      அட்மின் முடிவு செய்யும் உறுப்பினர் வரம்பு (Default: 30 பேர்). இந்த வரம்பை எட்டியதும் புதிய வணிகர்கள் சேர முடியாது.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleSaveSettings}
+                    className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-xs transition cursor-pointer self-start sm:self-auto"
+                  >
+                    அமைப்புகளைச் சேமிக்க ➔
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-purple-800/80 text-xs">
+                  <div className="bg-slate-950/40 p-3 rounded-xl border border-purple-500/30">
+                    <label className="block text-slate-300 font-bold mb-1">ஒரு சாப்டருக்கு உச்ச வரம்பு (Max Members):</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="5"
+                        max="100"
+                        value={settingsForm.chapterMaxMembers || 30}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, chapterMaxMembers: Number(e.target.value) })}
+                        className="w-24 p-2 rounded-lg bg-slate-800 text-amber-300 font-black text-base border border-slate-700 text-center"
+                      />
+                      <span className="text-slate-400 text-xs">உறுப்பினர்கள் (Members)</span>
+                    </div>
+                    <p className="text-[10px] text-purple-300 mt-1">ஹரூர், சேலம் உள்ளிட்ட அனைத்து சாப்டர்களுக்கும் பொருந்தும்.</p>
+                  </div>
+
+                  <div className="bg-slate-950/40 p-3 rounded-xl border border-purple-500/30">
+                    <label className="block text-slate-300 font-bold mb-1">சாப்டர் பிரத்யேக குரூப் அரட்டை:</label>
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.enableChapterChat !== false}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, enableChapterChat: e.target.checked })}
+                        className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-white">30 உறுப்பினர்கள் மட்டும் பேச அனுமதி</span>
+                    </label>
+                    <p className="text-[10px] text-purple-300 mt-1">சாப்டரில் உள்ள 30 பேர் மட்டுமே இந்த குரூப்பில் அரட்டையடிக்க முடியும்.</p>
+                  </div>
+
+                  <div className="bg-slate-950/40 p-3 rounded-xl border border-purple-500/30">
+                    <label className="block text-slate-300 font-bold mb-1">மோனோபோலி வணிகப் பிரிவு கட்டுப்பாடு:</label>
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.strictCategoryExclusivity !== false}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, strictCategoryExclusivity: e.target.checked })}
+                        className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-white">1 சாப்டர் = 1 தொழில் பிரிவு மட்டும்</span>
+                    </label>
+                    <p className="text-[10px] text-purple-300 mt-1">ஒரே தொழிலைச் சேர்ந்த இருவர் ஒரே சாப்டரில் இணைய முடியாது.</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {chapters.map((c) => {
                   const chMembers = members.filter((m) => m.chapterId === c.id);
-                  const occ = chMembers.length || c.filledSeats || 8;
-                  const pct = Math.min(100, Math.round((occ / 100) * 100));
+                  const maxCap = settingsForm.chapterMaxMembers || 30;
+                  const occ = chMembers.length || c.filledSeats || 6;
+                  const pct = Math.min(100, Math.round((occ / maxCap) * 100));
                   return (
                     <div key={c.id} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-3 hover:shadow-md transition">
                       <div className="flex items-center justify-between">
@@ -1330,8 +1484,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         <div>👤 Director: <span className="font-bold text-slate-800">{c.directorName || 'சந்துரு (Chandru)'}</span></div>
                       </div>
                       <div className="flex items-baseline justify-between text-xs pt-1">
-                        <span className="text-slate-500 font-medium">Occupancy:</span>
-                        <span className="font-black text-slate-900">{occ} / 100 seats</span>
+                        <span className="text-slate-500 font-medium">அங்கீகரிக்கப்பட்ட இடங்கள்:</span>
+                        <span className="font-black text-slate-900">{occ} / {maxCap} உறுப்பினர்கள்</span>
                       </div>
                       <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
                         <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(5, pct)}%` }} />
@@ -1813,6 +1967,191 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* CHAPTER CAPACITY & NETWORKING GOVERNANCE CARD */}
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4 text-xs font-semibold">
+                <div className="flex items-center justify-between border-b pb-3">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">👥 சாப்டர் உறுப்பினர் வரம்பு & விதிகள் (Chapter Governance)</h3>
+                    <p className="text-[11px] text-slate-500">அட்மின் முடிவு செய்யும் உறுப்பினர் வரம்பு மற்றும் சாப்டர் அரட்டை விதிகள்.</p>
+                  </div>
+                  <span className="bg-purple-100 text-purple-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                    Admin Authority
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block mb-1 text-slate-700">சாப்டர் உச்ச வரம்பு (Max Members) *</label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="100"
+                      value={settingsForm.chapterMaxMembers || 30}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, chapterMaxMembers: Number(e.target.value) })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-bold text-sm"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">இயல்புநிலை: 30 வணிகர்கள்</span>
+                  </div>
+
+                  <div className="flex flex-col justify-center">
+                    <label className="flex items-center gap-2 cursor-pointer pt-2">
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.enableChapterChat !== false}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, enableChapterChat: e.target.checked })}
+                        className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-slate-800">சாப்டர் குரூப் அரட்டை அனுமதி</span>
+                    </label>
+                    <span className="text-[10px] text-slate-500 mt-0.5">30 உறுப்பினர்கள் மட்டுமே பேச முடியும்</span>
+                  </div>
+
+                  <div className="flex flex-col justify-center">
+                    <label className="flex items-center gap-2 cursor-pointer pt-2">
+                      <input
+                        type="checkbox"
+                        checked={settingsForm.strictCategoryExclusivity !== false}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, strictCategoryExclusivity: e.target.checked })}
+                        className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-slate-800">1 தொழில் = 1 உறுப்பினர் (Monopoly)</span>
+                    </label>
+                    <span className="text-[10px] text-slate-500 mt-0.5">சாப்டரில் மோனோபோலி கட்டுப்பாடு</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* HOSTINGER REMOTE MYSQL INTEGRATION CARD */}
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4 text-xs font-semibold">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm">
+                      🗄️
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900">Hostinger Remote MySQL நேரடி தரவுத்தள இணைப்பு</h3>
+                      <p className="text-[11px] text-slate-500">
+                        டொமைன் இல்லாவிட்டாலும், வணிகர்கள் பதிவு செய்யும் அனைத்து விவரங்களும் Hostinger MySQL-ல் நேரடியாக சேமிக்கப்படும்.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                      <input
+                        type="checkbox"
+                        checked={hostingerConfig.enabled}
+                        onChange={(e) => setHostingerConfig({ ...hostingerConfig, enabled: e.target.checked })}
+                        className="w-4 h-4 text-orange-600 rounded cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-slate-700">Remote Sync இயக்கு</span>
+                    </label>
+                  </div>
+                </div>
+
+                {hostingerStatus && (
+                  <div className={`p-3 rounded-xl text-xs font-bold ${
+                    hostingerStatus.includes('✅') 
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}>
+                    {hostingerStatus}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block mb-1 text-slate-700">Hostinger DB Host (IP அல்லது Server Address) *</label>
+                    <input
+                      type="text"
+                      placeholder="எ.கா: sql300.main-hosting.eu அல்லது 185.xxx.xxx.xxx"
+                      value={hostingerConfig.host}
+                      onChange={(e) => setHostingerConfig({ ...hostingerConfig, host: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">MySQL Port</label>
+                    <input
+                      type="number"
+                      placeholder="3306"
+                      value={hostingerConfig.port}
+                      onChange={(e) => setHostingerConfig({ ...hostingerConfig, port: Number(e.target.value) })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">Database Name *</label>
+                    <input
+                      type="text"
+                      placeholder="எ.கா: u123456789_nbn"
+                      value={hostingerConfig.database}
+                      onChange={(e) => setHostingerConfig({ ...hostingerConfig, database: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-slate-700">Database Username *</label>
+                    <input
+                      type="text"
+                      placeholder="எ.கா: u123456789_nbn_user"
+                      value={hostingerConfig.user}
+                      onChange={(e) => setHostingerConfig({ ...hostingerConfig, user: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block mb-1 text-slate-700">Database Password *</label>
+                    <input
+                      type="password"
+                      placeholder="••••••••••••••••"
+                      value={hostingerConfig.password}
+                      onChange={(e) => setHostingerConfig({ ...hostingerConfig, password: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between flex-wrap gap-2 border-t border-slate-100">
+                  <div className="text-[11px] text-slate-500">
+                    Hostinger cPanel -&gt; Databases -&gt; <strong>Remote MySQL</strong>-ல் உங்கள் IP முகவரியை அனுமதிக்கவும்.
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveHostingerConfig}
+                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer"
+                    >
+                      💾 சேமிக்க
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleTestHostinger}
+                      disabled={isTestingHostinger}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
+                    >
+                      {isTestingHostinger ? 'சோதிக்கிறது...' : '🔌 இணைப்பைச் சோதிக்க'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSyncAllHostinger}
+                      disabled={isSyncingHostinger}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black rounded-xl shadow-xs transition cursor-pointer"
+                    >
+                      {isSyncingHostinger ? 'ஒத்திசைக்கிறது...' : '🔄 வணிகர்களை Hostinger-ல் Sync செய்ய'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 

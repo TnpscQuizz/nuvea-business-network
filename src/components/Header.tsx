@@ -12,6 +12,7 @@ interface HeaderProps {
   lang: 'ta' | 'en';
   toggleLang: () => void;
   openRegister?: (opt?: 'networking_marketplace' | 'marketplace_only' | 'customer') => void;
+  openLogin?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   lang,
   toggleLang,
   openRegister,
+  openLogin,
 }) => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
@@ -116,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
               
               {/* Login Button (Outline Pill) */}
               <button
-                onClick={() => setIsLoginModalOpen(true)}
+                onClick={() => openLogin ? openLogin() : setIsLoginModalOpen(true)}
                 className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm hover:bg-slate-50 transition shadow-2xs cursor-pointer"
               >
                 Login

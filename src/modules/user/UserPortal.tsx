@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { AppState, CartItem } from '../../types';
-import { Search, Plus, ShoppingBag, CheckCircle, Tag, MapPin, Phone } from 'lucide-react';
+import { Search, Plus, ShoppingBag, CheckCircle, Tag, MapPin, Phone, X, ExternalLink } from 'lucide-react';
 
 interface UserPortalProps {
   state: AppState;
@@ -12,6 +12,7 @@ interface UserPortalProps {
 export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPostRequirement, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTaluk, setSelectedTaluk] = useState('all');
+  const [selectedMapBiz, setSelectedMapBiz] = useState<any>(null);
 
   const members = state.members || [];
   const requirements = state.marketplaceRequirements || [];
@@ -144,29 +145,58 @@ export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPo
                 </div>
               </div>
 
-              <div className="p-5 pt-0 border-t border-slate-100 mt-2 flex items-center justify-between gap-2">
-                <a
-                  href={`/#/biz/${m.id}`}
-                  className="text-xs font-bold text-slate-600 hover:text-slate-900 py-2"
-                >
-                  கடை பார்க்க ➔
-                </a>
-                <button
-                  onClick={() =>
-                    addToCart({
-                      id: `${m.id}_deal`,
-                      name: `${m.businessName} - சிறப்பு சலுகை முன்பதிவு`,
-                      price: 999,
-                      qty: 1,
-                      sellerId: m.id,
-                      sellerName: m.businessName,
-                    })
-                  }
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>கார்ட்டில் சேர்</span>
-                </button>
+              <div className="p-5 pt-0 border-t border-slate-100 mt-2 space-y-2.5">
+                <div className="flex items-center justify-between gap-2 text-xs font-bold">
+                  <button
+                    onClick={() => setSelectedMapBiz(m)}
+                    className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>📍 வரைபடம்</span>
+                  </button>
+
+                  <a
+                    href={`tel:${m.phone}`}
+                    className="text-slate-600 hover:text-slate-900 flex items-center gap-1"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>அழைக்க</span>
+                  </a>
+
+                  <a
+                    href={`https://wa.me/91${m.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`வணக்கம் ${m.ownerName} அவர்களே, NBN மார்க்கெட்பிளேஸ் வழியாக உங்கள் தயாரிப்புகள் குறித்து விசாரிக்க விரும்புகிறேன்.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
+                  >
+                    <span>💬 WhatsApp</span>
+                  </a>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-50">
+                  <a
+                    href={`/#/biz/${m.id}`}
+                    className="text-xs font-bold text-slate-600 hover:text-slate-900 py-1.5"
+                  >
+                    கடை பார்க்க ➔
+                  </a>
+                  <button
+                    onClick={() =>
+                      addToCart({
+                        id: `${m.id}_deal`,
+                        name: `${m.businessName} - சிறப்பு சலுகை முன்பதிவு`,
+                        price: 999,
+                        qty: 1,
+                        sellerId: m.id,
+                        sellerName: m.businessName,
+                      })
+                    }
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>கார்ட்டில் சேர்</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -233,6 +263,63 @@ export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPo
           ))}
         </div>
       </div>
+
+      {/* GOOGLE MAPS STORE MODAL */}
+      {selectedMapBiz && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  📍 {selectedMapBiz.businessName} - கடை இருப்பிடம் & கூகுள் மேப்
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                  உரிமையாளர்: {selectedMapBiz.ownerName} • {selectedMapBiz.talukId.toUpperCase()}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedMapBiz(null)}
+                className="p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-600 space-y-1">
+              <div><strong>முகவரி:</strong> {selectedMapBiz.address || 'மெயின் ரோடு, தருமபுரி & சேலம் மண்டலம்'}</div>
+              <div><strong>தொடர்பு:</strong> {selectedMapBiz.phone}</div>
+            </div>
+
+            <div className="w-full h-64 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 relative">
+              <iframe
+                title="Store Location"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedMapBiz.address || selectedMapBiz.businessName + ', ' + selectedMapBiz.talukId)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                className="w-full h-full border-0"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="pt-2 border-t flex items-center justify-between">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedMapBiz.address || selectedMapBiz.businessName + ', ' + selectedMapBiz.talukId)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-emerald-600 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Google Maps-ல் வழிசெலுத்துக (Get Directions)</span>
+              </a>
+
+              <button
+                onClick={() => setSelectedMapBiz(null)}
+                className="px-4 py-2 bg-slate-100 font-bold text-xs rounded-xl cursor-pointer"
+              >
+                மூடுக
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -58,10 +58,14 @@ function registerUser({ name, email, phone, password, role = 'member' }) {
 function loginUser(identifier, password) {
   const users = db.getTable('users');
   const cleanPhone = identifier.replace(/\D/g, '');
-  const user = users.find(u => u.phone === cleanPhone || u.email === identifier);
+  const user = users.find(u => 
+    (u.username && u.username.toLowerCase() === identifier.toLowerCase()) || 
+    (cleanPhone && u.phone === cleanPhone) || 
+    (u.email && u.email.toLowerCase() === identifier.toLowerCase())
+  );
 
   if (!user) {
-    throw new Error('பயனர் கிடைக்கவில்லை (User not found)');
+    throw new Error('பயனர் கிடைக்கவில்லை (User not found. Check your Username, Phone or Email)');
   }
 
   const hash = hashPassword(password);
@@ -69,8 +73,16 @@ function loginUser(identifier, password) {
     throw new Error('கடவுச்சொல் தவறானது (Incorrect password)');
   }
 
+  // Find linked business profile
+  const businesses = db.getTable('businesses') || [];
+  const biz = businesses.find(b => b.userId === user.id || (user.phone && b.phone === user.phone)) || businesses[0];
+
   const token = generateToken(user);
-  return { user: sanitizeUser(user), token };
+  return { 
+    user: sanitizeUser(user), 
+    token,
+    businessId: biz ? biz.id : (user.businessId || 'biz_001')
+  };
 }
 
 function sanitizeUser(u) {

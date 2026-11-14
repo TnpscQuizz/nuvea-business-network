@@ -375,4 +375,75 @@ router.get('/reports/:type', requireAuth, requireRole('super_admin', 'state_admi
   res.json(data);
 });
 
+// ==========================================
+// HOSTINGER REMOTE MYSQL SETTINGS & SYNC APIS
+// ==========================================
+const hostingerService = require('../services/hostingerService');
+
+router.get('/hostinger-config', (req, res) => {
+  res.json(hostingerService.getConfig());
+});
+
+router.post('/hostinger-config', (req, res) => {
+  try {
+    const updated = hostingerService.saveConfig(req.body);
+    res.json({
+      success: true,
+      message: 'ஹோஸ்டிங்கர் MySQL அமைப்புகள் வெற்றிகரமாக சேமிக்கப்பட்டன!',
+      config: updated
+    });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+router.post('/hostinger-test', async (req, res) => {
+  try {
+    const result = await hostingerService.testConnection(req.body);
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+router.post('/hostinger-sync-all', async (req, res) => {
+  try {
+    const businesses = db.getTable('businesses');
+    const users = db.getTable('users');
+    let syncedCount = 0;
+
+    for (const b of businesses) {
+      const u = users.find(user => user.id === b.userId || user.phone === b.phone) || {};
+      const resSync = await hostingerService.syncOwnerRecord({
+        userId: u.id || `usr_${b.id}`,
+        username: u.username || b.phone,
+        ownerName: b.ownerName,
+        email: b.email,
+        phone: b.phone,
+        businessId: b.id,
+        businessName: b.businessName,
+        categoryId: b.categoryId,
+        talukId: b.talukId,
+        chapterId: b.chapterId,
+        forumType: b.forumType,
+        accountType: b.accountType,
+        address: b.address,
+        mapEmbedUrl: b.mapEmbedUrl,
+        logo: b.logo,
+        cover: b.cover
+      });
+      if (resSync.synced) syncedCount++;
+    }
+
+    res.json({
+      success: true,
+      message: `${syncedCount}/${businesses.length} வணிகர்கள் Hostinger MySQL-ல் ஒத்திசைக்கப்பட்டனர்!`,
+      syncedCount,
+      totalCount: businesses.length
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 module.exports = router;

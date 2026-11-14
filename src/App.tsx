@@ -9,6 +9,7 @@ import { AdminPortal } from './modules/admin/AdminPortal';
 import { CartModal } from './components/CartModal';
 import { PostRequirementModal } from './components/PostRequirementModal';
 import { RegistrationModal } from './components/RegistrationModal';
+import { LoginModal } from './components/LoginModal';
 
 export function App() {
   const [activePortal, setActivePortal] = useState<'gateway' | 'business' | 'user' | 'admin'>('gateway');
@@ -18,6 +19,7 @@ export function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isPostReqOpen, setIsPostReqOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [registerOption, setRegisterOption] = useState<'networking_marketplace' | 'marketplace_only' | 'customer'>('networking_marketplace');
   const [currentMemberId, setCurrentMemberId] = useState<string>('mem_001');
 
@@ -99,6 +101,14 @@ export function App() {
     setActivePortal('business');
   };
 
+  const handleLoginSuccess = (userData: any, targetPortal: 'business' | 'user' | 'admin', businessId?: string) => {
+    if (businessId) {
+      setCurrentMemberId(businessId);
+    }
+    setActivePortal(targetPortal);
+    setIsLoginOpen(false);
+  };
+
   const cartTotalCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   if (!state) {
@@ -136,6 +146,7 @@ export function App() {
         lang={lang}
         toggleLang={() => setLang((prev) => (prev === 'ta' ? 'en' : 'ta'))}
         openRegister={handleOpenRegister}
+        openLogin={() => setIsLoginOpen(true)}
       />
 
       {/* MODULAR PORTAL VIEW CONTAINER */}
@@ -199,6 +210,17 @@ export function App() {
         initialOption={registerOption}
         chapters={state?.chapters || []}
         onSuccessLogin={handleRegistrationComplete}
+      />
+
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        lang={lang}
+        onLoginSuccess={handleLoginSuccess}
+        onOpenRegister={() => {
+          setIsLoginOpen(false);
+          handleOpenRegister('networking_marketplace');
+        }}
       />
 
       {/* FOOTER */}

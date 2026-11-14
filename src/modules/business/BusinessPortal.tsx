@@ -32,8 +32,15 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
   const defaultMember = members.find(m => m.businessName.includes('நுவேவா') || m.ownerName.includes('சந்திரா')) || members[0] || {} as Member;
   const [selectedMemberId, setSelectedMemberId] = useState<string>(currentMemberId || defaultMember.id || 'biz_001');
   const [copied, setCopied] = useState(false);
-  const [activeSectionTab, setActiveSectionTab] = useState<'members' | 'meetings' | 'referrals' | 'opportunities'>('members');
+  const [activeSectionTab, setActiveSectionTab] = useState<'members' | 'chat' | 'meetings' | 'referrals' | 'opportunities'>('members');
   
+  // Chapter Chat States
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [newChatText, setNewChatText] = useState('');
+  const [chatTag, setChatTag] = useState<'general' | 'opportunity' | 'referral' | 'meeting' | 'announcement'>('general');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatFilter, setChatFilter] = useState<string>('all');
+
   // Modals
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState<any>(null);
@@ -160,10 +167,55 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
   const activeMember: Member = members.find((m) => m.id === selectedMemberId) || defaultMember || {} as Member;
   const isNetworking = activeMember.accountType !== 'marketplace_only';
   
-  // Chapter members list (exactly 6 verified members in the Harur chapter)
+  // Chapter Capacity (Admin configurable: default 30 members max)
+  const chapterCapacity = (state as any)?.settings?.chapterMaxMembers || 30;
+
+  // Chapter members list: includes all members registered in this chapter up to 30 capacity
   const chapterMembers = members
-    .filter((m) => (m.chapterId === activeMember.chapterId || m.talukId === 'harur') && m.id !== activeMember.id)
-    .slice(0, 6);
+    .filter((m) => (m.chapterId === activeMember.chapterId || m.talukId === activeMember.talukId || m.talukId === 'harur') && m.id !== activeMember.id)
+    .slice(0, chapterCapacity - 1);
+
+  const activeChapterId = activeMember.chapterId || `${activeMember.talukId || 'harur'}_titans`;
+
+  // Fetch chapter chat messages
+  useEffect(() => {
+    fetch(`/api/member/chapter-chat/${activeChapterId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setChatMessages(data);
+      })
+      .catch(err => console.error('Error fetching chat:', err));
+  }, [activeChapterId]);
+
+  const handleSendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChatText.trim()) return;
+
+    setChatLoading(true);
+    try {
+      const res = await fetch(`/api/member/chapter-chat/${activeChapterId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          senderId: activeMember.id,
+          senderName: activeMember.ownerName,
+          businessName: activeMember.businessName,
+          category: activeMember.categoryName || activeMember.categoryId,
+          message: newChatText.trim(),
+          tag: chatTag
+        })
+      });
+      const data = await res.json();
+      if (data.message) {
+        setChatMessages(prev => [...prev, data.message]);
+        setNewChatText('');
+      }
+    } catch (err) {
+      console.error('Failed to send chat message:', err);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   // Edit Form State
   const [editForm, setEditForm] = useState({
@@ -173,6 +225,8 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
     phone: activeMember.phone || '917548820641',
     email: activeMember.email || 'chandru@nuveastudio.com',
     address: activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+    mapAddress: (activeMember as any).mapAddress || activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+    mapEmbedUrl: (activeMember as any).mapEmbedUrl || '',
     specialOffer: activeMember.specialOffer || '4K வணிக விளம்பரம் & மெட்டா ஆட்ஸ் வளர்ச்சி தொகுப்பு',
     tagline: activeMember.tagline || '4K சினிமாடிக் விளம்பரங்கள் மூலம் பிராண்ட் வளர்ச்சி',
     logo: activeMember.logo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
@@ -188,6 +242,8 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
       phone: activeMember.phone || '917548820641',
       email: activeMember.email || 'chandru@nuveastudio.com',
       address: activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+      mapAddress: (activeMember as any).mapAddress || activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+      mapEmbedUrl: (activeMember as any).mapEmbedUrl || '',
       specialOffer: activeMember.specialOffer || '',
       tagline: activeMember.tagline || '',
       logo: activeMember.logo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
@@ -639,26 +695,41 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
               <Handshake className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-900">
-                உங்கள் சாப்டர் உறுப்பினர்கள் ({chapterMembers.length})
-              </h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-lg font-black text-slate-900">
+                  உங்கள் சாப்டர் உறுப்பினர்கள் ({chapterMembers.length + 1} / {chapterCapacity})
+                </h3>
+                <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200">
+                  சாப்டர் வரம்பு: {chapterCapacity} பேர் மட்டுமே
+                </span>
+              </div>
               <p className="text-xs text-slate-500 font-medium">
-                1-to-1 சந்திப்பு மற்றும் நேரடி பரிந்துரைகள் வழங்கலாம்.
+                1-to-1 சந்திப்பு, நேரடி அழைப்பு, வாட்ஸ்அப் மற்றும் பிரத்யேக சாப்டர் அரட்டை வசதி.
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => setShowReferralModal(true)}
-            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 active:scale-98 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/25 transition flex items-center gap-2 cursor-pointer self-start sm:self-auto"
-          >
-            <Handshake className="w-4 h-4" />
-            <span>+ பரிந்துரை வழங்க (Pass Referral)</span>
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button
+              onClick={() => setActiveSectionTab('chat')}
+              className="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4 text-indigo-600" />
+              <span>குரூப் அரட்டை ({chatMessages.length})</span>
+            </button>
+
+            <button
+              onClick={() => setShowReferralModal(true)}
+              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 active:scale-98 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/25 transition flex items-center gap-2 cursor-pointer"
+            >
+              <Handshake className="w-4 h-4" />
+              <span>+ பரிந்துரை வழங்க</span>
+            </button>
+          </div>
         </div>
 
-        {/* 4 ACTION / QUICK ACCESS PILLS */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* 5 ACTION / QUICK ACCESS PILLS */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           
           {/* Pill 1: மொத்த உறுப்பினர்கள் */}
           <button
@@ -673,12 +744,32 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-base font-black text-slate-900 leading-none">{chapterMembers.length}</div>
-              <div className="text-xs font-bold text-slate-600 mt-0.5">மொத்த உறுப்பினர்கள்</div>
+              <div className="text-base font-black text-slate-900 leading-none">{chapterMembers.length + 1} / {chapterCapacity}</div>
+              <div className="text-xs font-bold text-slate-600 mt-0.5">உறுப்பினர்கள்</div>
             </div>
           </button>
 
-          {/* Pill 2: 1-to-1 சந்திப்புகள் */}
+          {/* Pill 2: சாப்டர் குரூப் அரட்டை */}
+          <button
+            onClick={() => setActiveSectionTab('chat')}
+            className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${
+              activeSectionTab === 'chat'
+                ? 'bg-indigo-50/70 border-indigo-300 ring-2 ring-indigo-200'
+                : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100'
+            }`}
+          >
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 relative">
+              <MessageSquare className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full" />
+            </div>
+            <div>
+              <div className="text-xs font-black text-slate-900 leading-tight">சாப்டர் அரட்டை</div>
+              <div className="text-[11px] font-medium text-slate-500 mt-0.5">30 பேர் குரூப்</div>
+            </div>
+          </button>
+
+          {/* Pill 3: 1-to-1 சந்திப்புகள் */}
           <button
             onClick={() => setActiveSectionTab('meetings')}
             className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${
@@ -692,11 +783,11 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
             </div>
             <div>
               <div className="text-xs font-black text-slate-900 leading-tight">1-to-1 சந்திப்புகள்</div>
-              <div className="text-[11px] font-medium text-slate-500 mt-0.5">நேரடி மீட்டிங் அமைக்க</div>
+              <div className="text-[11px] font-medium text-slate-500 mt-0.5">நேரடி மீட்டிங்</div>
             </div>
           </button>
 
-          {/* Pill 3: பரிந்துரைகள் */}
+          {/* Pill 4: பரிந்துரைகள் */}
           <button
             onClick={() => setActiveSectionTab('referrals')}
             className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${
@@ -710,11 +801,11 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
             </div>
             <div>
               <div className="text-xs font-black text-slate-900 leading-tight">பரிந்துரைகள்</div>
-              <div className="text-[11px] font-medium text-slate-500 mt-0.5">உறுப்பினர்களுடன் பகிர்க</div>
+              <div className="text-[11px] font-medium text-slate-500 mt-0.5">உறுப்பினர்களுடன்</div>
             </div>
           </button>
 
-          {/* Pill 4: வணிக வாய்ப்புகள் */}
+          {/* Pill 5: வணிக வாய்ப்புகள் */}
           <button
             onClick={() => setActiveSectionTab('opportunities')}
             className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${
@@ -728,7 +819,7 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
             </div>
             <div>
               <div className="text-xs font-black text-slate-900 leading-tight">வணிக வாய்ப்புகள்</div>
-              <div className="text-[11px] font-medium text-slate-500 mt-0.5">புதிய வாய்ப்புகளை காண்க</div>
+              <div className="text-[11px] font-medium text-slate-500 mt-0.5">புதிய லீட்ஸ்</div>
             </div>
           </button>
 
@@ -748,7 +839,7 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
                     <img 
                       src={cm.logo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80'} 
                       alt={cm.businessName} 
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200" 
+                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" 
                     />
                     <div className="min-w-0 flex-grow">
                       <h4 className="font-black text-sm text-slate-900 truncate">{cm.businessName}</h4>
@@ -756,28 +847,187 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
                     </div>
                   </div>
                   
-                  <div className="text-xs text-slate-600">
-                    <div>உரிமையாளர்: <strong className="text-slate-800">{cm.ownerName}</strong></div>
-                    {cm.specialOffer && <div className="text-[11px] text-amber-700 italic truncate mt-0.5">{cm.specialOffer}</div>}
+                  <div className="text-xs text-slate-600 space-y-0.5">
+                    <div>👤 உரிமையாளர்: <strong className="text-slate-800">{cm.ownerName}</strong></div>
+                    <div className="text-[11px] text-slate-500 truncate">📍 {cm.address || 'தருமபுரி & சேலம் மண்டலம்'}</div>
+                    {cm.specialOffer && <div className="text-[11px] text-amber-700 italic truncate mt-0.5">🎁 {cm.specialOffer}</div>}
                   </div>
 
-                  <div className="border-t border-slate-200/80 pt-3 flex items-center justify-between text-xs font-bold">
-                    <button 
-                      onClick={() => setShowMeetingModal(cm)} 
-                      className="text-purple-600 hover:text-purple-800 flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>🤝 1-to-1 சந்திக்க</span>
-                    </button>
+                  <div className="border-t border-slate-200/80 pt-3 grid grid-cols-3 gap-2 text-xs font-bold">
                     <a 
                       href={`tel:${cm.phone}`} 
-                      className="text-slate-600 hover:text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs"
+                      className="text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 py-1.5 px-2 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-center gap-1"
                     >
-                      📞 அழைக்க
+                      <span>📞</span>
+                      <span>அழைக்க</span>
                     </a>
+                    
+                    <a 
+                      href={`https://wa.me/91${cm.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`வணக்கம் ${cm.ownerName} அவர்களே, நான் ${activeMember.businessName} உரிமையாளர் ${activeMember.ownerName}. NBN சாப்டர் வழியாக தொடர்பு கொள்கிறேன்.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 py-1.5 px-2 rounded-xl border border-emerald-200 shadow-2xs flex items-center justify-center gap-1"
+                    >
+                      <span>💬</span>
+                      <span>WhatsApp</span>
+                    </a>
+
+                    <button 
+                      onClick={() => setShowMeetingModal(cm)} 
+                      className="text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 py-1.5 px-2 rounded-xl border border-purple-200 flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span>🤝</span>
+                      <span>1-to-1</span>
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* TAB 2: IN-CHAPTER 30-MEMBER GROUP CHAT & NETWORKING SPACE */}
+        {activeSectionTab === 'chat' && (
+          <div className="pt-2 space-y-4">
+            <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-black text-slate-900">
+                    🔒 {(activeMember.talukId || 'ஹரூர்').toUpperCase()} சாப்டர் பிரத்யேக நெட்வொர்க்கிங் அரட்டை
+                  </h4>
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full">
+                    30 உறுப்பினர்கள் மட்டுமே
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  அங்கீகரிக்கப்பட்ட சாப்டர் உறுப்பினர்கள் மட்டுமே இங்கு அரட்டையடிக்கலாம். புதிய வாடிக்கையாளர் தேவைகள், பரிந்துரைகள் மற்றும் சந்திப்புகளைப் பகிரவும்.
+                </p>
+              </div>
+
+              {/* Tag filters */}
+              <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-bold shrink-0">
+                {['all', 'opportunity', 'referral', 'meeting', 'announcement', 'general'].map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => setChatFilter(tag)}
+                    className={`px-2.5 py-1 rounded-lg transition text-[11px] cursor-pointer ${
+                      chatFilter === tag
+                        ? 'bg-indigo-600 text-white font-black'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {tag === 'all' && 'அனைத்தும்'}
+                    {tag === 'opportunity' && '💡 வாய்ப்புகள்'}
+                    {tag === 'referral' && '🤝 பரிந்துரைகள்'}
+                    {tag === 'meeting' && '📅 சந்திப்புகள்'}
+                    {tag === 'announcement' && '📢 அறிவிப்புகள்'}
+                    {tag === 'general' && '💬 பொது'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Chat Message Stream */}
+            <div className="h-96 overflow-y-auto space-y-3 p-4 rounded-2xl border border-slate-200 bg-slate-50/50">
+              {chatMessages
+                .filter(m => chatFilter === 'all' ? true : m.tag === chatFilter)
+                .map((msg) => {
+                  const isMe = msg.senderId === activeMember.id;
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex gap-3 max-w-2xl ${isMe ? 'ml-auto flex-row-reverse' : ''}`}
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                        {msg.senderName?.charAt(0) || 'U'}
+                      </div>
+                      
+                      <div className={`p-3.5 rounded-2xl border text-xs space-y-1 shadow-2xs ${
+                        isMe 
+                          ? 'bg-purple-600 text-white border-purple-500 rounded-tr-none' 
+                          : 'bg-white text-slate-800 border-slate-200 rounded-tl-none'
+                      }`}>
+                        <div className="flex items-center justify-between gap-3 text-[11px]">
+                          <span className={`font-black ${isMe ? 'text-purple-100' : 'text-slate-900'}`}>
+                            {msg.senderName} ({msg.businessName})
+                          </span>
+                          <span className={`${isMe ? 'text-purple-200' : 'text-slate-400'}`}>
+                            {msg.timestamp || 'இப்போது'}
+                          </span>
+                        </div>
+
+                        {msg.tag && (
+                          <div className="pb-0.5">
+                            <span className={`inline-block text-[10px] font-black px-2 py-0.5 rounded-full ${
+                              msg.tag === 'opportunity' ? 'bg-amber-100 text-amber-800' :
+                              msg.tag === 'referral' ? 'bg-emerald-100 text-emerald-800' :
+                              msg.tag === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                              msg.tag === 'announcement' ? 'bg-rose-100 text-rose-800' :
+                              'bg-slate-100 text-slate-700'
+                            }`}>
+                              {msg.tag === 'opportunity' && '💡 வணிக வாய்ப்பு (Lead)'}
+                              {msg.tag === 'referral' && '🤝 பரிந்துரை (Referral)'}
+                              {msg.tag === 'meeting' && '📅 1-to-1 சந்திப்பு'}
+                              {msg.tag === 'announcement' && '📢 சாப்டர் அறிவிப்பு'}
+                              {msg.tag === 'general' && '💬 கலந்துரையாடல்'}
+                            </span>
+                          </div>
+                        )}
+
+                        <p className={`text-xs leading-relaxed ${isMe ? 'text-white' : 'text-slate-700'}`}>
+                          {msg.message}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              
+              {chatMessages.length === 0 && (
+                <div className="h-full flex items-center justify-center text-center text-slate-400 text-xs">
+                  <div>
+                    <MessageSquare className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                    <p className="font-bold">இன்னும் செய்திகள் எதுவும் இல்லை.</p>
+                    <p className="text-[11px]">முதல் வணிக வாய்ப்பை அல்லது வாழ்த்தைப் பகிருங்கள்!</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chat Composer Form */}
+            <form onSubmit={handleSendChatMessage} className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-500">செய்தி வகை:</span>
+                <select
+                  value={chatTag}
+                  onChange={(e: any) => setChatTag(e.target.value)}
+                  className="p-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50"
+                >
+                  <option value="general">💬 பொதுவான கலந்துரையாடல் (General)</option>
+                  <option value="opportunity">💡 புதிய வணிக வாய்ப்பு (Lead Opportunity)</option>
+                  <option value="referral">🤝 சக உறுப்பினர் பரிந்துரை (Referral)</option>
+                  <option value="meeting">📅 1-to-1 சந்திப்பு அழைப்பு (Meeting)</option>
+                  <option value="announcement">📢 சாப்டர் அறிவிப்பு (Announcement)</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="சாப்டர் நண்பர்களுடன் வணிக வாய்ப்பு அல்லது செய்தியைப் பகிரவும்..."
+                  value={newChatText}
+                  onChange={(e) => setNewChatText(e.target.value)}
+                  className="flex-grow p-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+                <button
+                  type="submit"
+                  disabled={chatLoading || !newChatText.trim()}
+                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>அனுப்புக ➔</span>
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
@@ -880,6 +1130,57 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
           </div>
         )}
 
+      </div>
+
+      {/* ======================================================== */}
+      {/* 4. GOOGLE MAPS STORE LOCATION & DIRECTIONS WIDGET        */}
+      {/* ======================================================== */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900">
+                📍 உங்கள் வணிக இருப்பிடம் & கூகுள் மேப் (Store Location & Directions)
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                {activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activeMember.address || activeMember.businessName + ', ' + activeMember.talukId)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Google Maps-ல் பார்க்க ➔</span>
+            </a>
+
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>முகவரி மாற்று</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Embedded Interactive Google Map */}
+        <div className="w-full h-64 rounded-2xl overflow-hidden border border-slate-200 relative bg-slate-100 shadow-inner">
+          <iframe
+            title="Business Location Map"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(activeMember.address || activeMember.businessName + ', ' + activeMember.talukId)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+            className="w-full h-full border-0"
+            loading="lazy"
+          />
+        </div>
       </div>
 
       {/* ======================================================== */}

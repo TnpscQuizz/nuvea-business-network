@@ -44,6 +44,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [formData, setFormData] = useState({
     // 1. Owner Details
     fullName: '',
+    username: '',
     designation: 'நிறுவனர் / உரிமையாளர் (Founder / Owner)',
     phone: '',
     whatsapp: '',
@@ -51,13 +52,20 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     password: '',
     profilePhoto: '', // base64 or url
 
-    // 2. Business Details
+    // 2. Business & Chapter Details
     businessName: '',
     categoryId: 'jewellery',
     talukId: 'harur',
     preferredChapterId: 'harur_titans',
+    forumType: 'Executive Forum (BNI-Style)',
     businessPhoto: '', // base64 or url
     accountType: initialOption as 'networking_marketplace' | 'marketplace_only' | 'customer',
+
+    // 3. Google Maps & Location
+    mapAddress: 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம் - 636903',
+    mapEmbedUrl: 'https://maps.google.com/maps?q=Harur,Tamil+Nadu&t=&z=14&ie=UTF8&iwloc=&output=embed',
+    latitude: 12.0621,
+    longitude: 78.4975
   });
 
   // Handle Local System File Upload for Owner Photo
@@ -244,6 +252,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fullName: formData.fullName,
+          username: formData.username || formData.phone,
           profilePhoto: formData.profilePhoto,
           phone: formData.phone,
           whatsapp: formData.whatsapp || formData.phone,
@@ -256,7 +265,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           categoryId: formData.categoryId,
           talukId: formData.talukId,
           preferredChapterId: formData.preferredChapterId,
-          accountType: 'networking_marketplace',
+          forumType: formData.forumType,
+          accountType: formData.accountType,
+          address: formData.mapAddress,
+          mapAddress: formData.mapAddress,
+          mapEmbedUrl: formData.mapEmbedUrl,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
           orderId,
           paymentId
         })
@@ -469,10 +484,35 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   <input
                     type="text"
                     value={formData.fullName}
-                    onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setFormData(prev => ({
+                        ...prev,
+                        fullName: val,
+                        username: prev.username ? prev.username : val.toLowerCase().replace(/\s+/g, '_')
+                      }));
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-400 focus:outline-none text-xs font-bold"
                     placeholder="எ.கா. சந்திரசேகர் கே. எஸ்."
                   />
+                </div>
+
+                {/* Unique Username for Login */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>{isTa ? 'பயனர் பெயர் (Login Username) *' : 'Login Username *'}</span>
+                    <span className="text-[10px] text-amber-700 font-bold">மறுபடியும் லாகின் செய்ய</span>
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <input
+                      type="text"
+                      value={formData.username}
+                      onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-400 focus:outline-none text-xs font-bold font-mono"
+                      placeholder="எ.கா. chandru_nuvea"
+                    />
+                  </div>
                 </div>
 
                 {/* Position / Designation */}
@@ -602,6 +642,64 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </select>
                 </div>
 
+                {/* Chapter Forum Selection */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {isTa ? 'சாப்டர் ஃபோரம் (Chapter Forum - BNI Style) *' : 'Chapter Forum *'}
+                  </label>
+                  <select
+                    value={formData.forumType}
+                    onChange={e => setFormData({ ...formData, forumType: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-400 focus:outline-none text-xs font-bold bg-white"
+                  >
+                    <option value="Executive Forum (BNI-Style)">Executive Forum (BNI பாணி வாராந்திர நேரடி சந்திப்பு)</option>
+                    <option value="Premier Business Forum">Premier Business Forum (உயர் மதிப்பு வர்த்தகக் குழு)</option>
+                    <option value="SME Growth Forum">SME Growth Forum (சிறு & நடுத்தர தொழில் வணிகக் குழு)</option>
+                  </select>
+                </div>
+
+                {/* Package Selection */}
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {isTa ? 'உறுப்பினர் பேக்கேஜ் (Membership Package) *' : 'Membership Package *'}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div 
+                      onClick={() => setFormData({ ...formData, accountType: 'networking_marketplace' })}
+                      className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex items-start gap-3 ${
+                        formData.accountType === 'networking_marketplace'
+                          ? 'border-amber-400 bg-amber-50/70 shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="w-5 h-5 rounded-full border-2 border-amber-500 flex items-center justify-center shrink-0 mt-0.5">
+                        {formData.accountType === 'networking_marketplace' && <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-black text-slate-900">Option A: சாப்டர் நெட்வொர்க்கிங் + மார்க்கெட்பிளேஸ்</div>
+                        <div className="text-[11px] text-slate-600 mt-0.5">100% சாப்டர் ஏகபோக சீட், வாராந்திர மீட்டிங் & B2B சந்தை (₹1 சலுகை)</div>
+                      </div>
+                    </div>
+
+                    <div 
+                      onClick={() => setFormData({ ...formData, accountType: 'marketplace_only' })}
+                      className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex items-start gap-3 ${
+                        formData.accountType === 'marketplace_only'
+                          ? 'border-blue-400 bg-blue-50/70 shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="w-5 h-5 rounded-full border-2 border-blue-500 flex items-center justify-center shrink-0 mt-0.5">
+                        {formData.accountType === 'marketplace_only' && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-black text-slate-900">Option B: மார்க்கெட்பிளேஸ் விற்பனையாளர் மட்டும்</div>
+                        <div className="text-[11px] text-slate-600 mt-0.5">சாப்டர் மீட்டிங் இன்றி தயாரிப்புகள் & சேவைகளை மட்டும் விற்கலாம்</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Taluk Location */}
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -632,6 +730,70 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                         {t.name}
                       </button>
                     ))}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-purple-700 bg-purple-50 p-2.5 rounded-xl border border-purple-200 mt-2 font-bold">
+                    <span>👥 சாப்டர் கொள்ளளவு உச்ச வரம்பு: <strong>30 உறுப்பினர்கள் மட்டுமே</strong></span>
+                    <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">✓ சேர்க்கை திறக்கப்பட்டுள்ளது</span>
+                  </div>
+                </div>
+
+                {/* Google Maps & Shop Address Section */}
+                <div className="sm:col-span-2 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-rose-500" />
+                      <span>கடை முகவரி மற்றும் கூகுள் மேப் இருப்பிடம் (Google Maps Location) *</span>
+                    </span>
+                    <span className="text-[10px] text-rose-700 bg-rose-100 font-bold px-2 py-0.5 rounded">
+                      மெயின் & டேஷ்போர்டில் காட்டப்படும்
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">கடை / நிறுவன முழு முகவரி (Full Address):</label>
+                    <input
+                      type="text"
+                      value={formData.mapAddress}
+                      onChange={e => setFormData({ ...formData, mapAddress: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                      placeholder="எ.கா. கதவு எண் 45, மெயின் ரோடு, பஸ் நிலையம் அருகில், ஹரூர் - 636903"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Google Maps Embed URL / வரைபட இணைப்பு:</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={formData.mapEmbedUrl}
+                        onChange={e => setFormData({ ...formData, mapEmbedUrl: e.target.value })}
+                        className="flex-grow px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                        placeholder="https://maps.google.com/..."
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const query = encodeURIComponent(`${formData.businessName || 'Business'}, ${formData.talukId || 'Harur'}, Tamil Nadu`);
+                          setFormData({
+                            ...formData,
+                            mapEmbedUrl: `https://maps.google.com/maps?q=${query}&t=&z=14&ie=UTF8&iwloc=&output=embed`
+                          });
+                        }}
+                        className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition cursor-pointer whitespace-nowrap"
+                      >
+                        📍 ஆட்டோ மேப்
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Interactive Map Preview */}
+                  <div className="rounded-xl overflow-hidden border border-slate-300 h-36 bg-slate-200 relative shadow-inner">
+                    <iframe
+                      title="Google Maps Location Preview"
+                      src={formData.mapEmbedUrl}
+                      className="w-full h-full border-0"
+                      loading="lazy"
+                    />
                   </div>
                 </div>
 

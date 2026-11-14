@@ -191,6 +191,7 @@ router.post('/register-owner-full', (req, res) => {
     const {
       // Step 1: Owner Information
       fullName,
+      username,
       profilePhoto,
       phone,
       whatsapp,
@@ -210,6 +211,10 @@ router.post('/register-owner-full', (req, res) => {
       website,
       socialLinks,
       address,
+      mapAddress,
+      mapEmbedUrl,
+      latitude,
+      longitude,
       districtId,
       talukId,
       pinCode,
@@ -220,6 +225,7 @@ router.post('/register-owner-full', (req, res) => {
       // Step 4: Account Type
       accountType, // 'networking_marketplace' | 'marketplace_only'
       preferredChapterId,
+      forumType,
 
       // Step 5: Verification Documents & Consent
       documents,
@@ -231,8 +237,9 @@ router.post('/register-owner-full', (req, res) => {
     }
 
     const cleanPhone = phone.replace(/\D/g, '');
+    const cleanUsername = (username || cleanPhone).trim().toLowerCase();
     const users = db.getTable('users');
-    let user = users.find(u => u.phone === cleanPhone);
+    let user = users.find(u => u.phone === cleanPhone || (u.username && u.username.toLowerCase() === cleanUsername));
 
     const isNetworking = accountType === 'networking_marketplace';
     const assignedRole = isNetworking ? 'member' : 'marketplace_owner';
@@ -241,6 +248,7 @@ router.post('/register-owner-full', (req, res) => {
       user = {
         id: `usr_${Date.now()}`,
         name: fullName,
+        username: cleanUsername,
         email: email || `${cleanPhone}@nbn.in`,
         phone: cleanPhone,
         whatsapp: whatsapp || cleanPhone,
@@ -256,12 +264,16 @@ router.post('/register-owner-full', (req, res) => {
       user.role = assignedRole;
       user.accountType = accountType || 'networking_marketplace';
       user.name = fullName;
+      user.username = cleanUsername;
+      if (password) user.passwordHash = authService.hashPassword(password);
       if (designation) user.designation = designation;
       if (profilePhoto) user.profilePhoto = profilePhoto;
     }
 
     const regId = 'REG-' + Date.now().toString(36).toUpperCase();
     let seatResult = null;
+    const now = new Date();
+    const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
     if (isNetworking) {
       // Module A: Networking + Marketplace with Chapter Category Exclusivity
@@ -275,12 +287,13 @@ router.post('/register-owner-full', (req, res) => {
         ownerName: fullName,
         phone: cleanPhone,
         email: user.email,
-        address: address || `${talukId || 'ஹரூர்'}, தமிழ்நாடு`,
+        address: address || mapAddress || `${talukId || 'ஹரூர்'}, தமிழ்நாடு`,
         tagline: `அங்கீகரிக்கப்பட்ட ${businessName}`,
         description: description || 'NBN அதிகாரப்பூர்வ நெட்வொர்க்கிங் உறுப்பினர்.'
       });
 
       if (seatResult.business) {
+        seatResult.business.username = cleanUsername;
         seatResult.business.logo = logo || '';
         seatResult.business.cover = cover || '';
         seatResult.business.subcategory = subcategory || '';
@@ -291,6 +304,13 @@ router.post('/register-owner-full', (req, res) => {
         seatResult.business.pinCode = pinCode || '';
         seatResult.business.productsServices = productsServices || [];
         seatResult.business.accountType = 'networking_marketplace';
+        seatResult.business.forumType = forumType || 'Executive Forum';
+        seatResult.business.mapEmbedUrl = mapEmbedUrl || '';
+        seatResult.business.latitude = latitude || 12.0621;
+        seatResult.business.longitude = longitude || 78.4975;
+        seatResult.business.membershipStartDate = now.toISOString();
+        seatResult.business.membershipExpiryDate = oneYearLater.toISOString();
+        seatResult.business.validityDays = 365;
         seatResult.business.registrationId = regId;
         seatResult.business.verificationStatus = 'submitted';
       }
@@ -301,6 +321,7 @@ router.post('/register-owner-full', (req, res) => {
       const newBiz = {
         id: bizId,
         userId: user.id,
+        username: cleanUsername,
         talukId: talukId || 'harur',
         chapterId: null, // No chapter for marketplace-only
         categoryId: categoryId || 'general_trade',
@@ -308,7 +329,10 @@ router.post('/register-owner-full', (req, res) => {
         ownerName: fullName,
         phone: cleanPhone,
         email: user.email,
-        address: address || 'தமிழ்நாடு',
+        address: address || mapAddress || 'தமிழ்நாடு',
+        mapEmbedUrl: mapEmbedUrl || '',
+        latitude: latitude || 12.0621,
+        longitude: longitude || 78.4975,
         logo: logo || '',
         cover: cover || '',
         subcategory: subcategory || '',
@@ -320,15 +344,45 @@ router.post('/register-owner-full', (req, res) => {
         pinCode: pinCode || '',
         productsServices: productsServices || [],
         accountType: 'marketplace_only',
+        forumType: forumType || 'Marketplace Hub',
+        membershipStartDate: now.toISOString(),
+        membershipExpiryDate: oneYearLater.toISOString(),
+        validityDays: 365,
         status: 'active',
         verificationStatus: 'submitted',
         registrationId: regId,
         rating: 5.0,
         reviewCount: 0,
-        createdAt: new Date().toISOString()
+        createdAt: now.toISOString()
       };
       businesses.push(newBiz);
       seatResult = { business: newBiz, membership: null };
+    }
+
+    // Auto sync to Hostinger Remote MySQL if configured
+    try {
+      const hostingerService = require('../services/hostingerService');
+      hostingerService.syncOwnerRecord({
+        userId: user.id,
+        username: cleanUsername,
+        ownerName: fullName,
+        email: user.email,
+        phone: cleanPhone,
+        businessId: seatResult.business.id,
+        businessName,
+        categoryId: categoryId || 'general_trade',
+        talukId: talukId || 'harur',
+        chapterId: isNetworking ? (preferredChapterId || 'harur_titans') : null,
+        forumType: forumType || 'Executive Forum',
+        accountType: accountType || 'networking_marketplace',
+        address: seatResult.business.address,
+        mapEmbedUrl: seatResult.business.mapEmbedUrl,
+        logo: logo || '',
+        cover: cover || '',
+        passwordHash: user.passwordHash
+      }).catch(e => console.log('[Hostinger Sync Background]', e.message));
+    } catch (e) {
+      // Non-blocking
     }
 
     // Save formal application record

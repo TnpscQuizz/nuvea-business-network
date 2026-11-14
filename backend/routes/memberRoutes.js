@@ -353,4 +353,98 @@ router.post('/referral/:id/confirm', requireAuth, (req, res) => {
   });
 });
 
+// ========================================================
+// EXCLUSIVE CHAPTER GROUP NETWORKING CHAT (30-MEMBER COHORT)
+// ========================================================
+router.get('/chapter-chat/:chapterId', (req, res) => {
+  const { chapterId } = req.params;
+  let chats = db.getTable('chapterChats');
+  if (!chats) {
+    db.data.chapterChats = [];
+    chats = db.data.chapterChats;
+  }
+
+  let chapterMessages = chats.filter(c => c.chapterId === chapterId);
+
+  // If no messages yet, seed initial collaborative chapter discussions
+  if (chapterMessages.length === 0) {
+    const seedMsgs = [
+      {
+        id: `msg_1`,
+        chapterId,
+        senderId: 'mem_001',
+        senderName: 'சந்திரா (Chandru)',
+        businessName: 'நுவேவா ஸ்டுடியோ',
+        category: 'digital_marketing',
+        message: 'அனைத்து சாப்டர் நண்பர்களுக்கும் வணக்கம்! நமது புதிய 30 உறுப்பினர் வர்த்தகக் குழுவிற்கு நல்வரவு!',
+        tag: 'general',
+        timestamp: new Date(Date.now() - 3600000 * 4).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: 'இன்று'
+      },
+      {
+        id: `msg_2`,
+        chapterId,
+        senderId: 'mem_002',
+        senderName: 'முருகன் கே.',
+        businessName: 'ஸ்ரீ முருகன் ஜூவல்லரி',
+        category: 'jewellery',
+        message: 'வணக்கம் சந்திரா! இந்த வாரம் 3 புதிய திருமண நகை தேவைகள் வந்துள்ளன. பட்டு மற்றும் கேட்டரிங் நண்பர்களுக்கு பரிந்துரை அனுப்ப உள்ளேன்.',
+        tag: 'opportunity',
+        timestamp: new Date(Date.now() - 3600000 * 2).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: 'இன்று'
+      },
+      {
+        id: `msg_3`,
+        chapterId,
+        senderId: 'mem_003',
+        senderName: 'சுரேஷ் குமார்',
+        businessName: 'ராயல் டெக்ஸ்டைல்ஸ்',
+        category: 'silks',
+        message: 'நன்றி முருகன் சார்! பட்டுப் புடவைகளுக்கான தேவைகளுக்கு நாங்கள் 10% பிரத்யேக NBN சாப்டர் தள்ளுபடி வழங்குகிறோம்.',
+        tag: 'referral',
+        timestamp: new Date(Date.now() - 3600000 * 1).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: 'இன்று'
+      }
+    ];
+    seedMsgs.forEach(m => chats.push(m));
+    db.persist();
+    chapterMessages = seedMsgs;
+  }
+
+  res.json(chapterMessages);
+});
+
+router.post('/chapter-chat/:chapterId', (req, res) => {
+  const { chapterId } = req.params;
+  const { senderId, senderName, businessName, category, message, tag } = req.body;
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: 'செய்தி உள்ளிடவும் (Message text required)' });
+  }
+
+  let chats = db.getTable('chapterChats');
+  if (!chats) {
+    db.data.chapterChats = [];
+    chats = db.data.chapterChats;
+  }
+
+  const newMsg = {
+    id: `msg_${Date.now()}`,
+    chapterId,
+    senderId: senderId || 'mem_001',
+    senderName: senderName || 'வணிகர்',
+    businessName: businessName || 'NBN உறுப்பினர்',
+    category: category || 'வணிகம்',
+    message: message.trim(),
+    tag: tag || 'general', // 'general' | 'referral' | 'opportunity' | 'meeting'
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    date: 'இன்று'
+  };
+
+  chats.push(newMsg);
+  db.persist();
+
+  res.json({ success: true, message: newMsg });
+});
+
 module.exports = router;

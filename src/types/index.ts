@@ -20,6 +20,10 @@ export type Member = {
   logo?: string;
   cover?: string;
   videoUrl?: string;
+  mapAddress?: string;
+  mapEmbedUrl?: string;
+  latitude?: number;
+  longitude?: number;
   status?: string;
   membershipStartDate?: string;
   membershipExpiryDate?: string;
@@ -37,6 +41,7 @@ export type Chapter = {
   location?: string;
   meetingDay?: string;
   directorName?: string;
+  maxSeats?: number;
   filledSeats?: number;
   availableSeats?: number;
 };
