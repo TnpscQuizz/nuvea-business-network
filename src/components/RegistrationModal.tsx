@@ -27,7 +27,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const isTa = lang === 'ta';
 
   // Constants - LOCKED TO ₹1 RS ONLY FOR LIVE TESTING
-  const [paymentLink, setPaymentLink] = useState<string>('https://rzp.io/rzp/qsujcmuB');
+  const [paymentLink, setPaymentLink] = useState<string>('https://rzp.io/rzp/zZS6aMWL');
   const MEMBERSHIP_FEE_INR = 1; // Strictly ₹1 RS ONLY
   const paymentAmount = 1; // Strictly ₹1 RS ONLY
 

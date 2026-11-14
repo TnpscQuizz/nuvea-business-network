@@ -75,7 +75,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     videoBenefitIncluded: true,
     razorpayKeyId: 'rzp_test_NBN_DEMO_KEY',
     razorpayKeySecret: '••••••••••••••••••••',
-    razorpayPaymentLink: 'https://rzp.io/rzp/qsujcmuB',
+    razorpayPaymentLink: 'https://rzp.io/rzp/zZS6aMWL',
     demoPaymentMode: true,
     elevationWeightLeads: 30,
     elevationWeightClosedValue: 40,
@@ -1632,7 +1632,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     onChange={(e) => setSettingsForm({ ...settingsForm, razorpayPaymentLink: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">Default: https://rzp.io/rzp/qsujcmuB (Chandru Madhesan)</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Default: https://rzp.io/rzp/zZS6aMWL (Chandru Madhesan)</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

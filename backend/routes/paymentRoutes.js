@@ -38,7 +38,7 @@ router.post('/verify', (req, res) => {
     razorpayOrderId,
     razorpayPaymentId: razorpayPaymentId || `pay_demo_${Date.now()}`,
     status: 'captured',
-    paymentUrl: 'https://rzp.io/rzp/qsujcmuB',
+    paymentUrl: 'https://rzp.io/rzp/zZS6aMWL',
     invoiceNumber: mem ? mem.invoiceNumber : `INV-${Date.now()}`,
     createdAt: new Date().toISOString()
   };

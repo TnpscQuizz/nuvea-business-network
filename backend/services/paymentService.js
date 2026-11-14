@@ -11,7 +11,7 @@ function createOrder({ membershipId, amount, currency = 'INR', keyId }) {
     membershipId,
     amount: validAmount,
     currency: 'INR', // Strictly Indian Rupee (INR) only
-    paymentUrl: settings.razorpayPaymentLink || 'https://rzp.io/rzp/qsujcmuB',
+    paymentUrl: settings.razorpayPaymentLink || 'https://rzp.io/rzp/zZS6aMWL',
     keyId: keyId || settings.razorpayKeyId || 'rzp_test_NBN_DEMO_KEY',
     isDemo: settings.demoPaymentMode !== false
   };
