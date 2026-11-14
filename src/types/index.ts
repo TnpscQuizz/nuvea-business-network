@@ -21,6 +21,10 @@ export type Member = {
   cover?: string;
   videoUrl?: string;
   status?: string;
+  membershipStartDate?: string;
+  membershipExpiryDate?: string;
+  membershipValidityDays?: number;
+  membershipFeePaid?: number;
 };
 
 export type Chapter = {

@@ -183,8 +183,9 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
                   <span>Join as Business Owner</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-                <div className="mt-2 text-[11px] text-amber-800/80 font-bold">
-                  ★ Exclusive 1 Seat Per Category • Launch Fee ₹1 Only
+                <div className="mt-2 text-[11px] text-amber-900 font-black bg-amber-100/90 py-1.5 px-3 rounded-xl border border-amber-300 flex items-center justify-center gap-1.5">
+                  <span>⏳</span>
+                  <span>1 வருடம் முழு வேலிடிட்டி (1-Year Validity) • கட்டணம் ₹1 மட்டுமே</span>
                 </div>
               </div>
             </div>

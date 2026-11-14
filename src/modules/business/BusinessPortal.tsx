@@ -12,13 +12,17 @@ interface BusinessPortalProps {
   updateState: (newState: AppState) => void;
   lang: 'ta' | 'en';
   currentMemberId?: string;
+  onExitPortal?: (portal?: 'gateway' | 'business' | 'user' | 'admin') => void;
+  onOpenRenewModal?: () => void;
 }
 
 export const BusinessPortal: React.FC<BusinessPortalProps> = ({ 
   state, 
   updateState, 
   lang,
-  currentMemberId 
+  currentMemberId,
+  onExitPortal,
+  onOpenRenewModal
 }) => {
   const isTa = lang === 'ta';
   const members = state.members || [];
@@ -36,6 +40,115 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
   const [showBidModal, setShowBidModal] = useState<string | null>(null);
   const [bidPrice, setBidPrice] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // 1-Year Membership Countdown Timer
+  const [expiryTimestamp, setExpiryTimestamp] = useState<number>(() => {
+    const key = `nbn_expiry_${selectedMemberId}`;
+    const stored = localStorage.getItem(key);
+    if (stored) return Number(stored);
+
+    const activeM = members.find(m => m.id === selectedMemberId);
+    if (activeM?.membershipExpiryDate) {
+      return new Date(activeM.membershipExpiryDate).getTime();
+    }
+    const defaultExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000;
+    localStorage.setItem(key, defaultExpiry.toString());
+    return defaultExpiry;
+  });
+
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    totalSeconds: number;
+    isExpired: boolean;
+  }>({ days: 364, hours: 23, minutes: 59, seconds: 59, totalSeconds: 31536000, isExpired: false });
+
+  const [isSimulatingExpiry, setIsSimulatingExpiry] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+
+  // Sync expiry timestamp when selected member changes
+  useEffect(() => {
+    const key = `nbn_expiry_${selectedMemberId}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      setExpiryTimestamp(Number(stored));
+    } else {
+      const activeM = members.find(m => m.id === selectedMemberId);
+      if (activeM?.membershipExpiryDate) {
+        setExpiryTimestamp(new Date(activeM.membershipExpiryDate).getTime());
+      } else {
+        const fullYear = Date.now() + 365 * 24 * 60 * 60 * 1000;
+        setExpiryTimestamp(fullYear);
+        localStorage.setItem(key, fullYear.toString());
+      }
+    }
+    setShowExpiredModal(false);
+  }, [selectedMemberId, members]);
+
+  // Live 1-Second Interval
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const diffMs = expiryTimestamp - now;
+
+      if (diffMs <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, totalSeconds: 0, isExpired: true });
+        setShowExpiredModal(true);
+      } else {
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSeconds / (3600 * 24));
+        const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        setTimeLeft({
+          days,
+          hours,
+          minutes,
+          seconds,
+          totalSeconds,
+          isExpired: false
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [expiryTimestamp]);
+
+  // Auto-Redirect back to Gateway on Expiry after 4 seconds
+  useEffect(() => {
+    if (showExpiredModal) {
+      const autoRedirect = setTimeout(() => {
+        handleAutoExit();
+      }, 5000);
+      return () => clearTimeout(autoRedirect);
+    }
+  }, [showExpiredModal]);
+
+  const handleAutoExit = () => {
+    setShowExpiredModal(false);
+    localStorage.removeItem(`nbn_expiry_${selectedMemberId}`);
+    if (onExitPortal) {
+      onExitPortal('gateway');
+    }
+  };
+
+  const handleTest10Sec = () => {
+    const testTime = Date.now() + 10 * 1000;
+    setExpiryTimestamp(testTime);
+    setIsSimulatingExpiry(true);
+    setShowExpiredModal(false);
+  };
+
+  const handleResetOneYear = () => {
+    const fullYear = Date.now() + 365 * 24 * 60 * 60 * 1000;
+    setExpiryTimestamp(fullYear);
+    localStorage.setItem(`nbn_expiry_${selectedMemberId}`, fullYear.toString());
+    setIsSimulatingExpiry(false);
+    setShowExpiredModal(false);
+  };
 
   // Sync when currentMemberId changes
   useEffect(() => {
@@ -131,6 +244,173 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
   return (
     <div className="space-y-6 max-w-6xl mx-auto py-3 font-sans">
       
+      {/* ======================================================== */}
+      {/* 0. LIVE 1-YEAR MEMBERSHIP VALIDITY COUNTDOWN TIMER BAR   */}
+      {/* ======================================================== */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 border-2 border-amber-400/80 shadow-2xl relative overflow-hidden">
+        {/* Glow backdrop */}
+        <div className="absolute -right-10 -top-10 w-60 h-60 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -left-10 -bottom-10 w-60 h-60 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          
+          {/* Left Info: Status, Plan, Duration */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>உறுப்பினர் நிலை: ஆக்டிவ் (1 Year Active)</span>
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[11px] font-black uppercase">
+                திட்டம்: ₹1 தொடக்கச் சலுகை (₹1 Launch Plan)
+              </span>
+              {isSimulatingExpiry && (
+                <span className="px-2.5 py-1 rounded-full bg-rose-500/30 text-rose-300 border border-rose-500/50 text-[11px] font-black animate-pulse">
+                  ⚡ 10-வினாடி சோதனை முறையில் இயங்குகிறது
+                </span>
+              )}
+            </div>
+
+            <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>⏳ உறுப்பினர் செல்லுபடியாகும் காலக்கோடு (1-Year Validity Timer)</span>
+            </h3>
+
+            <p className="text-xs text-slate-300 font-medium">
+              செல்லுபடியாகும் காலம்: <strong>1 முழு வருடம் (365 நாட்கள்)</strong> • காலக்கெடு முடிந்ததும் கணக்கு தானாக காலாவதியாகி முகப்புப் பக்கத்திற்குத் திரும்பும்.
+            </p>
+          </div>
+
+          {/* Center/Right: Prominent Live Digital Countdown Blocks */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="grid grid-cols-4 gap-2 text-center">
+              
+              {/* Days Block */}
+              <div className="bg-[#070b16] border border-amber-400/60 rounded-2xl px-3 py-2.5 shadow-inner min-w-[64px]">
+                <div className="font-mono text-xl sm:text-2xl font-black text-amber-300 leading-tight">
+                  {String(timeLeft.days).padStart(2, '0')}
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  நாட்கள் (Days)
+                </div>
+              </div>
+
+              {/* Hours Block */}
+              <div className="bg-[#070b16] border border-slate-700 rounded-2xl px-3 py-2.5 shadow-inner min-w-[64px]">
+                <div className="font-mono text-xl sm:text-2xl font-black text-white leading-tight">
+                  {String(timeLeft.hours).padStart(2, '0')}
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  மணி (Hrs)
+                </div>
+              </div>
+
+              {/* Minutes Block */}
+              <div className="bg-[#070b16] border border-slate-700 rounded-2xl px-3 py-2.5 shadow-inner min-w-[64px]">
+                <div className="font-mono text-xl sm:text-2xl font-black text-white leading-tight">
+                  {String(timeLeft.minutes).padStart(2, '0')}
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  நிமி (Mins)
+                </div>
+              </div>
+
+              {/* Seconds Block (Ticking Live) */}
+              <div className="bg-[#070b16] border border-amber-400/80 rounded-2xl px-3 py-2.5 shadow-inner min-w-[64px]">
+                <div className="font-mono text-xl sm:text-2xl font-black text-amber-400 leading-tight animate-pulse">
+                  {String(timeLeft.seconds).padStart(2, '0')}
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">
+                  விநாடி (Sec)
+                </div>
+              </div>
+
+            </div>
+
+            {/* Test Simulation Controls */}
+            <div className="flex sm:flex-col gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={handleTest10Sec}
+                title="1 வருடம் முடிந்ததும் தானாக வெளியேறும் நிகழ்வை உடனே பரிசோதிக்க"
+                className="flex-1 sm:flex-none px-3 py-2 bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap"
+              >
+                <span>🧪 10 விநாடி டெஸ்ட்</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleResetOneYear}
+                className="flex-1 sm:flex-none px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] rounded-xl transition flex items-center justify-center gap-1.5 border border-slate-700 cursor-pointer whitespace-nowrap"
+              >
+                <span>🔄 1 வருடம் ரீசெட்</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Progress Bar for 1-Year Duration */}
+        <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center gap-3">
+          <div className="flex-grow bg-slate-950/80 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div 
+              className="bg-gradient-to-r from-amber-400 via-emerald-400 to-amber-300 h-full rounded-full transition-all duration-1000"
+              style={{ width: `${Math.max(1, Math.min(100, (timeLeft.totalSeconds / (365 * 24 * 3600)) * 100))}%` }}
+            />
+          </div>
+          <span className="text-[11px] text-slate-400 font-bold whitespace-nowrap">
+            {((timeLeft.totalSeconds / (365 * 24 * 3600)) * 100).toFixed(1)}% மீதம் உள்ளது
+          </span>
+        </div>
+
+      </div>
+
+      {/* 1-YEAR MEMBERSHIP EXPIRED AUTO-MODAL */}
+      {showExpiredModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center space-y-5 shadow-2xl border-2 border-rose-500 animate-in fade-in zoom-in duration-300">
+            
+            <div className="w-16 h-16 rounded-3xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-3xl shadow-inner">
+              ⏰
+            </div>
+
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-black text-xs uppercase tracking-wider">
+                MEMBERSHIP EXPIRED • காலம் முடிந்தது
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                1 வருட உறுப்பினர் காலம் நிறைவடைந்தது!
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                உங்கள் <strong>1 வருட (365 நாட்கள்)</strong> NBN வணிகர் அங்கீகாரம் முடிவடைந்தது. கணக்கிலிருந்து தானாக வெளியேறி முகப்பு மற்றும் பதிவுப் பக்கத்திற்குச் செல்கிறது...
+              </p>
+            </div>
+
+            <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-slate-700 font-bold">
+              மறுபடியும் இணைய ₹1 செலுத்தி உடனடியாக உங்கள் 1 வருட புதிய காலக்கட்டத்தை துவங்கலாம்!
+            </div>
+
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={handleAutoExit}
+                className="w-full py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-sm rounded-2xl shadow-lg shadow-amber-400/25 transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>முகப்புப் பக்கத்திற்குச் செல்லவும் (Go to Gateway) ➔</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetOneYear}
+                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                சோதனைக்காக மீண்டும் 1 வருடம் நீட்டிக்க (Dev Extend)
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {/* ======================================================== */}
       {/* 1. MEMBER SWITCHER & PROFILE BANNER (EXACT DESIGN MATCH) */}
       {/* ======================================================== */}

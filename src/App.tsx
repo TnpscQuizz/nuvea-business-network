@@ -60,6 +60,9 @@ export function App() {
 
   const handleRegistrationComplete = (regData: any) => {
     if (!state) return;
+    const now = new Date();
+    const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+
     if (regData.business) {
       const newMember = {
         id: regData.business.id,
@@ -79,15 +82,20 @@ export function App() {
         businessWon: 0,
         referralsReceived: 0,
         referralsGiven: 0,
-        status: 'active'
+        status: 'active',
+        membershipStartDate: now.toISOString(),
+        membershipExpiryDate: oneYearLater.toISOString(),
+        membershipValidityDays: 365,
+        membershipFeePaid: 1
       };
       setCurrentMemberId(newMember.id);
+      localStorage.setItem(`nbn_expiry_${newMember.id}`, oneYearLater.getTime().toString());
       setState({
         ...state,
         members: [newMember, ...state.members]
       });
     }
-    // Automatically navigate to business portal
+    // Automatically navigate straight to business portal main dashboard!
     setActivePortal('business');
   };
 
@@ -146,6 +154,8 @@ export function App() {
             updateState={(s) => setState(s)}
             lang={lang}
             currentMemberId={currentMemberId}
+            onExitPortal={(portal) => setActivePortal(portal || 'gateway')}
+            onOpenRenewModal={() => handleOpenRegister('networking_marketplace')}
           />
         )}
 

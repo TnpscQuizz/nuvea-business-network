@@ -344,6 +344,25 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           {currentStep === 1 && (
             <div className="space-y-6">
 
+              {/* UPFRONT 1-YEAR VALIDITY & ₹1 FEE ANNOUNCEMENT BANNER */}
+              <div className="bg-gradient-to-r from-amber-500/10 via-amber-400/20 to-amber-500/10 border-2 border-amber-400 rounded-2xl p-4 sm:p-5 shadow-sm space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="px-3 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-xs flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+                    <span>1 ஆண்டு முழு வேலிடிட்டி (1-Year Validity)</span>
+                  </span>
+                  <span className="text-xs font-black text-amber-900 bg-amber-200/80 px-2.5 py-1 rounded-lg">
+                    கட்டணம்: ₹1 மட்டுமே (FIRST 1 RS ONLY)
+                  </span>
+                </div>
+                <h3 className="text-sm sm:text-base font-black text-slate-900">
+                  🚀 NBN அதிகாரப்பூர்வ வணிக உறுப்பினர் பதிவு — 365 நாட்கள் செல்லுபடியாகும்
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  இப்போது <strong>₹1 ரூபாய் செலுத்தி</strong> பதிவு செய்ததும், உங்கள் வணிகக் கணக்கு உடனடியாக செயல்படுத்தப்பட்டு மெயின் டேஷ்போர்டுக்கு செல்லும். உங்கள் உறுப்பினர் அங்கீகாரம் <strong>சரியாக 1 வருடம் (365 நாட்கள்)</strong> நேரலை டைமருடன் இயங்கும். 1 வருடம் நிறைவடைந்ததும் கணக்கு தானாக வெளியேறும் (Auto-Exit) மற்றும் நீங்கள் மீண்டும் புதுப்பித்துக் கொள்ளலாம்.
+                </p>
+              </div>
+
               {/* 1. PHOTO UPLOADS ROW (OWNER PHOTO + BUSINESS PHOTO) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
                 
@@ -696,6 +715,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 </div>
 
                 <div className="space-y-2 text-xs text-slate-300">
+                  <div className="flex justify-between items-center text-amber-300 font-bold bg-amber-950/60 p-2.5 rounded-xl border border-amber-500/40">
+                    <span className="flex items-center gap-1.5">
+                      <span>⏳</span>
+                      <span>உறுப்பினர் செல்லுபடியாகும் காலம் (Validity):</span>
+                    </span>
+                    <span className="text-amber-400 font-black text-sm">1 வருடம் (365 நாட்கள்)</span>
+                  </div>
                   <div className="flex justify-between">
                     <span>உறுப்பினர் சேர்க்கை கட்டணம் (100% Monopoly Seat):</span>
                     <span className="font-bold text-white">₹0.85 INR</span>
