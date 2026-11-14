@@ -129,9 +129,14 @@ export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPo
 
                 <div className="p-5 space-y-2">
                   <h4 className="font-black text-slate-900 text-base leading-tight">{m.businessName}</h4>
-                  <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 flex-wrap">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span>{m.talukId.toUpperCase()} • {m.ownerName}</span>
+                    {m.locationTag && (
+                      <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-md">
+                        📍 {m.locationTag}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed pt-1">
                     {m.specialOffer ? (
@@ -285,7 +290,13 @@ export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPo
               </button>
             </div>
 
-            <div className="text-xs text-slate-600 space-y-1">
+            <div className="text-xs text-slate-600 space-y-1.5">
+              {selectedMapBiz.locationTag && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 border border-amber-300 rounded-lg text-amber-900 font-bold">
+                  <span>🏷️</span>
+                  <span>டேக் செய்யப்பட்ட இடம்: {selectedMapBiz.locationTag}</span>
+                </div>
+              )}
               <div><strong>முகவரி:</strong> {selectedMapBiz.address || 'மெயின் ரோடு, தருமபுரி & சேலம் மண்டலம்'}</div>
               <div><strong>தொடர்பு:</strong> {selectedMapBiz.phone}</div>
             </div>
@@ -293,7 +304,7 @@ export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPo
             <div className="w-full h-64 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 relative">
               <iframe
                 title="Store Location"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedMapBiz.address || selectedMapBiz.businessName + ', ' + selectedMapBiz.talukId)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                src={selectedMapBiz.mapEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent((selectedMapBiz.locationTag ? selectedMapBiz.locationTag + ', ' : '') + (selectedMapBiz.address || selectedMapBiz.businessName + ', ' + selectedMapBiz.talukId))}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                 className="w-full h-full border-0"
                 loading="lazy"
               />
@@ -301,7 +312,7 @@ export const UserPortal: React.FC<UserPortalProps> = ({ state, addToCart, openPo
 
             <div className="pt-2 border-t flex items-center justify-between">
               <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedMapBiz.address || selectedMapBiz.businessName + ', ' + selectedMapBiz.talukId)}`}
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((selectedMapBiz.locationTag ? selectedMapBiz.locationTag + ', ' : '') + (selectedMapBiz.address || selectedMapBiz.businessName + ', ' + selectedMapBiz.talukId))}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-emerald-600 text-white font-black text-xs rounded-xl shadow-xs flex items-center gap-1.5"

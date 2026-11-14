@@ -212,6 +212,7 @@ router.post('/register-owner-full', (req, res) => {
       socialLinks,
       address,
       mapAddress,
+      locationTag,
       mapEmbedUrl,
       latitude,
       longitude,
@@ -305,6 +306,7 @@ router.post('/register-owner-full', (req, res) => {
         seatResult.business.productsServices = productsServices || [];
         seatResult.business.accountType = 'networking_marketplace';
         seatResult.business.forumType = forumType || 'Executive Forum';
+        seatResult.business.locationTag = locationTag || '';
         seatResult.business.mapEmbedUrl = mapEmbedUrl || '';
         seatResult.business.latitude = latitude || 12.0621;
         seatResult.business.longitude = longitude || 78.4975;
@@ -330,6 +332,7 @@ router.post('/register-owner-full', (req, res) => {
         phone: cleanPhone,
         email: user.email,
         address: address || mapAddress || 'தமிழ்நாடு',
+        locationTag: locationTag || '',
         mapEmbedUrl: mapEmbedUrl || '',
         latitude: latitude || 12.0621,
         longitude: longitude || 78.4975,

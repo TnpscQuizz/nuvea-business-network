@@ -136,6 +136,7 @@ class HostingerService {
           phone VARCHAR(20),
           email VARCHAR(150),
           address TEXT,
+          location_tag VARCHAR(255),
           map_embed_url TEXT,
           latitude DECIMAL(10, 8),
           longitude DECIMAL(11, 8),
@@ -149,7 +150,7 @@ class HostingerService {
       // 3. Membership Validity Table
       await pool.query(`
         CREATE TABLE IF NOT EXISTS nbn_membership_validity (
-          id INT AUTO-INCREMENT PRIMARY KEY,
+          id INT AUTO_INCREMENT PRIMARY KEY,
           business_id VARCHAR(64),
           validity_days INT DEFAULT 365,
           fee_amount DECIMAL(10,2) DEFAULT 1.00,
@@ -213,8 +214,8 @@ class HostingerService {
       // Insert Business Profile with Map
       await pool.query(`
         INSERT INTO nbn_business_profiles 
-        (id, user_id, business_name, owner_name, category_id, taluk_id, chapter_id, forum_type, package_type, phone, email, address, map_embed_url, latitude, longitude, logo_url, cover_url, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (id, user_id, business_name, owner_name, category_id, taluk_id, chapter_id, forum_type, package_type, phone, email, address, location_tag, map_embed_url, latitude, longitude, logo_url, cover_url, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE 
           business_name = VALUES(business_name),
           owner_name = VALUES(owner_name),
@@ -222,6 +223,7 @@ class HostingerService {
           taluk_id = VALUES(taluk_id),
           chapter_id = VALUES(chapter_id),
           address = VALUES(address),
+          location_tag = VALUES(location_tag),
           map_embed_url = VALUES(map_embed_url);
       `, [
         ownerData.businessId,
@@ -236,6 +238,7 @@ class HostingerService {
         ownerData.phone,
         ownerData.email || `${ownerData.phone}@nbn.in`,
         ownerData.address || '',
+        ownerData.locationTag || '',
         ownerData.mapEmbedUrl || '',
         ownerData.latitude || 12.0621,
         ownerData.longitude || 78.4975,

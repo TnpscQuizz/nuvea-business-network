@@ -61,12 +61,97 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     businessPhoto: '', // base64 or url
     accountType: initialOption as 'networking_marketplace' | 'marketplace_only' | 'customer',
 
-    // 3. Google Maps & Location
+    // 3. Google Maps & Location Tagging
+    locationTag: 'ஹரூர் பஸ் நிலையம் அருகில்',
     mapAddress: 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம் - 636903',
     mapEmbedUrl: 'https://maps.google.com/maps?q=Harur,Tamil+Nadu&t=&z=14&ie=UTF8&iwloc=&output=embed',
     latitude: 12.0621,
     longitude: 78.4975
   });
+
+  // GPS & Locality Tagging States
+  const [isGpsLoading, setIsGpsLoading] = useState(false);
+  const [gpsSuccess, setGpsSuccess] = useState(false);
+
+  const localityTagsByTaluk: Record<string, string[]> = {
+    harur: [
+      'ஹரூர் பஸ் நிலையம்',
+      'கடைவீதி பஜார்',
+      'தருமபுரி மெயின் ரோடு',
+      'சேலம் பைபாஸ்',
+      'மொரப்பூர் சந்திப்பு',
+      'வட்டாட்சியர் அலுவலகம்'
+    ],
+    dharmapuri_town: [
+      'தருமபுரி புதிய பேருந்து நிலையம்',
+      'நேதாஜி பைபாஸ் ரோடு',
+      'நான்கு ரோடு சந்திப்பு',
+      'கலெக்டர் அலுவலகம்',
+      'பெரிய பள்ளிவாசல் அருகில்'
+    ],
+    palacode: [
+      'பாலக்கோடு மார்க்கெட்',
+      'மெயின் பஜார்',
+      'தருமபுரி ரோடு',
+      'ரயில்வே கேட்'
+    ],
+    karimangalam: [
+      'காரிமங்கலம் பஸ் ஸ்டாண்ட்',
+      'தேசிய நெடுஞ்சாலை 44 (NH44)',
+      'கடைவீதி ரோடு'
+    ],
+    pennagaram: [
+      'பெண்ணாகரம் மெயின் ரோடு',
+      'ஒகேனக்கல் ரோடு',
+      'பஸ் ஸ்டாண்ட் ரவுண்டானா'
+    ]
+  };
+
+  const handleTagCurrentGPS = () => {
+    if (!navigator.geolocation) {
+      alert('உங்கள் உலாவியில் GPS இருப்பிட வசதி இல்லை. கைமுறையாக அமைவிடத்தை தேர்ந்தெடுக்கவும்.');
+      return;
+    }
+
+    setIsGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lng = Number(pos.coords.longitude.toFixed(6));
+        const embed = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+        const tagText = `நேரடி GPS அமைவிடம் (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`;
+
+        setFormData(prev => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+          locationTag: tagText,
+          mapAddress: prev.mapAddress ? `${prev.mapAddress} [GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}]` : `GPS அமைவிடம்: ${lat.toFixed(4)}, ${lng.toFixed(4)}, ${(prev.talukId || 'ஹரூர்').toUpperCase()}, தமிழ்நாடு`,
+          mapEmbedUrl: embed
+        }));
+        setIsGpsLoading(false);
+        setGpsSuccess(true);
+        setTimeout(() => setGpsSuccess(false), 4000);
+      },
+      (err) => {
+        setIsGpsLoading(false);
+        alert(`GPS இருப்பிடத்தை பெற முடியவில்லை (${err.message}). கீழேயுள்ள அமைவிடப் பட்டியலிலிருந்து தேர்ந்தெடுக்கவும்.`);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  const handleSelectLocalityTag = (tag: string) => {
+    const query = encodeURIComponent(`${tag}, ${formData.talukId || 'Harur'}, Tamil Nadu`);
+    const embed = `https://maps.google.com/maps?q=${query}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+    setFormData(prev => ({
+      ...prev,
+      locationTag: tag,
+      mapAddress: `${tag}, ${(prev.talukId || 'ஹரூர்').toUpperCase()}, தருமபுரி மாவட்டம்`,
+      mapEmbedUrl: embed
+    }));
+  };
 
   // Handle Local System File Upload for Owner Photo
   const handleOwnerPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,6 +353,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           forumType: formData.forumType,
           accountType: formData.accountType,
           address: formData.mapAddress,
+          locationTag: formData.locationTag,
           mapAddress: formData.mapAddress,
           mapEmbedUrl: formData.mapEmbedUrl,
           latitude: formData.latitude,
@@ -642,20 +728,93 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </select>
                 </div>
 
-                {/* Chapter Forum Selection */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {isTa ? 'சாப்டர் ஃபோரம் (Chapter Forum - BNI Style) *' : 'Chapter Forum *'}
-                  </label>
-                  <select
-                    value={formData.forumType}
-                    onChange={e => setFormData({ ...formData, forumType: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-400 focus:outline-none text-xs font-bold bg-white"
-                  >
-                    <option value="Executive Forum (BNI-Style)">Executive Forum (BNI பாணி வாராந்திர நேரடி சந்திப்பு)</option>
-                    <option value="Premier Business Forum">Premier Business Forum (உயர் மதிப்பு வர்த்தகக் குழு)</option>
-                    <option value="SME Growth Forum">SME Growth Forum (சிறு & நடுத்தர தொழில் வணிகக் குழு)</option>
-                  </select>
+                {/* Chapter Forum Selection - Default Pre-selected with Visual Cards */}
+                <div className="sm:col-span-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-black text-slate-800">
+                      {isTa ? '🏛️ நீங்கள் சேரும் சாப்டர் ஃபோரம் (Chapter Forum Selection) *' : 'Chapter Forum Selection *'}
+                    </label>
+                    <span className="text-[10px] text-amber-700 bg-amber-100 font-bold px-2 py-0.5 rounded-full">
+                      டீஃபால்ட்டாக தேர்வு செய்யப்பட்டுள்ளது
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      {
+                        id: 'Executive Forum (BNI-Style)',
+                        nameTa: 'Executive Forum (BNI பாணி நேரடி சந்திப்பு)',
+                        descTa: 'வாராந்திர காலை 7:00 மணி நேரடி வணிக சந்திப்பு, பரிந்துரைகள் & லீட் பகிர்வு',
+                        isDefault: true,
+                        badge: '⭐ DEFAULT • பரிந்துரைக்கப்பட்டது',
+                        icon: '🤝'
+                      },
+                      {
+                        id: 'Premier Business Forum',
+                        nameTa: 'Premier Business Forum (உயர் மதிப்பு வர்த்தகக் குழு)',
+                        descTa: 'உயர் மதிப்பு முதலீட்டாளர்கள் & பெருநிறுவனங்களுக்கான சிறப்பு வணிகக் குழு',
+                        isDefault: false,
+                        badge: '💎 உயர் மதிப்பு',
+                        icon: '💎'
+                      },
+                      {
+                        id: 'SME Growth Forum',
+                        nameTa: 'SME Growth Forum (சிறு & நடுத்தர தொழில் குழு)',
+                        descTa: 'வளரும் சிறு & குறு நிறுவனங்களுக்கான வணிக ஒத்துழைப்பு மன்றம்',
+                        isDefault: false,
+                        badge: '📈 தொழில் முனைவோர்',
+                        icon: '📈'
+                      },
+                      {
+                        id: 'Digital Marketplace Forum',
+                        nameTa: 'Digital Marketplace Forum (இ-காமர்ஸ் சப்ளையர்கள்)',
+                        descTa: 'ஆன்லைன் நேரடி தயாரிப்பு விற்பனை & வாடிக்கையாளர் ஆர்டர்கள் மன்றம்',
+                        isDefault: false,
+                        badge: '🛒 நேரடி ஆர்டர்கள்',
+                        icon: '🛒'
+                      }
+                    ].map(f => {
+                      const isSel = formData.forumType === f.id;
+                      return (
+                        <div
+                          key={f.id}
+                          onClick={() => setFormData({ ...formData, forumType: f.id })}
+                          className={`p-3.5 rounded-2xl border-2 transition cursor-pointer flex flex-col justify-between ${
+                            isSel
+                              ? 'border-amber-500 bg-amber-50/80 shadow-xs ring-1 ring-amber-400'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="text-sm font-black flex items-center gap-1.5 text-slate-900">
+                              <span>{f.icon}</span>
+                              <span className="text-xs">{f.nameTa}</span>
+                            </span>
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${
+                              f.isDefault ? 'bg-amber-400 text-slate-950 shadow-2xs' : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {f.badge}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                            {f.descTa}
+                          </p>
+
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                            <span className={isSel ? 'text-amber-800' : 'text-slate-400'}>
+                              {isSel ? '✓ தேர்ந்தெடுக்கப்பட்டுள்ளது' : 'தேர்வு செய்ய கிளிக் செய்க'}
+                            </span>
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              isSel ? 'border-amber-600 bg-amber-500' : 'border-slate-300'
+                            }`}>
+                              {isSel && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Package Selection */}
@@ -737,63 +896,133 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
                 </div>
 
-                {/* Google Maps & Shop Address Section */}
-                <div className="sm:col-span-2 p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="flex items-center justify-between">
+                {/* Google Maps & Shop Address Section with Interactive Location Tagging */}
+                <div className="sm:col-span-2 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-amber-50/30 border border-slate-200 space-y-3.5 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200">
                     <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-rose-500" />
-                      <span>கடை முகவரி மற்றும் கூகுள் மேப் இருப்பிடம் (Google Maps Location) *</span>
+                      <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
+                      <span>கடை முகவரி & கூகுள் மேப் அமைவிட டேக்கிங் (Shop Map Location & Tagging) *</span>
                     </span>
-                    <span className="text-[10px] text-rose-700 bg-rose-100 font-bold px-2 py-0.5 rounded">
-                      மெயின் & டேஷ்போர்டில் காட்டப்படும்
-                    </span>
+                    <button
+                      type="button"
+                      onClick={handleTagCurrentGPS}
+                      disabled={isGpsLoading}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-black rounded-xl shadow-xs transition disabled:opacity-50 cursor-pointer self-start sm:self-auto"
+                    >
+                      <span>{isGpsLoading ? '⏳ GPS கண்டறியப்படுகிறது...' : '🛰️ என் GPS-ஐ டேக் செய் (Tag GPS)'}</span>
+                    </button>
                   </div>
 
+                  {gpsSuccess && (
+                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+                      <span>✓</span>
+                      <span>உங்கள் சரியான GPS அட்சரேகை/தீர்க்கரேகை வெற்றிகரமாக டேக் செய்யப்பட்டது!</span>
+                    </div>
+                  )}
+
+                  {/* Quick Locality Tags */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">கடை / நிறுவன முழு முகவரி (Full Address):</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                      🏷️ விரைவு அமைவிட டேக் (Quick Locality Tag - 1-Click தேர்வு):
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(localityTagsByTaluk[formData.talukId] || localityTagsByTaluk['harur']).map((tag) => {
+                        const isTagSel = formData.locationTag === tag;
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => handleSelectLocalityTag(tag)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 border ${
+                              isTagSel
+                                ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-2xs'
+                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                            }`}
+                          >
+                            <span>📍</span>
+                            <span>{tag}</span>
+                            {isTagSel && <span className="text-[10px]">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Specific Location Landmark Tag Input */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      🏷️ குறிப்பிட்ட இடம் / லேண்ட்மார்க் டேக் (Landmark / Location Tag):
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.locationTag}
+                      onChange={e => setFormData({ ...formData, locationTag: e.target.value })}
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"
+                      placeholder="எ.கா. ஹரூர் பஸ் நிலையம் அருகில், கடைவீதி, காமராஜர் சிலை எதிரில்"
+                    />
+                  </div>
+
+                  {/* Full Shop Address */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      கடை / நிறுவன முழு முகவரி (Full Shop Address):
+                    </label>
                     <input
                       type="text"
                       value={formData.mapAddress}
                       onChange={e => setFormData({ ...formData, mapAddress: e.target.value })}
-                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"
                       placeholder="எ.கா. கதவு எண் 45, மெயின் ரோடு, பஸ் நிலையம் அருகில், ஹரூர் - 636903"
                     />
                   </div>
 
+                  {/* Embed Map URL & Auto-Map Trigger */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Google Maps Embed URL / வரைபட இணைப்பு:</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Google Maps Embed URL / வரைபட இணைப்பு:
+                    </label>
                     <div className="flex gap-2">
                       <input
                         type="url"
                         value={formData.mapEmbedUrl}
                         onChange={e => setFormData({ ...formData, mapEmbedUrl: e.target.value })}
-                        className="flex-grow px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                        className="flex-grow px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"
                         placeholder="https://maps.google.com/..."
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const query = encodeURIComponent(`${formData.businessName || 'Business'}, ${formData.talukId || 'Harur'}, Tamil Nadu`);
+                          const query = encodeURIComponent(`${formData.locationTag || formData.businessName || 'Business'}, ${formData.talukId || 'Harur'}, Tamil Nadu`);
                           setFormData({
                             ...formData,
-                            mapEmbedUrl: `https://maps.google.com/maps?q=${query}&t=&z=14&ie=UTF8&iwloc=&output=embed`
+                            mapEmbedUrl: `https://maps.google.com/maps?q=${query}&t=&z=15&ie=UTF8&iwloc=&output=embed`
                           });
                         }}
-                        className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition cursor-pointer whitespace-nowrap"
+                        className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition cursor-pointer whitespace-nowrap flex items-center gap-1.5"
                       >
-                        📍 ஆட்டோ மேப்
+                        <span>📍</span>
+                        <span>ஆட்டோ மேப்</span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Interactive Map Preview */}
-                  <div className="rounded-xl overflow-hidden border border-slate-300 h-36 bg-slate-200 relative shadow-inner">
+                  {/* Interactive Map Preview with Pinned Location Tag Banner */}
+                  <div className="rounded-xl overflow-hidden border border-slate-300 h-44 bg-slate-200 relative shadow-inner">
                     <iframe
                       title="Google Maps Location Preview"
                       src={formData.mapEmbedUrl}
                       className="w-full h-full border-0"
                       loading="lazy"
                     />
+                    <div className="absolute top-2 left-2 right-2 bg-slate-950/90 text-white text-[11px] px-3 py-1.5 rounded-lg backdrop-blur-sm shadow flex items-center justify-between gap-2 border border-white/20">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="text-amber-400">📍 டேக் செய்யப்பட்ட இடம்:</span>
+                        <strong className="text-amber-300 truncate">{formData.locationTag || 'ஹரூர் பஸ் நிலையம்'}</strong>
+                      </div>
+                      <span className="text-[10px] text-slate-300 font-mono shrink-0">
+                        GPS: {formData.latitude?.toFixed(4) || '12.0621'}, {formData.longitude?.toFixed(4) || '78.4975'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

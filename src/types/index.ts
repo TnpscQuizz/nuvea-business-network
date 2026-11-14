@@ -21,6 +21,7 @@ export type Member = {
   cover?: string;
   videoUrl?: string;
   mapAddress?: string;
+  locationTag?: string;
   mapEmbedUrl?: string;
   latitude?: number;
   longitude?: number;

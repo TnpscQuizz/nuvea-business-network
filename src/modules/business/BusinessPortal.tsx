@@ -225,6 +225,7 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
     phone: activeMember.phone || '917548820641',
     email: activeMember.email || 'chandru@nuveastudio.com',
     address: activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+    locationTag: (activeMember as any).locationTag || '',
     mapAddress: (activeMember as any).mapAddress || activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
     mapEmbedUrl: (activeMember as any).mapEmbedUrl || '',
     specialOffer: activeMember.specialOffer || '4K வணிக விளம்பரம் & மெட்டா ஆட்ஸ் வளர்ச்சி தொகுப்பு',
@@ -242,6 +243,7 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
       phone: activeMember.phone || '917548820641',
       email: activeMember.email || 'chandru@nuveastudio.com',
       address: activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+      locationTag: (activeMember as any).locationTag || '',
       mapAddress: (activeMember as any).mapAddress || activeMember.address || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
       mapEmbedUrl: (activeMember as any).mapEmbedUrl || '',
       specialOffer: activeMember.specialOffer || '',
@@ -279,6 +281,7 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
           phone: editForm.phone,
           email: editForm.email,
           address: editForm.address,
+          locationTag: editForm.locationTag,
           specialOffer: editForm.specialOffer,
           tagline: editForm.tagline,
           logo: editForm.logo,
@@ -558,6 +561,15 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
               
               <div className="text-xs text-amber-300/90 font-bold flex items-center gap-2 flex-wrap pt-0.5">
                 <span>📍 {(activeMember.talukId || 'harur').toUpperCase()} சாப்டர்</span>
+                {(activeMember as any).locationTag && (
+                  <>
+                    <span className="text-slate-500">|</span>
+                    <span className="bg-amber-400/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-400/30 text-[11px] flex items-center gap-1">
+                      <span>🏷️</span>
+                      <span>{(activeMember as any).locationTag}</span>
+                    </span>
+                  </>
+                )}
                 <span className="text-slate-500">|</span>
                 <span>📞 {activeMember.phone || '917548820641'}</span>
                 <span className="text-slate-500">|</span>
@@ -1248,6 +1260,17 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
                     value={editForm.address}
                     onChange={e => setEditForm({ ...editForm, address: e.target.value })}
                     placeholder="கதவு எண், தெரு, ஊர்"
+                    className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block mb-1 text-slate-700">குறிப்பிட்ட அமைவிட லேண்ட்மார்க் டேக் (Location Landmark Tag)</label>
+                  <input
+                    type="text"
+                    value={editForm.locationTag}
+                    onChange={e => setEditForm({ ...editForm, locationTag: e.target.value })}
+                    placeholder="எ.கா. ஹரூர் பஸ் நிலையம் அருகில், கடைவீதி"
                     className="w-full p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
