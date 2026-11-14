@@ -337,7 +337,15 @@ app.post('/api/register', (req, res) => {
 
 // Single Page Application Fallback
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const distIndex = path.join(__dirname, 'dist', 'index.html');
+  const pubIndex = path.join(__dirname, 'public', 'index.html');
+  if (fs.existsSync(distIndex)) {
+    res.sendFile(distIndex);
+  } else if (fs.existsSync(pubIndex)) {
+    res.sendFile(pubIndex);
+  } else {
+    res.status(404).send('Not Found');
+  }
 });
 
 // Start Server
