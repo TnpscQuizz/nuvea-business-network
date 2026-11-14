@@ -1,5 +1,10 @@
-import React from 'react';
-import { Sparkles, Building, ShoppingBag, Lock, Handshake, Video, Store, Zap, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Briefcase, Store, Users, ArrowRight, PlayCircle, Handshake, 
+  BarChart3, ShieldCheck, Zap, CheckCircle2, X, Sparkles,
+  Layers, Tag, Check, Award, ArrowUpRight, HelpCircle
+} from 'lucide-react';
+import heroHandshakeImg from '../../assets/hero-handshake.jpg';
 
 interface GatewayPortalProps {
   onSelectPortal: (portal: 'business' | 'user' | 'admin') => void;
@@ -7,286 +12,406 @@ interface GatewayPortalProps {
   openRegister?: (opt?: 'networking_marketplace' | 'marketplace_only' | 'customer') => void;
 }
 
-export const GatewayPortal: React.FC<GatewayPortalProps> = ({ onSelectPortal, lang, openRegister }) => {
+export const GatewayPortal: React.FC<GatewayPortalProps> = ({ 
+  onSelectPortal, 
+  lang, 
+  openRegister 
+}) => {
   const isTa = lang === 'ta';
 
+  // Interactive Modal States
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   return (
-    <div className="space-y-10 py-6 max-w-6xl mx-auto">
+    <div className="bg-white text-slate-900 min-h-screen flex flex-col justify-between selection:bg-amber-300 selection:text-slate-900">
       
-      {/* HERO BANNER */}
-      <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-3xl p-8 sm:p-12 text-white shadow-2xl border border-slate-800 text-center overflow-hidden">
-        <div className="absolute -right-20 -top-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/20 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            <span>NBN Official Onboarding Portal • React Edition</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            WELCOME TO NBN <br />
-            <span className="text-amber-400">NUVEA BUSINESS NETWORK</span>
-          </h1>
-
-          <p className="text-sm sm:text-lg text-slate-300 font-medium">
-            "Choose how you want to grow your business with NBN."
-          </p>
-
-          <div className="flex items-center justify-center gap-3 pt-2 text-xs text-slate-400 font-bold">
-            <span>CONNECT • REFER • GROW</span>
-            <span>•</span>
-            <span className="text-amber-300/90">தருமபுரி & சேலம் மண்டல தொழில் நெட்வொர்க்</span>
-          </div>
-        </div>
-      </div>
-
-      {/* DUAL MASTER GATEWAY SELECTION (NBN NETWORKING vs NBN BUSINESS MARKETPLACE) */}
-      <div className="space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-amber-400 text-xs font-black uppercase tracking-wider border border-slate-800">
-            <span>⚡ PRIMARY CHOICE • முதன்மை தேர்வு</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            {isTa ? 'எந்த முறையில் இணைய விரும்புகிறீர்கள்?' : 'Select Your Growth Gateway'}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium">
-            {isTa
-              ? 'NBN வழங்கும் இரண்டு முக்கிய தளங்களில் உங்கள் வணிகத்திற்கான சரியான விருப்பத்தைத் தேர்வு செய்யுங்கள்'
-              : 'Choose between Exclusive Chapter Networking or Multi-Chapter Marketplace'}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+      {/* MAIN CONTAINER */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-10 w-full space-y-12 sm:space-y-16">
+        
+        {/* ========================================================= */}
+        {/* HERO SECTION (EXACT MATCH TO DESIGNER MOCKUP)            */}
+        {/* ========================================================= */}
+        <section id="home" className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
           
-          {/* OPTION 1: NBN NETWORKING (சாப்டர் நெட்வொர்க்கிங்) */}
-          <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 rounded-3xl p-7 sm:p-9 text-white shadow-xl border-2 border-amber-400/80 hover:border-amber-400 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group overflow-hidden">
-            <div className="relative z-10 space-y-5">
-              <div className="flex items-center justify-between">
-                <div className="w-14 h-14 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-3xl font-black shadow-lg shadow-amber-400/30">
-                  🏛️
+          {/* Left Column: Headlines, CTAs, Feature Badges */}
+          <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left">
+            
+            {/* Top Subtitle */}
+            <div className="inline-block">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] text-slate-500">
+                BUSINESS NETWORKING PLATFORM
+              </span>
+            </div>
+
+            {/* Huge Headline with Brush Underline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black text-[#0a1128] tracking-tight leading-[1.08]">
+              Connect. Refer.<br />
+              <span className="relative inline-block mt-1">
+                Grow Together.
+                {/* Yellow Curved Brush Underline */}
+                <svg 
+                  className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-4 text-amber-400 pointer-events-none" 
+                  viewBox="0 0 280 14" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path 
+                    d="M3 10.5C68 2.5 195 2.5 277 8.5" 
+                    stroke="#F59E0B" 
+                    strokeWidth="6" 
+                    strokeLinecap="round" 
+                  />
+                </svg>
+              </span>
+            </h1>
+
+            {/* Sub-paragraph */}
+            <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-lg">
+              A simple platform to connect business owners, get referrals and grow your business.
+            </p>
+
+            {/* Dual CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-1">
+              <button
+                onClick={() => openRegister?.('networking_marketplace')}
+                className="px-6 sm:px-7 py-3 sm:py-3.5 bg-[#0a1128] hover:bg-slate-800 text-white font-bold text-sm sm:text-base rounded-full shadow-lg shadow-slate-900/10 flex items-center gap-2 transition transform hover:scale-[1.02] cursor-pointer"
+              >
+                <span>Join NBN</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="px-5 sm:px-6 py-3 sm:py-3.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-sm sm:text-base rounded-full shadow-2xs flex items-center gap-2 transition cursor-pointer"
+              >
+                <PlayCircle className="w-5 h-5 text-slate-800 shrink-0" />
+                <span>See How it Works</span>
+              </button>
+            </div>
+
+            {/* Feature Pills (Connect, Refer, Grow) */}
+            <div className="flex items-center gap-3 sm:gap-4 pt-2 flex-wrap">
+              
+              {/* Connect Badge */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50/90 rounded-full border border-slate-200/70 shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                  <Users className="w-3.5 h-3.5" />
                 </div>
-                <span className="px-3.5 py-1.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 text-xs font-black uppercase tracking-wider">
-                  ★ BNI-INSPIRED CHAPTER MODEL
-                </span>
+                <span className="font-bold text-slate-800 text-xs sm:text-sm">Connect</span>
               </div>
 
-              <div>
-                <div className="text-xs font-black uppercase tracking-widest text-amber-400">
-                  விருப்பம் 1 • PRIMARY GATEWAY
+              {/* Refer Badge */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50/90 rounded-full border border-slate-200/70 shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                  <Handshake className="w-3.5 h-3.5" />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
-                  NBN நெட்வொர்க்கிங் <br />
-                  <span className="text-amber-400 text-xl sm:text-2xl font-bold">(NBN Networking)</span>
+                <span className="font-bold text-slate-800 text-xs sm:text-sm">Refer</span>
+              </div>
+
+              {/* Grow Badge */}
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50/90 rounded-full border border-slate-200/70 shadow-2xs">
+                <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                </div>
+                <span className="font-bold text-slate-800 text-xs sm:text-sm">Grow</span>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Right Column: Hero Illustration / Photo with sweeping yellow accent */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-[460px] overflow-hidden rounded-bl-[70px] sm:rounded-bl-[90px] shadow-sm">
+              <img 
+                src={heroHandshakeImg} 
+                alt="Two business owners shaking hands warmly - Nuvea Business Network"
+                className="w-full h-auto object-cover select-none"
+              />
+            </div>
+          </div>
+
+        </section>
+
+
+        {/* ========================================================= */}
+        {/* CHOOSE YOUR ROLE SECTION (3 CARDS)                        */}
+        {/* ========================================================= */}
+        <section id="plans" className="pt-4 sm:pt-6 space-y-8">
+          
+          {/* Section Divider Title: — Choose Your Role — */}
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center gap-3 sm:gap-5">
+              <div className="w-12 sm:w-20 h-[1.5px] bg-slate-300 rounded-full" />
+              <h2 className="text-2xl sm:text-3xl font-black text-[#0a1128] tracking-tight">
+                Choose Your Role
+              </h2>
+              <div className="w-12 sm:w-20 h-[1.5px] bg-slate-300 rounded-full" />
+            </div>
+          </div>
+
+          {/* 3 Role Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
+            
+            {/* ---------------- CARD 1: BUSINESS OWNER ---------------- */}
+            <div className="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-amber-300 hover:border-amber-400 shadow-lg shadow-amber-100/50 flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
+              <div>
+                {/* Yellow Briefcase Icon Badge */}
+                <div className="w-14 h-14 rounded-2xl bg-[#fffbeb] border border-amber-200/80 text-amber-600 mx-auto flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition">
+                  <Briefcase className="w-7 h-7 text-amber-600" />
+                </div>
+
+                {/* Title */}
+                <h3 className="text-xl sm:text-2xl font-black text-[#0a1128] tracking-tight mb-1.5">
+                  Business Owner
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-300 font-medium mt-2 leading-relaxed">
-                  {isTa
-                    ? 'தாலுகா அளவிலான பிரத்யேக வணிக சாப்டர். உங்கள் தொழில் பிரிவில் உங்களுக்கு மட்டுமே 100% பிரத்யேக ஏகபோக சீட் (Category Exclusivity) மற்றும் வாராந்திர நேரடி வணிகப் பரிந்துரைகள்.'
-                    : 'Taluk-level chapter networking with 100% Category Exclusivity seat per business category, weekly business meetings and verified referral exchange.'}
+
+                {/* Subtitle */}
+                <p className="text-xs sm:text-sm text-slate-500 font-medium mb-6">
+                  Network • Get Referrals • Grow
                 </p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-slate-800 text-xs text-slate-200">
-                <div className="flex items-start gap-2.5">
-                  <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>100% Category Exclusivity:</strong> உங்கள் தாலுகா சாப்டரில் உங்கள் தொழில் பிரிவுக்கு நீங்கள் மட்டுமே ஒரே உறுப்பினர் (போட்டி இல்லை).
-                  </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Handshake className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>வாராந்திர நேரடி சந்திப்பு:</strong> வாராந்திர காலை மீட்டிங், 1-to-1 விவாதங்கள் மற்றும் வணிகப் பரிந்துரைகள் பரிமாற்றம்.
-                  </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Nuvea Studio 4K Branding:</strong> வணிகர்களுக்கான பிரத்தியேக வீடியோ விளம்பரம் & மார்க்கெட்பிளேஸ் முழு அணுகல்.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 pt-6 mt-6 border-t border-slate-800/80 space-y-2.5">
-              {openRegister && (
-                <button
-                  onClick={() => openRegister('networking_marketplace')}
-                  className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-400/20 transition-all transform group-hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>🚀 புதிய உறுப்பினர் பதிவு (Pay ₹1 RS Only) ➔</span>
-                </button>
-              )}
-              <button
-                onClick={() => onSelectPortal('business')}
-                className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-bold text-xs rounded-xl border border-slate-700/80 transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>NBN நெட்வொர்க்கிங் போர்டல் திறக்க (Open Business Portal)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* OPTION 2: NBN BUSINESS MARKETPLACE (பிசினஸ் மார்க்கெட் பிளேஸ்) */}
-          <div className="relative bg-gradient-to-br from-slate-900 via-brand-950 to-blue-950 rounded-3xl p-7 sm:p-9 text-white shadow-xl border-2 border-blue-400/60 hover:border-blue-400 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group overflow-hidden">
-            <div className="relative z-10 space-y-5">
-              <div className="flex items-center justify-between">
-                <div className="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-3xl font-black shadow-lg shadow-blue-500/30">
-                  🛒
-                </div>
-                <span className="px-3.5 py-1.5 rounded-full bg-blue-400/20 text-blue-300 border border-blue-400/40 text-xs font-black uppercase tracking-wider">
-                  ⚡ MULTI-CHAPTER COMMERCE HUB
-                </span>
-              </div>
-
+              {/* Action Button: Join as Business Owner → */}
               <div>
-                <div className="text-xs font-black uppercase tracking-widest text-blue-400">
-                  விருப்பம் 2 • PRIMARY GATEWAY
+                <button
+                  onClick={() => openRegister?.('networking_marketplace')}
+                  className="w-full py-3 px-5 bg-gradient-to-r from-amber-300 via-amber-400 to-amber-400 hover:from-amber-400 hover:to-amber-500 text-slate-900 font-black text-sm rounded-full shadow-md shadow-amber-400/25 flex items-center justify-center gap-2 transition cursor-pointer"
+                >
+                  <span>Join as Business Owner</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <div className="mt-2 text-[11px] text-amber-800/80 font-bold">
+                  ★ Exclusive 1 Seat Per Category • Launch Fee ₹1 Only
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
-                  NBN பிசினஸ் மார்க்கெட் பிளேஸ் <br />
-                  <span className="text-blue-400 text-xl sm:text-2xl font-bold">(NBN Business Marketplace)</span>
+              </div>
+            </div>
+
+            {/* ---------------- CARD 2: MARKETPLACE SELLER ---------------- */}
+            <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-blue-200 hover:border-blue-400 shadow-sm hover:shadow-md flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
+              <div>
+                {/* Blue Store Icon Badge */}
+                <div className="w-14 h-14 rounded-2xl bg-[#eff6ff] border border-blue-200/80 text-blue-600 mx-auto flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition">
+                  <Store className="w-7 h-7 text-blue-600" />
+                </div>
+
+                {/* Title */}
+                <h3 className="text-xl sm:text-2xl font-black text-[#0a1128] tracking-tight mb-1.5">
+                  Marketplace Seller
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-300 font-medium mt-2 leading-relaxed">
-                  {isTa
-                    ? 'தயாரிப்புகள் மற்றும் சேவைகளுக்கான நேரடி வர்த்தக சந்தை. வாடிக்கையாளர்கள் தேவைகளை சமர்ப்பிக்கலாம்; விற்பனையாளர்கள் கொட்டேஷன் அனுப்பி நேரடி ஆர்டர்களைப் பெறலாம்.'
-                    : 'Direct business marketplace for buying and selling products & services. Post requirements, submit competitive quotes, and manage orders with 18% GST billing.'}
+
+                {/* Subtitle */}
+                <p className="text-xs sm:text-sm text-slate-500 font-medium mb-6">
+                  List Your Products & Services
                 </p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-slate-800 text-xs text-slate-200">
-                <div className="flex items-start gap-2.5">
-                  <Store className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>விற்பனையாளர் ஸ்டோர் (Seller Store):</strong> பொருட்கள் மற்றும் சேவைகளை பட்டியலிட்டு ஆன்லைன் ஆர்டர்களை பெறலாம்.
-                  </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Zap className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>வாடிக்கையாளர் தேவைகள் & நேரடி கொட்டேஷன்:</strong> வாடிக்கையாளர்கள் பதிவிடும் தேவைகளுக்கு நேரடியாக விலைப் புள்ளி அனுப்பலாம்.
-                  </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <ShoppingBag className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>வாடிக்கையாளர் & பையர் தளம்:</strong> தருமபுரி & சேலம் சப்ளையர்களிடம் சிறந்த விலையில் வாங்க 18% GST பில்லிங்.
-                  </span>
+              {/* Action Button: Join as Seller → */}
+              <div>
+                <button
+                  onClick={() => openRegister?.('marketplace_only')}
+                  className="w-full py-3 px-5 bg-[#eff6ff] hover:bg-blue-100/80 border border-blue-200 text-slate-900 font-bold text-sm rounded-full flex items-center justify-center gap-2 transition cursor-pointer"
+                >
+                  <span>Join as Seller</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <div className="mt-2 text-[11px] text-blue-700/80 font-semibold">
+                  Multi-Chapter B2B Sales Hub • Free Onboarding
                 </div>
               </div>
             </div>
 
-            <div className="relative z-10 pt-6 mt-6 border-t border-slate-800/80 space-y-2.5">
-              {openRegister && (
+            {/* ---------------- CARD 3: CUSTOMER / BUYER ---------------- */}
+            <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-emerald-200 hover:border-emerald-400 shadow-sm hover:shadow-md flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
+              <div>
+                {/* Green Users Icon Badge */}
+                <div className="w-14 h-14 rounded-2xl bg-[#ecfdf5] border border-emerald-200/80 text-emerald-600 mx-auto flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition">
+                  <Users className="w-7 h-7 text-emerald-600" />
+                </div>
+
+                {/* Title */}
+                <h3 className="text-xl sm:text-2xl font-black text-[#0a1128] tracking-tight mb-1.5">
+                  Customer / Buyer
+                </h3>
+
+                {/* Subtitle */}
+                <p className="text-xs sm:text-sm text-slate-500 font-medium mb-6">
+                  Find Trusted Businesses
+                </p>
+              </div>
+
+              {/* Action Button: Join as Buyer → */}
+              <div>
                 <button
-                  onClick={() => openRegister('marketplace_only')}
-                  className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-black text-sm rounded-2xl shadow-xl shadow-blue-600/30 transition-all transform group-hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer"
+                  onClick={() => onSelectPortal('user')}
+                  className="w-full py-3 px-5 bg-[#ecfdf5] hover:bg-emerald-100/80 border border-emerald-200 text-slate-900 font-bold text-sm rounded-full flex items-center justify-center gap-2 transition cursor-pointer"
                 >
-                  <span>📦 விற்பனையாளர் பதிவு (Free Seller Onboarding) ➔</span>
+                  <span>Join as Buyer</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
-              )}
-              <button
-                onClick={() => onSelectPortal('user')}
-                className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-bold text-xs rounded-xl border border-slate-700/80 transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>மார்க்கெட்பிளேஸ் போர்டல் திறக்க (Open Marketplace)</span>
-              </button>
+                <div className="mt-2 text-[11px] text-emerald-700/80 font-semibold">
+                  100% Free Access • Compare Verified Quotes
+                </div>
+              </div>
             </div>
+
           </div>
 
-        </div>
+        </section>
+
+
+        {/* ========================================================= */}
+        {/* BOTTOM TRUST STRIP                                        */}
+        {/* ========================================================= */}
+        <section id="success" className="pt-2">
+          <div className="max-w-4xl mx-auto px-6 sm:px-10 py-4 bg-[#f6f5ff] border border-purple-100/90 rounded-2xl sm:rounded-full shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4 text-center">
+            
+            {/* Item 1: Trusted Network */}
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="w-5 h-5 text-purple-600 shrink-0" />
+              <span className="font-bold text-slate-900 text-sm sm:text-base">
+                Trusted Network
+              </span>
+            </div>
+
+            {/* Vertical Divider */}
+            <div className="w-[1.5px] h-6 bg-slate-300/80 hidden sm:block" />
+
+            {/* Item 2: Business Opportunities */}
+            <div className="flex items-center gap-3">
+              <Zap className="w-5 h-5 text-purple-600 shrink-0" />
+              <span className="font-bold text-slate-900 text-sm sm:text-base">
+                Business Opportunities
+              </span>
+            </div>
+
+            {/* Vertical Divider */}
+            <div className="w-[1.5px] h-6 bg-slate-300/80 hidden sm:block" />
+
+            {/* Item 3: Local Business Community */}
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                <Users className="w-3.5 h-3.5 text-purple-600" />
+              </div>
+              <span className="font-bold text-slate-900 text-sm sm:text-base">
+                Local Business Community
+              </span>
+            </div>
+
+          </div>
+        </section>
+
       </div>
 
-      {/* 3 TIERS BREAKDOWN CARDS */}
-      <div className="pt-4 border-t border-slate-200">
-        <div className="text-center max-w-xl mx-auto mb-6">
-          <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">DETAILED ACCOUNT SECTIONS</span>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-900">3 முதன்மை கணக்கு வகைகள்</h3>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* OPTION A */}
-          <div className="bg-white rounded-3xl p-6 border-2 border-amber-400 shadow-lg flex flex-col justify-between space-y-4">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center text-2xl">
-                🏛️
-              </div>
-              <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider">OPTION A</span>
-              <h4 className="text-lg font-black text-slate-900">Business Owner: Networking + Marketplace</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                தாலுகா சாப்டர் ஏகபோக சீட், வாராந்திர மீட்டிங் மற்றும் மார்க்கெட்பிளேஸ் முழு அணுகல்.
-              </p>
-            </div>
-            <div className="space-y-2">
-              {openRegister && (
-                <button
-                  onClick={() => openRegister('networking_marketplace')}
-                  className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition cursor-pointer"
-                >
-                  🚀 பதிவு செய்க (Pay ₹1 RS Only) ➔
-                </button>
-              )}
-              <button
-                onClick={() => onSelectPortal('business')}
-                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition cursor-pointer"
-              >
-                வணிகர் போர்டல் செல்ல
-              </button>
-            </div>
-          </div>
+      {/* ========================================================= */}
+      {/* BOTTOM DECORATIVE PURPLE GRADIENT WAVE                    */}
+      {/* ========================================================= */}
+      <div className="w-full overflow-hidden leading-none mt-8">
+        <svg 
+          className="w-full h-16 sm:h-24 pointer-events-none" 
+          viewBox="0 0 1200 120" 
+          preserveAspectRatio="none"
+        >
+          <path 
+            d="M0,40 C200,90 420,10 600,60 C800,110 1020,30 1200,70 L1200,120 L0,120 Z" 
+            fill="url(#bottom-purple-wave)"
+          />
+          <defs>
+            <linearGradient id="bottom-purple-wave" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ddd6fe" stopOpacity="0.6" />
+              <stop offset="50%" stopColor="#c4b5fd" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.55" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
 
-          {/* OPTION B */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center text-2xl">
-                🛒
-              </div>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">OPTION B</span>
-              <h4 className="text-lg font-black text-slate-900">Business Owner: Marketplace Only</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                சாப்டர் மீட்டிங் கட்டாயம் இன்றி, தயாரிப்புகள் மற்றும் சேவைகளை மார்க்கெட்பிளேஸில் மட்டும் விற்கலாம்.
-              </p>
-            </div>
-            <div className="space-y-2">
-              {openRegister && (
-                <button
-                  onClick={() => openRegister('marketplace_only')}
-                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow transition cursor-pointer"
-                >
-                  📦 விற்பனையாளர் பதிவு (இலவசம்) ➔
-                </button>
-              )}
-              <button
-                onClick={() => onSelectPortal('business')}
-                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition cursor-pointer"
-              >
-                செல்லர் மையம் செல்ல
-              </button>
-            </div>
-          </div>
 
-          {/* OPTION C */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center text-2xl">
-                👤
-              </div>
-              <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">OPTION C</span>
-              <h4 className="text-lg font-black text-slate-900">Customer & Buyer</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                சரிபார்க்கப்பட்ட நிறுவனங்களிடம் பொருட்கள் வாங்கவும், மொத்த தேவைகளுக்கு கொட்டேஷன் பெறவும்.
-              </p>
-            </div>
+      {/* ========================================================= */}
+      {/* INTERACTIVE MODAL 1: "HOW IT WORKS" WALKTHROUGH           */}
+      {/* ========================================================= */}
+      {showHowItWorks && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in duration-200">
             <button
-              onClick={() => onSelectPortal('user')}
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl transition cursor-pointer"
+              onClick={() => setShowHowItWorks(false)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition cursor-pointer"
             >
-              வாடிக்கையாளர் போர்டல் செல்ல ➔
+              <X className="w-5 h-5" />
             </button>
-          </div>
 
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-black">
+                <Layers className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900">How NBN Works</h3>
+                <p className="text-xs text-slate-500">3 simple steps to grow your business</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-start gap-3.5">
+                <div className="w-8 h-8 rounded-full bg-amber-400 text-slate-950 font-black flex items-center justify-center shrink-0 text-sm">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Connect with Category Exclusivity</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Join your local taluk chapter (e.g. Harur, Dharmapuri, Salem). Only 1 business owner is admitted per category — no direct competition inside your chapter!
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 flex items-start gap-3.5">
+                <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-black flex items-center justify-center shrink-0 text-sm">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Exchange Verified Referrals</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Participate in weekly business meetings and structured 1-to-1 discussions to pass and receive high-ticket verified business leads.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3.5">
+                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center shrink-0 text-sm">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Expand on Business Marketplace</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Sell products & services across all regional chapters. Respond to buyer RFQs with quotes and close 18% GST verified transactions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowHowItWorks(false)}
+                className="px-5 py-2.5 rounded-full border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setShowHowItWorks(false);
+                  openRegister?.('networking_marketplace');
+                }}
+                className="px-6 py-2.5 rounded-full bg-[#0a1128] text-white text-xs font-bold hover:bg-slate-800 transition cursor-pointer flex items-center gap-1.5"
+              >
+                <span>Get Started Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

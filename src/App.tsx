@@ -117,7 +117,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className={`min-h-screen flex flex-col font-sans ${activePortal === 'gateway' ? 'bg-white' : 'bg-slate-50'}`}>
       
       {/* GLOBAL HEADER */}
       <Header
@@ -131,7 +131,7 @@ export function App() {
       />
 
       {/* MODULAR PORTAL VIEW CONTAINER */}
-      <main className="flex-grow px-4 sm:px-6 lg:px-8 py-4">
+      <main className={`flex-grow ${activePortal === 'gateway' ? 'bg-white' : 'px-4 sm:px-6 lg:px-8 py-4'}`}>
         {activePortal === 'gateway' && (
           <GatewayPortal
             onSelectPortal={(portal) => setActivePortal(portal)}
