@@ -274,42 +274,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         return;
       }
 
-      // Try Razorpay modal
-      const scriptLoaded = await loadRazorpayScript();
-      if (scriptLoaded && (window as any).Razorpay) {
-        const options = {
-          key: orderData.keyId || 'rzp_test_NBN_DEMO_KEY',
-          amount: 100, // Strictly 100 paise = ₹1.00 INR (FIRST 1 RS ONLY)
-          currency: 'INR',
-          name: 'NBN - Nuvea Business Network',
-          description: 'NBN லைவ் உறுப்பினர் பதிவு - ₹1 RS ONLY',
-          image: formData.businessPhoto || formData.profilePhoto,
-          order_id: orderData.id,
-          prefill: {
-            name: formData.fullName,
-            email: formData.email,
-            contact: formData.phone
-          },
-          theme: { color: '#f59e0b' },
-          handler: async function (response: any) {
-            await finalizeRegistration(
-              response.razorpay_order_id || orderData.id,
-              response.razorpay_payment_id
-            );
-          },
-          modal: {
-            ondismiss: function () {
-              setLoading(false);
-            }
-          }
-        };
-        const rzp = new (window as any).Razorpay(options);
-        rzp.open();
-      } else {
-        // Open user's payment link in new tab, then complete registration
-        window.open(paymentLink, '_blank');
-        await finalizeRegistration(orderData.id || `order_rzp_${Date.now()}`, `pay_link_${Date.now()}`);
-      }
+      // Open user's official 1 Rs Razorpay link in new tab so they can pay safely via UPI/Card
+      window.open(paymentLink, '_blank');
+      setLoading(false);
     } catch (e: any) {
       setErrorMsg(e.message || 'கட்டண நடைமுறையில் பிழை ஏற்பட்டது');
       setLoading(false);
@@ -318,6 +285,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
   // Finalize Backend Registration & Redirect Straight to Business Profile
   const finalizeRegistration = async (orderId: string, paymentId: string) => {
+    setLoading(true);
+    setErrorMsg('');
     try {
       // 1. Verify Payment
       await fetch('/api/payment/verify', {
@@ -331,33 +300,33 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         })
       });
 
-      // 2. Submit Master Registration
+      // 2. Submit Master Registration with safe defaults
       const regRes = await fetch('/api/auth/register-owner-full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: formData.fullName,
-          username: formData.username || formData.phone,
-          profilePhoto: formData.profilePhoto,
-          phone: formData.phone,
-          whatsapp: formData.whatsapp || formData.phone,
-          email: formData.email,
-          password: formData.password,
-          designation: formData.designation,
-          businessName: formData.businessName,
-          logo: formData.businessPhoto,
-          cover: formData.businessPhoto,
-          categoryId: formData.categoryId,
-          talukId: formData.talukId,
-          preferredChapterId: formData.preferredChapterId,
-          forumType: formData.forumType,
-          accountType: formData.accountType,
-          address: formData.mapAddress,
-          locationTag: formData.locationTag,
-          mapAddress: formData.mapAddress,
-          mapEmbedUrl: formData.mapEmbedUrl,
-          latitude: formData.latitude,
-          longitude: formData.longitude,
+          fullName: formData.fullName?.trim() || 'NBN அங்கீகரிக்கப்பட்ட வணிகர்',
+          username: formData.username?.trim() || formData.phone?.trim() || `owner_${Date.now()}`,
+          profilePhoto: formData.profilePhoto || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+          phone: formData.phone?.trim() || '917548820641',
+          whatsapp: formData.whatsapp?.trim() || formData.phone?.trim() || '917548820641',
+          email: formData.email?.trim() || `${formData.phone?.trim() || 'owner'}@nbn.in`,
+          password: formData.password?.trim() || 'Password123!',
+          designation: formData.designation || 'உரிமையாளர்',
+          businessName: formData.businessName?.trim() || 'NBN வணிக மையம்',
+          logo: formData.businessPhoto || formData.profilePhoto || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80',
+          cover: formData.businessPhoto || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80',
+          categoryId: formData.categoryId || 'jewellery',
+          talukId: formData.talukId || 'harur',
+          preferredChapterId: formData.preferredChapterId || 'harur_titans',
+          forumType: formData.forumType || 'Executive Forum (BNI-Style)',
+          accountType: formData.accountType || 'networking_marketplace',
+          address: formData.mapAddress || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+          locationTag: formData.locationTag || 'ஹரூர் பஸ் நிலையம் அருகில்',
+          mapAddress: formData.mapAddress || 'மெயின் ரோடு, ஹரூர், தருமபுரி மாவட்டம்',
+          mapEmbedUrl: formData.mapEmbedUrl || 'https://maps.google.com/maps?q=Harur,Tamil+Nadu&t=&z=14&ie=UTF8&iwloc=&output=embed',
+          latitude: formData.latitude || 12.0621,
+          longitude: formData.longitude || 78.4975,
           orderId,
           paymentId
         })
@@ -377,6 +346,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         origin: { y: 0.6 },
         colors: ['#f59e0b', '#3b82f6', '#10b981', '#ffffff']
       });
+
+      if (regData.business?.id) {
+        localStorage.setItem('nbn_active_business_id', regData.business.id);
+      }
+      localStorage.setItem('nbn_membership_paid', 'true');
 
       // Immediately log into profile and enter Business Portal!
       if (onSuccessLogin) {
@@ -1160,32 +1134,59 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 </p>
               </div>
 
-              {/* PAYMENT BUTTONS */}
-              <div className="space-y-3">
+              {/* PAYMENT CONFIRMATION & ACTIONS */}
+              <div className="space-y-3.5">
+
+                {/* 0. PRIMARY CONFIRMATION BUTTON: ALREADY PAID ON RAZORPAY */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-500 shadow-lg shadow-emerald-500/10 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-base shadow-xs">
+                        ✓
+                      </div>
+                      <div>
+                        <div className="text-xs sm:text-sm font-black text-slate-900">
+                          Razorpay-ல் ₹1 பேமெண்ட் முடித்துவிட்டீர்களா?
+                        </div>
+                        <div className="text-[11px] text-emerald-800 font-bold">
+                          பேமெண்ட் முடிந்ததும் உடனடியாக உங்கள் மெயின் வணிகர் டேஷ்போர்டிற்குள் செல்லவும்!
+                        </div>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white animate-pulse">
+                      உடனடி நுழைவு
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => finalizeRegistration(`order_rzp_${Date.now()}`, `pay_confirmed_${Date.now()}`)}
+                    className="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <span>{loading ? '⏳ கணக்கு துவங்கப்படுகிறது...' : '✅ நான் ₹1 செலுத்திவிட்டேன்! என் மெயின் டேஷ்போர்டிற்குச் செல்க ➔'}</span>
+                  </button>
+                </div>
+
                 {/* 1. Official Direct Razorpay Popup / Checkout (Big Golden Button) */}
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => handlePaymentAndEntry(false)}
-                  className="w-full py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <CreditCard className="w-5 h-5 text-slate-950" />
-                  <span>💳 Razorpay மூலம் ₹1 மட்டும் செலுத்தவும் (Pay ₹1 RS ONLY) ➔</span>
+                  <span>💳 Razorpay ₹1 கட்டண பக்கத்திற்குச் செல்ல (Open Razorpay ₹1 Pay) ➔</span>
                 </button>
 
-                {/* 2. Razorpay Link Direct Button */}
+                {/* 2. Direct Link Fallback */}
                 <a
                   href={paymentLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => {
-                    setTimeout(() => {
-                      handlePaymentAndEntry(false);
-                    }, 1200);
-                  }}
-                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs rounded-xl border border-slate-800 transition flex items-center justify-center gap-2 cursor-pointer no-underline text-center"
+                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs rounded-xl border border-slate-800 transition flex items-center justify-center gap-2 cursor-pointer no-underline text-center"
                 >
-                  <span>🔗 Razorpay லிங்க் மூலம் ₹1 INR செலுத்த (Open Link in New Tab)</span>
+                  <span>🔗 Razorpay நேரடி லிங்க்: {paymentLink}</span>
                 </a>
 
                 {/* 3. Instant Sandbox Simulation */}

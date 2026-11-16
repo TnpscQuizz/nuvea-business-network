@@ -28,7 +28,31 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
     <div className="bg-white text-slate-900 min-h-screen flex flex-col justify-between selection:bg-amber-300 selection:text-slate-900">
       
       {/* MAIN CONTAINER */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-10 w-full space-y-12 sm:space-y-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-10 w-full space-y-8 sm:space-y-12">
+        
+        {/* QUICK ACCESS BANNER IF PAYMENT COMPLETED / RETURNING OWNER */}
+        <div className="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-950 text-white p-3.5 sm:p-4 rounded-2xl shadow-lg border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-black text-base shadow-sm shrink-0">
+              ₹1
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
+                <span>Razorpay-ல் ₹1 கட்டணம் செலுத்தியுள்ளீர்களா?</span>
+                <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">1 YEAR LIVE</span>
+              </div>
+              <div className="text-[11px] text-purple-200">
+                நேரடியாக உங்கள் பிரதான வணிகர் டேஷ்போர்டு திரைக்குள் செல்ல கீழே உள்ள பொத்தானை அழுத்தவும்:
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => onSelectPortal('business')}
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+          >
+            <span>🏢 வணிகர் டேஷ்போர்டிற்குச் செல்க (Enter Dashboard) ➔</span>
+          </button>
+        </div>
         
         {/* ========================================================= */}
         {/* HERO SECTION (EXACT MATCH TO DESIGNER MOCKUP)            */}

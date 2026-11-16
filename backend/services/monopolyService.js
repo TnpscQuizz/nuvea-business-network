@@ -33,12 +33,57 @@ function reserveCategorySeat({
   // 2. Strict Category Exclusivity Check on (talukId, categoryId, chapterId)
   const exclusivity = db.checkCategoryExclusivity(talukId, categoryId, resolvedChapterId);
   if (!exclusivity.available) {
-    const error = new Error(
-      `மன்னிக்கவும்! இந்த கேட்டகிரி ஏற்கனவே "${exclusivity.occupiedBy ? exclusivity.occupiedBy.businessName : 'மற்றொரு நிறுவனம்'}" என்பவரால் பூட்டப்பட்டுள்ளது! (Category already locked by another owner in this chapter)`
+    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+    const isSameOwner = exclusivity.occupiedBy && (
+      exclusivity.occupiedBy.userId === userId ||
+      (cleanPhone && exclusivity.occupiedBy.phone && exclusivity.occupiedBy.phone.replace(/\D/g, '') === cleanPhone)
     );
-    error.statusCode = 409; // HTTP 409 Conflict as specified in Master Prompt
-    error.occupiedBy = exclusivity.occupiedBy;
-    throw error;
+
+    if (!isSameOwner) {
+      const error = new Error(
+        `மன்னிக்கவும்! இந்த கேட்டகிரி ஏற்கனவே "${exclusivity.occupiedBy ? exclusivity.occupiedBy.businessName : 'மற்றொரு நிறுவனம்'}" என்பவரால் பூட்டப்பட்டுள்ளது! (Category already locked by another owner in this chapter)`
+      );
+      error.statusCode = 409; // HTTP 409 Conflict as specified in Master Prompt
+      error.occupiedBy = exclusivity.occupiedBy;
+      throw error;
+    }
+
+    // Reuse and re-activate existing business for the same owner
+    const existingBiz = exclusivity.occupiedBy;
+    existingBiz.businessName = businessName || existingBiz.businessName;
+    existingBiz.ownerName = ownerName || existingBiz.ownerName;
+    existingBiz.phone = cleanPhone || existingBiz.phone;
+    existingBiz.email = email || existingBiz.email;
+    existingBiz.status = 'active';
+
+    const memberships = db.getTable('memberships');
+    let mem = memberships.find(m => m.businessId === existingBiz.id && m.status === 'active');
+    if (!mem) {
+      mem = {
+        id: `mem_${Date.now()}`,
+        businessId: existingBiz.id,
+        userId: userId || existingBiz.userId,
+        talukId,
+        chapterId: resolvedChapterId,
+        categoryId,
+        tier: 'taluk',
+        status: 'active',
+        startDate: new Date().toISOString().split('T')[0],
+        expiryDate: new Date(Date.now() + 365*24*3600*1000).toISOString().split('T')[0],
+        annualFee: 1,
+        gstAmount: 0,
+        totalAmount: 1,
+        invoiceNumber: `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+      };
+      memberships.push(mem);
+    }
+
+    return {
+      success: true,
+      business: existingBiz,
+      membership: mem,
+      isRenewal: true
+    };
   }
 
   const settings = db.getSettings();

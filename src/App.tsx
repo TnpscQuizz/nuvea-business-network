@@ -24,7 +24,22 @@ export function App() {
   const [currentMemberId, setCurrentMemberId] = useState<string>('mem_001');
 
   useEffect(() => {
-    fetchAppState().then((data) => setState(data));
+    fetchAppState().then((data) => {
+      setState(data);
+      // Auto-restore active business if user already registered
+      const savedBizId = localStorage.getItem('nbn_active_business_id');
+      if (savedBizId && data.members?.some((m: any) => m.id === savedBizId)) {
+        setCurrentMemberId(savedBizId);
+      }
+    });
+
+    // Check if user returned from Razorpay or has active query params
+    const params = new URLSearchParams(window.location.search);
+    const hasPaymentParam = params.get('razorpay_payment_id') || params.get('payment_id') || params.get('status') === 'paid' || params.get('payment') === 'success';
+    if (hasPaymentParam) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setActivePortal('business');
+    }
   }, []);
 
   const addToCart = (item: CartItem) => {
@@ -77,6 +92,10 @@ export function App() {
         phone: regData.business.phone,
         email: regData.business.email,
         address: regData.business.address,
+        locationTag: regData.business.locationTag,
+        mapEmbedUrl: regData.business.mapEmbedUrl,
+        latitude: regData.business.latitude,
+        longitude: regData.business.longitude,
         logo: regData.business.logo,
         cover: regData.business.cover,
         rating: 5.0,
@@ -92,6 +111,7 @@ export function App() {
       };
       setCurrentMemberId(newMember.id);
       localStorage.setItem(`nbn_expiry_${newMember.id}`, oneYearLater.getTime().toString());
+      localStorage.setItem('nbn_active_business_id', newMember.id);
       setState({
         ...state,
         members: [newMember, ...state.members]
