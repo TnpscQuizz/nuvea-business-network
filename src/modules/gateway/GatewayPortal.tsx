@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Briefcase, Store, Users, ArrowRight, PlayCircle, Handshake, 
   BarChart3, ShieldCheck, Zap, CheckCircle2, X, Sparkles,
@@ -19,48 +19,62 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
 }) => {
   const isTa = lang === 'ta';
 
+  // Check if member already has active paid session
+  const [hasPaidSession, setHasPaidSession] = useState(false);
+  useEffect(() => {
+    try {
+      const isPaid = localStorage.getItem('nbn_membership_paid') === 'true';
+      const hasBusiness = !!localStorage.getItem('nbn_active_business_id');
+      if (isPaid || hasBusiness) {
+        setHasPaidSession(true);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   // Interactive Modal States
   const [showHowItWorks, setShowHowItWorks] = useState(false);
-  const [showPlans, setShowPlans] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   return (
     <div className="bg-white text-slate-900 min-h-screen flex flex-col justify-between selection:bg-amber-300 selection:text-slate-900">
       
       {/* MAIN CONTAINER */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-10 w-full space-y-8 sm:space-y-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-10 w-full space-y-8 sm:space-y-10">
         
-        {/* QUICK ACCESS BANNER IF PAYMENT COMPLETED / RETURNING OWNER */}
-        <div className="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-950 text-white p-3.5 sm:p-4 rounded-2xl shadow-lg border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-center sm:text-left">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-black text-base shadow-sm shrink-0">
-              ₹1
-            </div>
-            <div>
-              <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
-                <span>Razorpay-ல் ₹1 கட்டணம் செலுத்தியுள்ளீர்களா?</span>
-                <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">1 YEAR LIVE</span>
+        {/* QUICK ACCESS BANNER ONLY IF USER ALREADY COMPLETED ₹1 PAYMENT */}
+        {hasPaidSession && (
+          <div className="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-950 text-white p-3 sm:p-3.5 rounded-2xl shadow-lg border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center font-black text-sm shadow-sm shrink-0">
+                ₹1
               </div>
-              <div className="text-[11px] text-purple-200">
-                நேரடியாக உங்கள் பிரதான வணிகர் டேஷ்போர்டு திரைக்குள் செல்ல கீழே உள்ள பொத்தானை அழுத்தவும்:
+              <div>
+                <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
+                  <span>Razorpay ₹1 கட்டணம் செலுத்தப்பட்டு மெம்பர்ஷிப் செயலில் உள்ளது!</span>
+                  <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">1 YEAR ACTIVE</span>
+                </div>
+                <div className="text-[11px] text-purple-200">
+                  உங்கள் பிரதான வணிகர் டேஷ்போர்டிற்குள் செல்ல:
+                </div>
               </div>
             </div>
+            <button
+              onClick={() => onSelectPortal('business')}
+              className="w-full sm:w-auto px-5 py-2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+            >
+              <span>🏢 என் வணிகர் டேஷ்போர்டு (My Dashboard) ➔</span>
+            </button>
           </div>
-          <button
-            onClick={() => onSelectPortal('business')}
-            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
-          >
-            <span>🏢 வணிகர் டேஷ்போர்டிற்குச் செல்க (Enter Dashboard) ➔</span>
-          </button>
-        </div>
+        )}
         
         {/* ========================================================= */}
         {/* HERO SECTION (EXACT MATCH TO DESIGNER MOCKUP)            */}
         {/* ========================================================= */}
-        <section id="home" className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
+        <section id="home" className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-center pt-2">
           
           {/* Left Column: Headlines, CTAs, Feature Badges */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left">
+          <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-left">
             
             {/* Top Subtitle */}
             <div className="inline-block">
@@ -69,26 +83,27 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
               </span>
             </div>
 
-            {/* Huge Headline with Brush Underline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black text-[#0a1128] tracking-tight leading-[1.08]">
-              Connect. Refer.<br />
-              <span className="relative inline-block mt-1">
-                Grow Together.
-                {/* Yellow Curved Brush Underline */}
+            {/* Huge Headline with Brush Underline under "Connect." */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black text-[#0a1128] tracking-tight leading-[1.12]">
+              <span className="relative inline-block">
+                Connect.
+                {/* Yellow Curved Brush Underline under Connect. */}
                 <svg 
                   className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-4 text-amber-400 pointer-events-none" 
-                  viewBox="0 0 280 14" 
+                  viewBox="0 0 170 14" 
                   fill="none" 
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path 
-                    d="M3 10.5C68 2.5 195 2.5 277 8.5" 
+                    d="M4 11C48 2 122 2 166 9" 
                     stroke="#F59E0B" 
                     strokeWidth="6" 
                     strokeLinecap="round" 
                   />
                 </svg>
-              </span>
+              </span>{' '}
+              Refer.<br />
+              Grow Together.
             </h1>
 
             {/* Sub-paragraph */}
@@ -119,7 +134,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
             <div className="flex items-center gap-3 sm:gap-4 pt-2 flex-wrap">
               
               {/* Connect Badge */}
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50/90 rounded-full border border-slate-200/70 shadow-2xs">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f5ff] rounded-full border border-purple-100/90 shadow-2xs">
                 <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
                   <Users className="w-3.5 h-3.5" />
                 </div>
@@ -127,7 +142,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
               </div>
 
               {/* Refer Badge */}
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50/90 rounded-full border border-slate-200/70 shadow-2xs">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f5ff] rounded-full border border-purple-100/90 shadow-2xs">
                 <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
                   <Handshake className="w-3.5 h-3.5" />
                 </div>
@@ -135,7 +150,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
               </div>
 
               {/* Grow Badge */}
-              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50/90 rounded-full border border-slate-200/70 shadow-2xs">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#f6f5ff] rounded-full border border-purple-100/90 shadow-2xs">
                 <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0">
                   <BarChart3 className="w-3.5 h-3.5" />
                 </div>
@@ -148,7 +163,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
 
           {/* Right Column: Hero Illustration / Photo with sweeping yellow accent */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[460px] overflow-hidden rounded-bl-[70px] sm:rounded-bl-[90px] shadow-sm">
+            <div className="relative w-full max-w-[480px] overflow-hidden rounded-bl-[70px] sm:rounded-bl-[90px] shadow-sm">
               <img 
                 src={heroHandshakeImg} 
                 alt="Two business owners shaking hands warmly - Nuvea Business Network"
@@ -163,7 +178,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
         {/* ========================================================= */}
         {/* CHOOSE YOUR ROLE SECTION (3 CARDS)                        */}
         {/* ========================================================= */}
-        <section id="plans" className="pt-4 sm:pt-6 space-y-8">
+        <section id="plans" className="pt-4 sm:pt-6 space-y-7">
           
           {/* Section Divider Title: — Choose Your Role — */}
           <div className="text-center">
@@ -180,7 +195,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
             
             {/* ---------------- CARD 1: BUSINESS OWNER ---------------- */}
-            <div className="relative bg-white rounded-3xl p-6 sm:p-7 border-2 border-amber-300 hover:border-amber-400 shadow-lg shadow-amber-100/50 flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
+            <div className="relative bg-[#fffdf7] rounded-3xl p-6 sm:p-7 border-2 border-amber-300 hover:border-amber-400 shadow-lg shadow-amber-100/50 flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
               <div>
                 {/* Yellow Briefcase Icon Badge */}
                 <div className="w-14 h-14 rounded-2xl bg-[#fffbeb] border border-amber-200/80 text-amber-600 mx-auto flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition">
@@ -207,15 +222,15 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
                   <span>Join as Business Owner</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-                <div className="mt-2 text-[11px] text-amber-900 font-black bg-amber-100/90 py-1.5 px-3 rounded-xl border border-amber-300 flex items-center justify-center gap-1.5">
+                <div className="mt-2.5 text-[11px] text-amber-900 font-bold bg-amber-100/90 py-1.5 px-3 rounded-xl border border-amber-300 flex items-center justify-center gap-1.5">
                   <span>⏳</span>
-                  <span>1 வருடம் முழு வேலிடிட்டி (1-Year Validity) • கட்டணம் ₹1 மட்டுமே</span>
+                  <span>1 வருடம் முழு வேலிடிட்டி • Razorpay கட்டணம் ₹1 மட்டுமே</span>
                 </div>
               </div>
             </div>
 
             {/* ---------------- CARD 2: MARKETPLACE SELLER ---------------- */}
-            <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-blue-200 hover:border-blue-400 shadow-sm hover:shadow-md flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
+            <div className="relative bg-[#f9fbff] rounded-3xl p-6 sm:p-7 border border-blue-200 hover:border-blue-400 shadow-sm hover:shadow-md flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
               <div>
                 {/* Blue Store Icon Badge */}
                 <div className="w-14 h-14 rounded-2xl bg-[#eff6ff] border border-blue-200/80 text-blue-600 mx-auto flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition">
@@ -242,14 +257,14 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
                   <span>Join as Seller</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-                <div className="mt-2 text-[11px] text-blue-700/80 font-semibold">
+                <div className="mt-2.5 text-[11px] text-blue-700/80 font-semibold">
                   Multi-Chapter B2B Sales Hub • Free Onboarding
                 </div>
               </div>
             </div>
 
             {/* ---------------- CARD 3: CUSTOMER / BUYER ---------------- */}
-            <div className="relative bg-white rounded-3xl p-6 sm:p-7 border border-emerald-200 hover:border-emerald-400 shadow-sm hover:shadow-md flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
+            <div className="relative bg-[#f8fdfa] rounded-3xl p-6 sm:p-7 border border-emerald-200 hover:border-emerald-400 shadow-sm hover:shadow-md flex flex-col justify-between text-center transition-all duration-300 hover:-translate-y-1 group">
               <div>
                 {/* Green Users Icon Badge */}
                 <div className="w-14 h-14 rounded-2xl bg-[#ecfdf5] border border-emerald-200/80 text-emerald-600 mx-auto flex items-center justify-center mb-4 shadow-inner group-hover:scale-105 transition">
@@ -276,7 +291,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
                   <span>Join as Buyer</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-                <div className="mt-2 text-[11px] text-emerald-700/80 font-semibold">
+                <div className="mt-2.5 text-[11px] text-emerald-700/80 font-semibold">
                   100% Free Access • Compare Verified Quotes
                 </div>
               </div>
@@ -334,7 +349,7 @@ export const GatewayPortal: React.FC<GatewayPortalProps> = ({
       {/* ========================================================= */}
       {/* BOTTOM DECORATIVE PURPLE GRADIENT WAVE                    */}
       {/* ========================================================= */}
-      <div className="w-full overflow-hidden leading-none mt-8">
+      <div className="w-full overflow-hidden leading-none mt-6">
         <svg 
           className="w-full h-16 sm:h-24 pointer-events-none" 
           viewBox="0 0 1200 120" 
