@@ -35,9 +35,6 @@ process.on('SIGTERM', () => {
 });
 
 logServerEvent(`[SERVER STARTUP]: PID ${process.pid} at ${new Date().toISOString()}`);
-try {
-  process.stdin.resume();
-} catch (e) {}
 
 const db = require('./backend/database/db');
 
@@ -414,16 +411,13 @@ if (require.main === module) {
   });
 
   server.on('error', (err) => {
-    console.error('[HTTP SERVER ERROR]:', err);
+    logServerEvent(`[HTTP SERVER ERROR]: ${err.stack || err.message || err}`);
   });
-
-  server.keepAliveTimeout = 65000;
-  server.headersTimeout = 66000;
 
   // Keep event loop alive indefinitely
   setInterval(() => {
     // Keepalive heartbeat
-  }, 30000);
+  }, 60000);
 
   process.on('exit', (code) => {
     console.log(`[PROCESS EXIT]: Exiting with code: ${code}`);
