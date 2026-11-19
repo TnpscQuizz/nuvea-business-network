@@ -360,12 +360,28 @@ app.use((req, res) => {
 
 // Start Server
 if (require.main === module) {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`====================================================`);
     console.log(` NUVEA BUSINESS NETWORK (NBN) SAAS PLATFORM RUNNING`);
     console.log(` URL: http://localhost:${PORT}`);
     console.log(` Commercial B2B Digital Networking for Dharmapuri & Salem`);
     console.log(`====================================================`);
+  });
+
+  server.on('error', (err) => {
+    console.error('[HTTP SERVER ERROR]:', err);
+  });
+
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
+
+  // Keep event loop alive indefinitely
+  setInterval(() => {
+    // Keepalive heartbeat
+  }, 30000);
+
+  process.on('exit', (code) => {
+    console.log(`[PROCESS EXIT]: Exiting with code: ${code}`);
   });
 }
 
