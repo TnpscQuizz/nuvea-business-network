@@ -402,10 +402,10 @@ app.use((err, req, res, next) => {
 
 // Start Server
 if (require.main === module) {
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`====================================================`);
     console.log(` NUVEA BUSINESS NETWORK (NBN) SAAS PLATFORM RUNNING`);
-    console.log(` URL: http://localhost:${PORT}`);
+    console.log(` URL: http://localhost:${PORT} (Bound to 0.0.0.0:${PORT})`);
     console.log(` Commercial B2B Digital Networking for Dharmapuri & Salem`);
     console.log(`====================================================`);
   });

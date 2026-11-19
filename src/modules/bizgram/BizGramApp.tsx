@@ -3,13 +3,14 @@ import {
   Home, Search, Film, MessageCircle, PlusSquare, BarChart3, 
   User, Shield, Settings, LogOut, Clock, CheckCircle2, 
   Sparkles, ExternalLink, Menu, X, ArrowRight, Phone, Tag, 
-  MapPin, Bell 
+  MapPin, Bell, Lock, UserCheck 
 } from 'lucide-react';
-import type { AppState, BizPost, BizStory, BizEnquiryMessage } from '../../types';
+import type { AppState, BizPost, BizStory, BizEnquiryMessage, BizUser } from '../../types';
 import { 
   INITIAL_BIZ_POSTS, 
   INITIAL_BIZ_STORIES, 
-  INITIAL_ENQUIRIES 
+  INITIAL_ENQUIRIES,
+  DEFAULT_CURRENT_USER 
 } from './data/bizGramData';
 import { StoriesBar } from './components/StoriesBar';
 import { PostCard } from './components/PostCard';
@@ -20,6 +21,8 @@ import { BusinessProfileView } from './components/BusinessProfileView';
 import { ExploreView } from './components/ExploreView';
 import { InsightsView } from './components/InsightsView';
 import { SuperAdminConsole } from './components/SuperAdminConsole';
+import { ProfileSettingsModal } from './components/ProfileSettingsModal';
+import { AuthModal } from './components/AuthModal';
 import { RegistrationModal } from '../../components/RegistrationModal';
 
 interface BizGramAppProps {
@@ -40,11 +43,26 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     'feed' | 'explore' | 'reels' | 'messages' | 'insights' | 'profile' | 'admin'
   >('feed');
 
+  // Logged-in BizUser state (Instagram Style Handle, Security, Permissions)
+  const [currentUser, setCurrentUser] = useState<BizUser>(() => {
+    try {
+      const saved = localStorage.getItem('nbn_biz_current_user');
+      return saved ? JSON.parse(saved) : DEFAULT_CURRENT_USER;
+    } catch {
+      return DEFAULT_CURRENT_USER;
+    }
+  });
+
   // Posts, Stories and Enquiries state
   const [posts, setPosts] = useState<BizPost[]>(() => {
     try {
       const saved = localStorage.getItem('nbn_biz_posts');
-      return saved ? JSON.parse(saved) : INITIAL_BIZ_POSTS;
+      if (saved) {
+        const parsed: BizPost[] = JSON.parse(saved);
+        // If saved cache has fewer than 24 posts, update with 24 posts from INITIAL_BIZ_POSTS
+        if (parsed.length >= 24) return parsed;
+      }
+      return INITIAL_BIZ_POSTS;
     } catch {
       return INITIAL_BIZ_POSTS;
     }
@@ -57,19 +75,17 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Active Business Member Profile Info
-  const activeMember = state.members[0] || {
-    id: 'mem_001',
-    businessName: 'நுவேவா ஸ்டுடியோ (Nuvea Studio)',
-    ownerName: 'சந்திரா (Chandru)',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-    taluk: 'தருமபுரி & சேலம்',
-    category: 'டிஜிட்டல் மார்க்கெட்டிங் & வெப்',
-    phone: '917548820641',
-    locationTag: 'தருமபுரி மெயின் ரோடு & சேலம் ஜங்ஷன்',
-    validityDaysLeft: 364,
-  };
+  // Save currentUser to localStorage whenever updated
+  useEffect(() => {
+    try {
+      localStorage.setItem('nbn_biz_current_user', JSON.stringify(currentUser));
+    } catch (e) {
+      // ignore
+    }
+  }, [currentUser]);
 
   // Save posts to localStorage whenever updated
   useEffect(() => {
@@ -127,12 +143,11 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const handleSendEnquiry = (post: BizPost, customMsg?: string) => {
     setSelectedEnquiryPost(post);
     
-    // Add enquiry message to the first thread or new thread
     const newMsg: BizEnquiryMessage = {
       id: `msg_${Date.now()}`,
       threadId: 'th_001',
-      senderId: 'buyer',
-      senderName: 'சந்திரா (நான்)',
+      senderId: currentUser.id,
+      senderName: `${currentUser.ownerName} (@${currentUser.username})`,
       text: customMsg || `வணக்கம்! "${post.businessName}" அவர்களின் "${post.caption.slice(0, 40)}..." ரீல்ஸைப் பார்த்து விசாரிக்கிறேன். இதன் விலை மற்றும் சலுகை விவரம் கூறவும்.`,
       attachedPostId: post.id,
       attachedPostTitle: post.caption.slice(0, 45),
@@ -163,8 +178,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     const newMsg: BizEnquiryMessage = {
       id: `msg_${Date.now()}`,
       threadId,
-      senderId: 'buyer',
-      senderName: 'சந்திரா',
+      senderId: currentUser.id,
+      senderName: currentUser.ownerName,
       text,
       isQuotation: !!quotationData,
       quotationData,
@@ -194,8 +209,21 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
-  // Filter only approved posts for Public Feed and Reels
-  const publicPosts = posts.filter((p) => p.status === 'approved' || !p.status);
+  // Filter approved posts, exclude blocked users, and rank according to user's content preferences
+  const nonBlockedPosts = posts.filter(
+    (p) => !currentUser.blockedUsers?.some((b) => p.businessName.toLowerCase().includes(b.toLowerCase()))
+  );
+
+  const publicPosts = nonBlockedPosts
+    .filter((p) => p.status === 'approved' || !p.status)
+    .sort((a, b) => {
+      const aPreferred = currentUser.contentPreferences?.some((pref) => a.category.includes(pref));
+      const bPreferred = currentUser.contentPreferences?.some((pref) => b.category.includes(pref));
+      if (aPreferred && !bPreferred) return -1;
+      if (!aPreferred && bPreferred) return 1;
+      return 0;
+    });
+
   const publicReels = publicPosts.filter((p) => p.type === 'video');
 
   return (
@@ -204,7 +232,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       {/* ========================================================================= */}
       {/* 1. LEFT DESKTOP SIDEBAR (EXACT INSTAGRAM WEB FORMAT)                      */}
       {/* ========================================================================= */}
-      <aside className="hidden md:flex flex-col justify-between w-64 lg:w-68 h-screen sticky top-0 bg-white border-r border-slate-200/80 p-4 lg:p-6 shrink-0 z-40 select-none">
+      <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 h-screen sticky top-0 bg-white border-r border-slate-200/80 p-4 lg:p-6 shrink-0 z-40 select-none">
         
         {/* Brand Header */}
         <div className="space-y-6">
@@ -255,7 +283,12 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               }`}
             >
               <Search className={`w-5 h-5 ${activeTab === 'explore' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>தேடுக (Explore)</span>
+              <div className="flex items-center gap-2">
+                <span>தேடுக (3x8 Grid)</span>
+                <span className="bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">
+                  24 ரீல்ஸ்
+                </span>
+              </div>
             </button>
 
             {/* 3. Reels */}
@@ -270,7 +303,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               <Film className={`w-5 h-5 ${activeTab === 'reels' ? 'text-amber-400' : 'text-slate-600'}`} />
               <div className="flex items-center gap-2">
                 <span>ரீல்ஸ் (Reels)</span>
-                <span className="bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">
+                <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">
                   HOT
                 </span>
               </div>
@@ -287,7 +320,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             >
               <div className="flex items-center gap-3.5">
                 <MessageCircle className={`w-5 h-5 ${activeTab === 'messages' ? 'text-amber-400' : 'text-slate-600'}`} />
-                <span>விசாரணைகள் (Enquiries)</span>
+                <span>விசாரணைகள் (Chat)</span>
               </div>
               <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                 3
@@ -328,10 +361,19 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               }`}
             >
               <User className={`w-5 h-5 ${activeTab === 'profile' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>என் புரொபைல் (Profile)</span>
+              <span>புரொபைல் (@{currentUser.username})</span>
             </button>
 
-            {/* 8. Super Admin Console */}
+            {/* 8. Profile Settings */}
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-100 transition cursor-pointer text-sm font-bold"
+            >
+              <Settings className="w-5 h-5 text-slate-600" />
+              <span>செக்யூரிட்டி & செட்டிங்ஸ்</span>
+            </button>
+
+            {/* 9. Super Admin Console */}
             <button
               onClick={() => setActiveTab('admin')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
@@ -341,7 +383,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               }`}
             >
               <Shield className={`w-5 h-5 ${activeTab === 'admin' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>அட்மின் கன்சோல் (Admin)</span>
+              <span>அட்மின் தணிக்கை (Admin)</span>
             </button>
 
           </nav>
@@ -357,20 +399,30 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           >
             <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 shrink-0">
               <img
-                src={activeMember.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
                 alt="Profile"
                 className="w-full h-full rounded-full object-cover border border-white"
               />
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-black text-slate-900 truncate flex items-center gap-1">
-                <span>{activeMember.businessName}</span>
+                <span>@{currentUser.username}</span>
                 <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
               </div>
               <div className="text-[11px] text-slate-500 truncate">
-                {activeMember.ownerName}
+                {currentUser.businessName}
               </div>
             </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAuthModalOpen(true);
+              }}
+              className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer"
+              title="கணக்கை மாற்று / உள்நுழை"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
 
           {/* 1-Year Validity Live Card */}
@@ -380,7 +432,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               <span>1 வருடம் வேலிடிட்டி:</span>
             </div>
             <span className="bg-slate-950 text-amber-400 font-mono text-[10px] px-1.5 py-0.5 rounded font-black">
-              364 நாட்கள்
+              {currentUser.validityDaysLeft || 364} நாட்கள்
             </span>
           </div>
 
@@ -412,13 +464,21 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="p-1.5 text-slate-700 hover:text-amber-600 transition cursor-pointer"
+            title="செட்டிங்ஸ்"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="p-1.5 text-slate-800 hover:text-amber-600 transition cursor-pointer"
             title="Create Post"
           >
-            <PlusSquare className="w-6 h-6" />
+            <PlusSquare className="w-5 h-5" />
           </button>
 
           <button
@@ -426,7 +486,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             className="relative p-1.5 text-slate-800 hover:text-amber-600 transition cursor-pointer"
             title="Messages"
           >
-            <MessageCircle className="w-6 h-6" />
+            <MessageCircle className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white" />
           </button>
         </div>
@@ -448,7 +508,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               {/* TOP STORIES BAR */}
               <StoriesBar
                 stories={stories}
-                currentUserAvatar={activeMember.avatar}
+                currentUserAvatar={currentUser.avatar}
                 onOpenCreateStory={() => setIsCreateModalOpen(true)}
                 onSendStoryReply={(story, text) => {
                   handleSendMessageInChat('th_001', `[ஸ்டோரி பதில்]: ${text}`);
@@ -479,23 +539,23 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <img
-                      src={activeMember.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-                      alt={activeMember.businessName}
+                      src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
+                      alt={currentUser.businessName}
                       className="w-12 h-12 rounded-full object-cover border-2 border-amber-400"
                     />
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-black text-sm text-slate-900 flex items-center gap-1">
-                        <span>{activeMember.businessName}</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="truncate">@{currentUser.username}</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                       </div>
-                      <div className="text-xs text-slate-500">
-                        {activeMember.ownerName} • {activeMember.taluk}
+                      <div className="text-xs text-slate-500 truncate">
+                        {currentUser.businessName} • {currentUser.taluk}
                       </div>
                     </div>
                   </div>
                   <button
-                    onClick={() => setActiveTab('profile')}
-                    className="text-xs font-black text-amber-600 hover:text-amber-700 cursor-pointer"
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="text-xs font-black text-amber-600 hover:text-amber-700 cursor-pointer shrink-0"
                   >
                     மாற்று
                   </button>
@@ -504,7 +564,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 <div className="p-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-purple-50 border border-amber-200 text-xs font-bold text-slate-800 flex items-center justify-between">
                   <span>⏳ வேலிடிட்டி டைமர்:</span>
                   <span className="font-mono text-amber-900 font-black">
-                    364D : 23H : 59M
+                    {currentUser.validityDaysLeft || 364}D : 23H : 59M
                   </span>
                 </div>
               </div>
@@ -524,7 +584,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                  {posts.slice(0, 3).map((p) => (
+                  {publicPosts.slice(0, 4).map((p) => (
                     <div key={p.id} className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <img
@@ -555,10 +615,10 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               {/* Verified Categories Quick Links */}
               <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-3">
                 <h4 className="font-black text-xs text-slate-700 uppercase tracking-wider">
-                  பிரபலமான வணிகப் பிரிவுகள்
+                  முன்னுரிமை வணிகப் பிரிவுகள்
                 </h4>
                 <div className="flex flex-wrap gap-1.5 text-xs">
-                  {['பட்டு & ஜவுளி', 'வேளாண் இயந்திரங்கள்', 'தங்க நகைகள்', 'கன்ஸ்ட்ரக்ஷன்', 'சாஃப்ட்வேர் & 3D', 'ஆட்டோமொபைல்'].map((cat) => (
+                  {['பட்டு & ஜவுளி', 'வேளாண் இயந்திரங்கள்', 'தங்க நகைகள்', 'கன்ஸ்ட்ரக்ஷன்', 'சாஃப்ட்வேர் & 3D', 'CNC & ஆட்டோமொபைல்'].map((cat) => (
                     <span 
                       key={cat}
                       onClick={() => setActiveTab('explore')}
@@ -581,7 +641,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           </div>
         )}
 
-        {/* VIEW 2: EXPLORE / SEARCH */}
+        {/* VIEW 2: EXPLORE / SEARCH (3x8 GRID = 24 AUTOPLAY MUTED VIDEOS) */}
         {activeTab === 'explore' && (
           <ExploreView
             posts={posts}
@@ -617,10 +677,12 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         {/* VIEW 5: BUSINESS PROFILE */}
         {activeTab === 'profile' && (
           <BusinessProfileView
-            member={activeMember}
+            currentUser={currentUser}
             posts={posts}
             onOpenCreateModal={() => setIsCreateModalOpen(true)}
             onOpenRenewModal={() => setIsRegisterModalOpen(true)}
+            onOpenSettings={() => setIsSettingsModalOpen(true)}
+            onOpenAuthModal={() => setIsAuthModalOpen(true)}
             onSelectPost={(post) => {
               if (post.type === 'video') {
                 setActiveTab('reels');
@@ -722,13 +784,29 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         onClose={() => setIsCreateModalOpen(false)}
         onCreatePost={handleCreatePost}
         currentUser={{
-          businessName: activeMember.businessName,
-          ownerName: activeMember.ownerName,
-          avatar: activeMember.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-          taluk: activeMember.taluk || 'சேலம் (Salem)',
-          category: activeMember.category || 'ஜவுளி & பட்டு',
-          phone: activeMember.phone || '917548820641',
+          businessName: currentUser.businessName,
+          ownerName: currentUser.ownerName,
+          avatar: currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+          taluk: currentUser.taluk || 'சேலம் (Salem)',
+          category: currentUser.category || 'ஜவுளி & பட்டு',
+          phone: currentUser.phone || '919842109999',
         }}
+      />
+
+      {/* Profile Security & Device Permissions Settings Modal */}
+      <ProfileSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        currentUser={currentUser}
+        onUpdateUser={(updated) => setCurrentUser(updated)}
+      />
+
+      {/* Auth / Switch Account Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onLogin={(loggedInUser) => setCurrentUser(loggedInUser)}
       />
 
       {/* Razorpay ₹1 Membership Registration / Renewal Modal */}

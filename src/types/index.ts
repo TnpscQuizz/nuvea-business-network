@@ -166,3 +166,35 @@ export type BizEnquiryMessage = {
   quotationData?: { items: string; amount: number; gst: number; total: number };
   timestamp: string;
 };
+
+export type BizUser = {
+  id: string;
+  username: string; // Unique Instagram-style handle (e.g. "chandru_nuvea")
+  businessName: string;
+  ownerName: string;
+  email: string;
+  phone: string;
+  password?: string;
+  avatar: string;
+  taluk: string;
+  category: string;
+  bio?: string;
+  locationTag?: string;
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  validityDaysLeft: number;
+  isPrivateAccount: boolean;
+  blockedUsers: string[];
+  liveLocationEnabled: boolean;
+  mediaUploadQuality: 'high' | 'data_saver';
+  devicePermissions: {
+    camera: boolean;
+    microphone: boolean;
+    location: boolean;
+    contacts: boolean;
+    notifications: boolean;
+    talkBox: boolean;
+  };
+  contentPreferences: string[];
+};
