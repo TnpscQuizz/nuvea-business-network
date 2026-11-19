@@ -19,7 +19,7 @@ import { EnquiryChat } from './components/EnquiryChat';
 import { BusinessProfileView } from './components/BusinessProfileView';
 import { ExploreView } from './components/ExploreView';
 import { InsightsView } from './components/InsightsView';
-import { AdminPortal } from '../admin/AdminPortal';
+import { SuperAdminConsole } from './components/SuperAdminConsole';
 import { RegistrationModal } from '../../components/RegistrationModal';
 
 interface BizGramAppProps {
@@ -102,8 +102,29 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     setPosts([newPost, ...posts]);
   };
 
+  // Super Admin Post Moderation Handlers
+  const handleApprovePost = (postId: string) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, status: 'approved' } : p))
+    );
+    alert('போஸ்ட் வெற்றிகரமாக அங்கீகரிக்கப்பட்டது (Approved)! இப்போது பப்ளிக் ரீல்ஸ் மற்றும் எக்ஸ்ப்ளோரில் தோன்றும்.');
+  };
+
+  const handleRejectPost = (postId: string) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, status: 'rejected' } : p))
+    );
+    alert('போஸ்ட் நிராகரிக்கப்பட்டது (Rejected).');
+  };
+
+  const handleDeletePost = (postId: string) => {
+    if (confirm('இந்த பதிவை நிச்சயமாக நீக்க விரும்புகிறீர்களா?')) {
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    }
+  };
+
   // Handle Enquiry click from Post or Reel -> Opens Messages tab with attached card
-  const handleSendEnquiry = (post: BizPost) => {
+  const handleSendEnquiry = (post: BizPost, customMsg?: string) => {
     setSelectedEnquiryPost(post);
     
     // Add enquiry message to the first thread or new thread
@@ -112,7 +133,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       threadId: 'th_001',
       senderId: 'buyer',
       senderName: 'சந்திரா (நான்)',
-      text: `வணக்கம்! "${post.businessName}" அவர்களின் "${post.caption.slice(0, 40)}..." ரீல்ஸைப் பார்த்து விசாரிக்கிறேன். இதன் விலை மற்றும் சலுகை விவரம் கூறவும்.`,
+      text: customMsg || `வணக்கம்! "${post.businessName}" அவர்களின் "${post.caption.slice(0, 40)}..." ரீல்ஸைப் பார்த்து விசாரிக்கிறேன். இதன் விலை மற்றும் சலுகை விவரம் கூறவும்.`,
       attachedPostId: post.id,
       attachedPostTitle: post.caption.slice(0, 45),
       attachedPostThumb: post.thumbnailUrl || post.mediaUrl,
@@ -172,6 +193,10 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
+
+  // Filter only approved posts for Public Feed and Reels
+  const publicPosts = posts.filter((p) => p.status === 'approved' || !p.status);
+  const publicReels = publicPosts.filter((p) => p.type === 'video');
 
   return (
     <div className="bg-[#fafafa] text-slate-900 min-h-screen flex flex-col md:flex-row selection:bg-amber-300 selection:text-slate-900 font-sans">
@@ -431,9 +456,9 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 }}
               />
 
-              {/* POSTS FEED LIST */}
+              {/* POSTS FEED LIST (APPROVED PUBLIC POSTS) */}
               <div className="space-y-6">
-                {posts.map((post) => (
+                {publicPosts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -574,7 +599,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         {/* VIEW 3: FULLSCREEN 9:16 REELS */}
         {activeTab === 'reels' && (
           <ReelsView
-            reels={posts.filter((p) => p.type === 'video')}
+            reels={publicReels}
             onLike={handleLike}
             onSendEnquiry={handleSendEnquiry}
             onShareWhatsApp={handleShareWhatsApp}
@@ -616,11 +641,13 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
         {/* VIEW 7: SUPER ADMIN CONSOLE */}
         {activeTab === 'admin' && (
-          <AdminPortal
+          <SuperAdminConsole
+            posts={posts}
             state={state}
-            updateState={updateState}
-            lang={lang}
-            onExitPortal={() => setActiveTab('feed')}
+            onApprovePost={handleApprovePost}
+            onRejectPost={handleRejectPost}
+            onDeletePost={handleDeletePost}
+            onExitAdmin={() => setActiveTab('feed')}
           />
         )}
 

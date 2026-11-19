@@ -99,12 +99,13 @@ export const CreateModal: React.FC<CreateModalProps> = ({
         commentsCount: 0,
         createdAt: 'இப்போது (Just Now)',
         isReel: isReel,
+        status: 'pending', // Requires Super Admin approval!
       };
 
       onCreatePost(newPost);
       setIsUploading(false);
       onClose();
-      alert('உங்கள் வணிக வீடியோ / பதிவு வெற்றிகரமாக பதிவேற்றப்பட்டது!');
+      alert('உங்கள் வணிக வீடியோ வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது! சூப்பர் அட்மின் தணிக்கை செய்து அங்கீகரித்ததும் (Admin Approval) உடனடியாக லைவாக Explore மற்றும் Reels-ல் தோன்றும்.');
     }, 600);
   };
 

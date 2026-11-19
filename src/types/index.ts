@@ -127,6 +127,8 @@ export type BizPost = {
   thumbnailUrl?: string;
   caption: string;
   priceTag?: string;
+  wholesalePrice?: string;
+  retailPrice?: string;
   actionText: string;
   phone: string;
   likes: number;
@@ -135,6 +137,7 @@ export type BizPost = {
   commentsCount: number;
   createdAt: string;
   isReel?: boolean;
+  status?: 'approved' | 'pending' | 'rejected';
 };
 
 export type BizStory = {

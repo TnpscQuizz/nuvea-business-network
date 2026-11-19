@@ -1723,6 +1723,15 @@
       "role": "member",
       "passwordHash": "6d1ba55e66d884cdc91235f53cd0b300938a306d6bac94e4671a9b7cb73b7b9a",
       "createdAt": "2026-11-19T08:47:14.003Z"
+    },
+    {
+      "id": "usr_1795080262891",
+      "name": "செல்வகுமார் (Test Owner)",
+      "email": "9842637859@nbn.in",
+      "phone": "9842637859",
+      "role": "member",
+      "passwordHash": "6d1ba55e66d884cdc91235f53cd0b300938a306d6bac94e4671a9b7cb73b7b9a",
+      "createdAt": "2026-11-19T09:24:22.891Z"
     }
   ],
   "businesses": [
@@ -3230,6 +3239,27 @@
       "reviewCount": 1,
       "status": "active",
       "createdAt": "2026-11-19T08:47:14.048Z"
+    },
+    {
+      "id": "biz_1795080262944",
+      "userId": "usr_1795080262944",
+      "talukId": "pennagaram",
+      "chapterId": "pennagaram_apex",
+      "categoryId": "transport_logistics",
+      "businessName": "பென்னாகரம் வெற்றிவேல் சர்வீஸ்",
+      "ownerName": "கே. வெற்றிவேல்",
+      "phone": "9842110028",
+      "email": "9842110028@nbn.in",
+      "address": "மெயின் ரோடு, பென்னாகரம்",
+      "gstNumber": "",
+      "tagline": "அங்கீகரிக்கப்பட்ட வணிகம்",
+      "description": "NBN அதிகாரப்பூர்வ உறுப்பினர்.",
+      "videoBenefitStatus": "scheduled",
+      "videoUrl": "",
+      "rating": 5,
+      "reviewCount": 1,
+      "status": "active",
+      "createdAt": "2026-11-19T09:24:22.944Z"
     }
   ],
   "memberships": [
@@ -4256,14 +4286,30 @@
       "gstAmount": 3150,
       "totalAmount": 20650,
       "invoiceNumber": "INV-2026-0061"
+    },
+    {
+      "id": "mem_1795080262944",
+      "businessId": "biz_1795080262944",
+      "userId": "usr_1795080262944",
+      "talukId": "pennagaram",
+      "chapterId": "pennagaram_apex",
+      "categoryId": "transport_logistics",
+      "tier": "taluk",
+      "status": "active",
+      "startDate": "2026-11-19",
+      "expiryDate": "2027-11-19",
+      "annualFee": 17500,
+      "gstAmount": 3150,
+      "totalAmount": 20650,
+      "invoiceNumber": "INV-2026-0062"
     }
   ],
   "performanceScores": [
     {
       "memberId": "mem_001",
-      "leadsGiven": 51,
+      "leadsGiven": 52,
       "leadsReceived": 39,
-      "closedValue": 51250000,
+      "closedValue": 52250000,
       "attendancePercent": 100,
       "conversionRate": 100,
       "score": 100,
@@ -4868,9 +4914,35 @@
       "conversionRate": 0,
       "score": 20,
       "eligibleTier": "Taluk Member"
+    },
+    {
+      "memberId": "mem_1795080262944",
+      "leadsGiven": 0,
+      "leadsReceived": 0,
+      "closedValue": 0,
+      "attendancePercent": 100,
+      "conversionRate": 0,
+      "score": 20,
+      "eligibleTier": "Taluk Member"
     }
   ],
   "referrals": [
+    {
+      "id": "ref_1795080262979",
+      "fromMemberId": "mem_001",
+      "fromBusinessName": "நுவேவா ஸ்டுடியோ (Nuvea Studio)",
+      "toMemberId": "mem_002",
+      "toBusinessName": "ஸ்ரீ லட்சுமி தங்கம் & வைரம் (Sri Lakshmi Jewellers)",
+      "clientName": "அரூர் கார்த்திக் வில்லா",
+      "clientPhone": "9842555444",
+      "requirement": "20 சவரன் ஆபரண நகை",
+      "expectedValue": 1000000,
+      "closedValue": 1000000,
+      "status": "won",
+      "notes": "ஆர்டர் உறுதி செய்யப்பட்டது (Order Won).",
+      "createdAt": "2026-11-19T09:24:22.979Z",
+      "updatedAt": "2026-11-19T09:24:23.008Z"
+    },
     {
       "id": "ref_1795078034071",
       "fromMemberId": "mem_001",
@@ -6610,7 +6682,7 @@
         "2. எனக்கு வேண்டிய லீட்: புதிய வணிக வாடிக்கையாளர்கள் & B2B தொடர்புகள்.",
         "3. அடுத்த வாரம் உறுதி: சக உறுப்பினர்களுக்கு குறைந்தபட்சம் 2 தரமான லீட்கள் வழங்குவேன்."
       ],
-      "status": "active"
+      "status": "completed"
     },
     {
       "id": "spk_1794641637025",
@@ -6625,7 +6697,7 @@
         "2. எனக்கு வேண்டிய லீட்: புதிய வணிக வாடிக்கையாளர்கள் & B2B தொடர்புகள்.",
         "3. அடுத்த வாரம் உறுதி: சக உறுப்பினர்களுக்கு குறைந்தபட்சம் 2 தரமான லீட்கள் வழங்குவேன்."
       ],
-      "status": "upcoming"
+      "status": "active"
     },
     {
       "id": "spk_1794642672426",
@@ -6755,6 +6827,21 @@
       "speaker": "கே. வெற்றிவேல்",
       "category": "குளிர்சாதன கிடங்கு & பழங்கள் சேமிப்பு",
       "order": 61,
+      "speakingPoints": [
+        "1. எங்கள் சேவை: பென்னாகரம் வெற்றிவேல் சர்வீஸ் - தரமான சேவை & வாடிக்கையாளர் திருப்தி.",
+        "2. எனக்கு வேண்டிய லீட்: புதிய வணிக வாடிக்கையாளர்கள் & B2B தொடர்புகள்.",
+        "3. அடுத்த வாரம் உறுதி: சக உறுப்பினர்களுக்கு குறைந்தபட்சம் 2 தரமான லீட்கள் வழங்குவேன்."
+      ],
+      "status": "upcoming"
+    },
+    {
+      "id": "spk_1795080262944",
+      "meetingId": "meet_current",
+      "memberId": "mem_1795080262944",
+      "businessName": "பென்னாகரம் வெற்றிவேல் சர்வீஸ்",
+      "speaker": "கே. வெற்றிவேல்",
+      "category": "பார்சல் லாரி & சரக்கு போக்குவரத்து",
+      "order": 62,
       "speakingPoints": [
         "1. எங்கள் சேவை: பென்னாகரம் வெற்றிவேல் சர்வீஸ் - தரமான சேவை & வாடிக்கையாளர் திருப்தி.",
         "2. எனக்கு வேண்டிய லீட்: புதிய வணிக வாடிக்கையாளர்கள் & B2B தொடர்புகள்.",
@@ -7707,6 +7794,20 @@
       "totalAmount": 20650,
       "status": "paid",
       "date": "2026-11-19"
+    },
+    {
+      "id": "inv_1795080262944",
+      "invoiceNumber": "INV-2026-0062",
+      "membershipId": "mem_1795080262944",
+      "businessName": "பென்னாகரம் வெற்றிவேல் சர்வீஸ்",
+      "gstin": "UNREGISTERED",
+      "sacCode": "998314",
+      "baseAmount": 17500,
+      "cgst": 1575,
+      "sgst": 1575,
+      "totalAmount": 20650,
+      "status": "paid",
+      "date": "2026-11-19"
     }
   ],
   "strikes": [
@@ -8409,6 +8510,20 @@
       "reviewedBy": null,
       "reviewedAt": null,
       "createdAt": "2026-11-19T08:47:14.140Z"
+    },
+    {
+      "id": "strk_1795080263092",
+      "memberId": "mem_003",
+      "talukId": "harur",
+      "reason": "3 தொடர் வாரங்கள் லீட்கள் வழங்கவில்லை (No referrals passed)",
+      "strikeNumber": 51,
+      "severity": "under_admin_review",
+      "status": "appealed",
+      "appealNote": "கடந்த வாரம் உடல்நிலை சரியில்லாததால் வர இயலவில்லை. அடுத்த வாரம் 2 லீட்கள் உறுதி.",
+      "appealedAt": "2026-11-19T09:24:23.112Z",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-11-19T09:24:23.092Z"
     }
   ],
   "videoProjects": [
@@ -8955,9 +9070,81 @@
       "videoUrl": "",
       "cameraGear": "Sony A7 IV & FX3 Cinema Line",
       "notes": "₹25,000 மதிப்பிலான 4K சினிமாடிக் விளம்பர வீடியோ ஷூட் திட்டமிடப்பட்டுள்ளது."
+    },
+    {
+      "id": "vid_1795080262944",
+      "businessId": "biz_1795080262944",
+      "status": "scheduled",
+      "shootDate": "2026-12-03",
+      "videoUrl": "",
+      "cameraGear": "Sony A7 IV & FX3 Cinema Line",
+      "notes": "₹25,000 மதிப்பிலான 4K சினிமாடிக் விளம்பர வீடியோ ஷூட் திட்டமிடப்பட்டுள்ளது."
     }
   ],
   "auditLogs": [
+    {
+      "id": "aud_1795080263137_730",
+      "actorId": "usr_admin",
+      "action": "UPDATE_SETTINGS",
+      "entity": "settings",
+      "entityId": "global",
+      "details": "{\"annualFeeTaluk\":17500,\"retreatLocation\":\"கொடைக்கானல் பிசினஸ் சம்மிட் (Kodaikanal Summit)\"}",
+      "timestamp": "2026-11-19T09:24:23.137Z"
+    },
+    {
+      "id": "aud_1795080263112_920",
+      "actorId": "mem_001",
+      "action": "SUBMIT_STRIKE_APPEAL",
+      "entity": "strikes",
+      "entityId": "strk_1795080263092",
+      "details": "{\"appealNote\":\"கடந்த வாரம் உடல்நிலை சரியில்லாததால் வர இயலவில்லை. அடுத்த வாரம் 2 லீட்கள் உறுதி.\"}",
+      "timestamp": "2026-11-19T09:24:23.112Z"
+    },
+    {
+      "id": "aud_1795080263092_767",
+      "actorId": "usr_admin",
+      "action": "ISSUE_STRIKE",
+      "entity": "strikes",
+      "entityId": "strk_1795080263092",
+      "details": "{\"memberId\":\"mem_003\",\"reason\":\"3 தொடர் வாரங்கள் லீட்கள் வழங்கவில்லை (No referrals passed)\",\"strikeNumber\":51,\"severity\":\"under_admin_review\"}",
+      "timestamp": "2026-11-19T09:24:23.092Z"
+    },
+    {
+      "id": "aud_1795080263008_363",
+      "actorId": "usr_1795080262891",
+      "action": "UPDATE_REFERRAL_STATUS",
+      "entity": "referrals",
+      "entityId": "ref_1795080262979",
+      "details": "{\"status\":\"won\",\"closedValue\":1000000}",
+      "timestamp": "2026-11-19T09:24:23.008Z"
+    },
+    {
+      "id": "aud_1795080262979_729",
+      "actorId": "usr_1795080262891",
+      "action": "PASS_REFERRAL",
+      "entity": "referrals",
+      "entityId": "ref_1795080262979",
+      "details": "{\"toMemberId\":\"mem_002\",\"clientName\":\"அரூர் கார்த்திக் வில்லா\",\"expectedValue\":1000000}",
+      "timestamp": "2026-11-19T09:24:22.979Z"
+    },
+    {
+      "id": "aud_1795080262944_225",
+      "actorId": "public",
+      "action": "LOCK_CATEGORY_SEAT",
+      "entity": "memberships",
+      "entityId": "mem_1795080262944",
+      "details": "{\"talukId\":\"pennagaram\",\"categoryId\":\"transport_logistics\",\"businessName\":\"பென்னாகரம் வெற்றிவேல் சர்வீஸ்\",\"totalAmount\":20650}",
+      "timestamp": "2026-11-19T09:24:22.944Z"
+    },
+    {
+      "id": "aud_1795080262891_677",
+      "actorId": "usr_1795080262891",
+      "action": "REGISTER_USER",
+      "entity": "users",
+      "entityId": "usr_1795080262891",
+      "details": "{\"name\":\"செல்வகுமார் (Test Owner)\",\"phone\":\"9842637859\",\"role\":\"member\"}",
+      "timestamp": "2026-11-19T09:24:22.891Z"
+    },
     {
       "id": "aud_1795078034167_64",
       "actorId": "usr_admin",
@@ -13300,6 +13487,33 @@
   ],
   "notifications": [
     {
+      "id": "notif_1795080263236",
+      "userId": "mem_001",
+      "title": "🎉 வாழ்த்துகள்! உங்கள் விலைப்புள்ளி தேர்வு செய்யப்பட்டது (Quotation Selected!)",
+      "message": "வாடிக்கையாளர் ரவிச்சந்திரன் பில்டர்ஸ் உங்கள் ₹202100 விலைப்புள்ளியை ஏற்றுக்கொண்டார். தொடர்பு எண்: 9842556677",
+      "type": "deal_won",
+      "read": false,
+      "createdAt": "2026-11-19T09:24:23.236Z"
+    },
+    {
+      "id": "notif_1795080263198",
+      "userId": "cust_mwncfvnd",
+      "title": "💼 புதிய விலைப்புள்ளி வந்தது (New Quotation Received)",
+      "message": "ஹரூர் ஸ்ரீ கணபதி சிமெண்ட் உங்கள் தேவைக்கு ₹202100 விலையை சமர்ப்பித்துள்ளனர்.",
+      "type": "quotation_received",
+      "read": false,
+      "createdAt": "2026-11-19T09:24:23.198Z"
+    },
+    {
+      "id": "notif_1795080263161",
+      "userId": "biz_1794532990067",
+      "title": "🛒 புதிய மார்க்கெட்பிளேஸ் தேவை (New Marketplace Requirement)",
+      "message": "உங்கள் பிரிவில் புதிய தேவை சமர்ப்பிக்கப்பட்டுள்ளது: 500 மூட்டை ஸ்டீல் & சிமெண்ட் தேவை (HARUR)",
+      "type": "marketplace_lead",
+      "read": false,
+      "createdAt": "2026-11-19T09:24:23.161Z"
+    },
+    {
       "id": "notif_1795078034232",
       "userId": "mem_001",
       "title": "🎉 வாழ்த்துகள்! உங்கள் விலைப்புள்ளி தேர்வு செய்யப்பட்டது (Quotation Selected!)",
@@ -14083,6 +14297,39 @@
     }
   ],
   "customerRequirements": [
+    {
+      "id": "REQ-MWNCFVND",
+      "customerId": "cust_mwncfvnd",
+      "customerName": "ரவிச்சந்திரன் பில்டர்ஸ்",
+      "customerPhone": "9842556677",
+      "customerEmail": "ravi.build@gmail.com",
+      "title": "500 மூட்டை ஸ்டீல் & சிமெண்ட் தேவை",
+      "categoryId": "steel_cement",
+      "categoryName": "ஸ்டீல் & சிமெண்ட்",
+      "quantity": 500,
+      "unit": "மூட்டை",
+      "brandPreference": "விருப்பத்தேர்வு (Any)",
+      "specifications": "",
+      "deliveryDistrict": "dharmapuri",
+      "deliveryTaluk": "harur",
+      "deliveryAddress": "",
+      "pinCode": "",
+      "deliveryRequired": true,
+      "requiredDate": "2026-11-26",
+      "status": "selected",
+      "matchedChapterIds": [
+        "pennagaram_apex"
+      ],
+      "matchedMemberIds": [
+        "biz_1794532990067"
+      ],
+      "selectedQuotationId": "QUO-MWNCFVOE",
+      "selectedSupplierId": "mem_001",
+      "contactConsent": true,
+      "consentTimestamp": "2026-11-19T09:24:23.236Z",
+      "createdAt": "2026-11-19T09:24:23.161Z",
+      "deadline": "2026-11-24T09:24:23.161Z"
+    },
     {
       "id": "REQ-MWNB43RB",
       "customerId": "cust_mwnb43rb",
@@ -15247,6 +15494,34 @@
   ],
   "quotations": [
     {
+      "id": "QUO-MWNCFVOE",
+      "requirementId": "REQ-MWNCFVND",
+      "supplierMemberId": "mem_001",
+      "supplierBusinessName": "ஹரூர் ஸ்ரீ கணபதி சிமெண்ட்",
+      "supplierChapterId": "harur_titans",
+      "supplierPhone": "",
+      "unitPrice": 340,
+      "quantity": 500,
+      "subtotal": 170000,
+      "gstAmount": 30600,
+      "deliveryCharges": 1500,
+      "installationCharges": 0,
+      "discount": 0,
+      "finalTotal": 202100,
+      "deliveryTimeline": "24 மணி நேரத்தில் டெலிவரி",
+      "validityDays": 7,
+      "validUntil": "2026-11-26",
+      "stockAvailability": "ரெடி ஸ்டாக் (Ready in Stock)",
+      "paymentTerms": "பொருட்கள் கிடைத்ததும் NEFT/UPI",
+      "warrantyTerms": "நிறுவன தயாரிப்பு உத்தரவாதம்",
+      "notes": "",
+      "status": "selected",
+      "version": 1,
+      "history": [],
+      "createdAt": "2026-11-19T09:24:23.198Z",
+      "updatedAt": "2026-11-19T09:24:23.198Z"
+    },
+    {
       "id": "QUO-MWNB43RX",
       "requirementId": "REQ-MWNB43RB",
       "supplierMemberId": "mem_001",
@@ -16228,6 +16503,38 @@
     }
   ],
   "marketplaceOrders": [
+    {
+      "id": "ORD-MWNCFVPG",
+      "requirementId": "REQ-MWNCFVND",
+      "quotationId": "QUO-MWNCFVOE",
+      "customerId": "cust_mwncfvnd",
+      "customerName": "ரவிச்சந்திரன் பில்டர்ஸ்",
+      "customerPhone": "9842556677",
+      "customerEmail": "ravi.build@gmail.com",
+      "supplierMemberId": "mem_001",
+      "supplierBusinessName": "ஹரூர் ஸ்ரீ கணபதி சிமெண்ட்",
+      "itemTitle": "500 மூட்டை ஸ்டீல் & சிமெண்ட் தேவை",
+      "finalDealValue": 202100,
+      "orderStatus": "delivered",
+      "orderDate": "2026-11-19T09:24:23.236Z",
+      "expectedDeliveryDate": "2026-11-26",
+      "completedDate": "2026-11-19T09:24:23.288Z",
+      "verifiedBusinessValue": 202100,
+      "statusUpdates": [
+        {
+          "status": "confirmed",
+          "note": "வாடிக்கையாளர் விலைப்புள்ளியை தேர்வு செய்து ஆர்டர் உறுதிப்படுத்தினார்",
+          "time": "2026-11-19T09:24:23.236Z"
+        },
+        {
+          "status": "delivered",
+          "note": "பொருட்கள் முழுமையாக டெலிவரி செய்யப்பட்டது",
+          "actorId": "actor_system",
+          "time": "2026-11-19T09:24:23.288Z"
+        }
+      ],
+      "disputeId": null
+    },
     {
       "id": "ORD-MWNB43SO",
       "requirementId": "REQ-MWNB43RB",
@@ -17316,6 +17623,21 @@
     }
   ],
   "transactionReviews": [
+    {
+      "id": "REV-MWNCFVRH",
+      "orderId": "ORD-MWNCFVPG",
+      "customerId": "cust_mwncfvnd",
+      "customerName": "ரவிச்சந்திரன் பில்டர்ஸ்",
+      "supplierMemberId": "mem_001",
+      "supplierBusinessName": "ஹரூர் ஸ்ரீ கணபதி சிமெண்ட்",
+      "rating": 5,
+      "qualityRating": 5,
+      "communicationRating": 5,
+      "deliveryRating": 5,
+      "comment": "நேரத்திற்கு துல்லியமான டெலிவரி. மிகுந்த திருப்தி!",
+      "createdAt": "2026-11-19T09:24:23.309Z",
+      "verifiedPurchase": true
+    },
     {
       "id": "REV-MWNB43U0",
       "orderId": "ORD-MWNB43SO",

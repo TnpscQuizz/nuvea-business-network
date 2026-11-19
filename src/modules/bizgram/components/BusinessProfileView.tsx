@@ -274,12 +274,19 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
               />
             )}
 
-            {/* Video icon on top right */}
-            {post.type === 'video' && (
-              <div className="absolute top-2.5 right-2.5 text-white drop-shadow-md">
-                <Film className="w-4 h-4" />
-              </div>
-            )}
+            {/* Video icon or Pending Review icon on top right */}
+            <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+              {post.status === 'pending' && (
+                <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full shadow-md">
+                  ⏳ அட்மின் தணிக்கையில்
+                </span>
+              )}
+              {post.type === 'video' && (
+                <div className="text-white drop-shadow-md">
+                  <Film className="w-4 h-4" />
+                </div>
+              )}
+            </div>
 
             {/* Hover Dark Overlay with Stats (Instagram Style) */}
             <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-4 text-white text-xs font-black">
