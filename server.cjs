@@ -34,6 +34,11 @@ process.on('SIGTERM', () => {
   logServerEvent('[SIGNAL]: Received SIGTERM');
 });
 
+logServerEvent(`[SERVER STARTUP]: PID ${process.pid} at ${new Date().toISOString()}`);
+try {
+  process.stdin.resume();
+} catch (e) {}
+
 const db = require('./backend/database/db');
 
 // Modular Route Handlers
