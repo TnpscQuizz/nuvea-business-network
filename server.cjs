@@ -360,7 +360,7 @@ app.use((req, res) => {
 
 // Start Server
 if (require.main === module) {
-  const server = app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(` NUVEA BUSINESS NETWORK (NBN) SAAS PLATFORM RUNNING`);
     console.log(` URL: http://localhost:${PORT}`);
