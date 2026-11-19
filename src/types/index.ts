@@ -113,3 +113,53 @@ export type AppState = {
   marketplaceOrders: Order[];
   users: User[];
 };
+
+export type BizPost = {
+  id: string;
+  memberId: string;
+  businessName: string;
+  ownerName: string;
+  avatar: string;
+  taluk: string;
+  category: string;
+  type: 'video' | 'image';
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  caption: string;
+  priceTag?: string;
+  actionText: string;
+  phone: string;
+  likes: number;
+  isLiked?: boolean;
+  enquiriesCount: number;
+  commentsCount: number;
+  createdAt: string;
+  isReel?: boolean;
+};
+
+export type BizStory = {
+  id: string;
+  memberId: string;
+  businessName: string;
+  avatar: string;
+  mediaUrl: string;
+  caption: string;
+  offerBadge?: string;
+  expiresAt: string;
+  hasUnseen?: boolean;
+};
+
+export type BizEnquiryMessage = {
+  id: string;
+  threadId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  attachedPostId?: string;
+  attachedPostTitle?: string;
+  attachedPostThumb?: string;
+  attachedPrice?: string;
+  isQuotation?: boolean;
+  quotationData?: { items: string; amount: number; gst: number; total: number };
+  timestamp: string;
+};
