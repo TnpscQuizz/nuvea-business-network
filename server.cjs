@@ -1,7 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
+
+// Global Exception & Rejection Handlers to Prevent Server Crash on Remote Network Timeouts
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT EXCEPTION]:', err.message || err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[UNHANDLED REJECTION]:', reason?.message || reason);
+});
 
 const db = require('./backend/database/db');
 
