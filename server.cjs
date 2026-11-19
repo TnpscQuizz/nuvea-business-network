@@ -5,12 +5,33 @@ const fs = require('fs');
 require('dotenv').config();
 
 // Global Exception & Rejection Handlers to Prevent Server Crash on Remote Network Timeouts
+const logFile = path.join(__dirname, 'server.log');
+function logServerEvent(msg) {
+  try {
+    const entry = `[${new Date().toISOString()}] ${msg}\n`;
+    fs.appendFileSync(logFile, entry);
+    console.log(msg);
+  } catch (e) {}
+}
+
 process.on('uncaughtException', (err) => {
-  console.error('[UNCAUGHT EXCEPTION]:', err.message || err);
+  logServerEvent(`[UNCAUGHT EXCEPTION]: ${err.stack || err.message || err}`);
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('[UNHANDLED REJECTION]:', reason?.message || reason);
+  logServerEvent(`[UNHANDLED REJECTION]: ${reason?.stack || reason?.message || reason}`);
+});
+
+process.on('exit', (code) => {
+  logServerEvent(`[PROCESS EXIT]: Exiting with code: ${code}`);
+});
+
+process.on('SIGINT', () => {
+  logServerEvent('[SIGNAL]: Received SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  logServerEvent('[SIGNAL]: Received SIGTERM');
 });
 
 const db = require('./backend/database/db');
