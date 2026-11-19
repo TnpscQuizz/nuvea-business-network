@@ -373,14 +373,33 @@ app.post('/api/register', (req, res) => {
 
 // Single Page Application Fallback
 app.use((req, res) => {
+  // If an unmatched API route is requested, return 404 JSON
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: `API route not found: ${req.path}` });
+  }
+
   const distIndex = path.join(__dirname, 'dist', 'index.html');
   const pubIndex = path.join(__dirname, 'public', 'index.html');
-  if (fs.existsSync(distIndex)) {
-    res.sendFile(distIndex);
-  } else if (fs.existsSync(pubIndex)) {
-    res.sendFile(pubIndex);
+  const target = fs.existsSync(distIndex) ? distIndex : (fs.existsSync(pubIndex) ? pubIndex : null);
+
+  if (target) {
+    try {
+      const html = fs.readFileSync(target, 'utf8');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+    } catch (e) {
+      res.status(500).send('Internal Server Error');
+    }
   } else {
     res.status(404).send('Not Found');
+  }
+});
+
+// Express Central Error Handling Middleware (Catches All Unhandled Route & Stream Errors)
+app.use((err, req, res, next) => {
+  logServerEvent(`[EXPRESS ROUTE ERROR]: ${err.stack || err.message || err}`);
+  if (!res.headersSent) {
+    res.status(err.status || 500).json({ error: err.message || 'Server error' });
   }
 });
 
