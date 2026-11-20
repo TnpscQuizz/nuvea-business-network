@@ -11,7 +11,8 @@ import {
   INITIAL_BIZ_POSTS, 
   INITIAL_BIZ_STORIES, 
   INITIAL_ENQUIRIES,
-  DEFAULT_CURRENT_USER 
+  DEFAULT_CURRENT_USER,
+  INITIAL_REGISTERED_USERS
 } from './data/bizGramData';
 import { translations, type Language } from './data/translations';
 import { ShinegahLogo } from './components/ShinegahLogo';
@@ -46,6 +47,46 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('nbn_biz_authenticated') === 'true';
   });
+
+  // Dedicated Super Admin Portal View State (#admin URL hash or button trigger)
+  const [isSuperAdminView, setIsSuperAdminView] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hash === '#admin';
+    }
+    return false;
+  });
+
+  // Registered Users Directory with verification status (Persisted in localStorage)
+  const [registeredUsers, setRegisteredUsers] = useState<BizUser[]>(() => {
+    try {
+      const saved = localStorage.getItem('nbn_registered_users');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return INITIAL_REGISTERED_USERS;
+    } catch {
+      return INITIAL_REGISTERED_USERS;
+    }
+  });
+
+  // Persist registeredUsers changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('nbn_registered_users', JSON.stringify(registeredUsers));
+    } catch {}
+  }, [registeredUsers]);
+
+  // Listen to hashchange for direct #admin URL navigation
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#admin') {
+        setIsSuperAdminView(true);
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   // Language State: English by default, togglable in Settings
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -252,6 +293,37 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     }
   };
 
+  // Super Admin User Registration Approval Handlers
+  const handleApproveUser = (userId: string) => {
+    setRegisteredUsers((prev) => {
+      const updated = prev.map((u) =>
+        u.id === userId ? { ...u, verificationStatus: 'approved' as const } : u
+      );
+      try {
+        localStorage.setItem('nbn_registered_users', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleRejectUser = (userId: string, reason?: string) => {
+    setRegisteredUsers((prev) => {
+      const updated = prev.map((u) =>
+        u.id === userId
+          ? {
+              ...u,
+              verificationStatus: 'rejected' as const,
+              rejectionReason: reason || 'Compliance / Incomplete business credentials',
+            }
+          : u
+      );
+      try {
+        localStorage.setItem('nbn_registered_users', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
   // Handle Enquiry click from Post or Reel -> Opens Messages tab with attached card
   const handleSendEnquiry = (post: BizPost, customMsg?: string) => {
     setSelectedEnquiryPost(post);
@@ -336,11 +408,40 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
   const publicReels = publicPosts.filter((p) => p.type === 'video');
 
+  // Dedicated Standalone Super Admin Portal (#admin or directly triggered)
+  if (isSuperAdminView) {
+    return (
+      <SuperAdminConsole
+        posts={posts}
+        state={state}
+        registeredUsers={registeredUsers}
+        onApproveUser={handleApproveUser}
+        onRejectUser={handleRejectUser}
+        onApprovePost={handleApprovePost}
+        onRejectPost={handleRejectPost}
+        onDeletePost={handleDeletePost}
+        onExitAdmin={() => {
+          setIsSuperAdminView(false);
+          if (typeof window !== 'undefined' && window.location.hash === '#admin') {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+          setActiveTab('feed');
+        }}
+      />
+    );
+  }
+
   // Mandatory Business Authentication Gate (User must register/login before entering home screen)
   if (!isAuthenticated) {
     return (
       <BusinessAuthGate
         lang={currentLang}
+        onOpenSuperAdmin={() => {
+          setIsSuperAdminView(true);
+          if (typeof window !== 'undefined') {
+            window.location.hash = 'admin';
+          }
+        }}
         onAuthenticated={(user) => {
           setCurrentUser(user);
           setIsAuthenticated(true);
@@ -475,14 +576,19 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
             {/* 6. Admin Console */}
             <button
-              onClick={() => setActiveTab('admin')}
+              onClick={() => {
+                setIsSuperAdminView(true);
+                if (typeof window !== 'undefined') {
+                  window.location.hash = 'admin';
+                }
+              }}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
-                activeTab === 'admin'
+                isSuperAdminView || activeTab === 'admin'
                   ? 'bg-slate-950 text-white shadow-md font-extrabold'
                   : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
               }`}
             >
-              <Shield className="w-5 h-5" />
+              <Shield className="w-5 h-5 text-amber-400" />
               <span>{t.admin}</span>
             </button>
 
@@ -926,10 +1032,19 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           <SuperAdminConsole
             posts={posts}
             state={state}
+            registeredUsers={registeredUsers}
+            onApproveUser={handleApproveUser}
+            onRejectUser={handleRejectUser}
             onApprovePost={handleApprovePost}
             onRejectPost={handleRejectPost}
             onDeletePost={handleDeletePost}
-            onExitAdmin={() => setActiveTab('feed')}
+            onExitAdmin={() => {
+              setActiveTab('feed');
+              setIsSuperAdminView(false);
+              if (typeof window !== 'undefined' && window.location.hash === '#admin') {
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
+              }
+            }}
           />
         )}
 

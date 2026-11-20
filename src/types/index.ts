@@ -290,6 +290,10 @@ export type BizUser = {
   products?: BizProduct[]; // Phase 1: Mini Store Catalog
   ordersPlaced?: BizOrder[]; // Phase 2: User Order History ("My Purchases")
   ordersReceived?: BizOrder[]; // Phase 2: Business User Dashboard ("Sales & Order Management")
+  verificationStatus?: 'pending' | 'approved' | 'rejected'; // Super Admin Approval Gate
+  registeredAt?: string;
+  verificationTicket?: string;
+  rejectionReason?: string;
   blockedUsers: string[];
   liveLocationEnabled: boolean;
   mediaUploadQuality: 'high' | 'data_saver';

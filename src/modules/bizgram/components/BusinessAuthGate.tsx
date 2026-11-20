@@ -1,24 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, User, Phone, MapPin, Tag, Lock, ArrowRight, 
   CheckCircle2, Sparkles, ShieldCheck, FileCheck, Layers, 
-  ChevronRight, AlertCircle, Eye, EyeOff 
+  ChevronRight, AlertCircle, Eye, EyeOff, Clock, Shield, 
+  RefreshCw, Check, X, ExternalLink
 } from 'lucide-react';
 import type { BizUser } from '../../../types';
 import { ShinegahLogo } from './ShinegahLogo';
 import { translations, type Language } from '../data/translations';
+import { INITIAL_REGISTERED_USERS } from '../data/bizGramData';
 
 interface BusinessAuthGateProps {
   lang?: Language;
   onAuthenticated: (user: BizUser) => void;
+  onOpenSuperAdmin?: () => void;
 }
 
 export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
   lang = 'en',
   onAuthenticated,
+  onOpenSuperAdmin,
 }) => {
   const t = translations[lang] || translations.en;
   const [tab, setTab] = useState<'register' | 'login'>('register');
+
+  // Registered Users Registry in LocalStorage
+  const [registeredUsers, setRegisteredUsers] = useState<BizUser[]>(() => {
+    try {
+      const saved = localStorage.getItem('nbn_registered_users');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return INITIAL_REGISTERED_USERS;
+    } catch {
+      return INITIAL_REGISTERED_USERS;
+    }
+  });
+
+  // Pending Super Admin Approval User state (If set, displays waiting screen!)
+  const [pendingUser, setPendingUser] = useState<BizUser | null>(null);
+  const [checkStatusFeedback, setCheckStatusFeedback] = useState<{ type: 'pending' | 'approved' | 'rejected'; msg: string } | null>(null);
   
   // Registration Form State
   const [businessName, setBusinessName] = useState('');
@@ -37,6 +59,13 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
   // Login Form State
   const [loginIdentifier, setLoginIdentifier] = useState('shinegah.in');
   const [loginPassword, setLoginPassword] = useState('user123');
+
+  // Save registered users whenever updated
+  useEffect(() => {
+    try {
+      localStorage.setItem('nbn_registered_users', JSON.stringify(registeredUsers));
+    } catch {}
+  }, [registeredUsers]);
 
   const categories = [
     'Manufacturing',
@@ -67,6 +96,7 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
     'Harur'
   ];
 
+  // Handle New Business Registration
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -90,6 +120,7 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
 
     const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
     const cleanPhone = phone.trim().replace(/\D/g, '');
+    const ticketId = `SHN-VER-${Math.floor(10000 + Math.random() * 90000)}`;
 
     const newUser: BizUser = {
       id: `usr_${Date.now()}`,
@@ -102,22 +133,25 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
       coverUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
       taluk: district,
       category,
-      bio: `${businessName.trim()} | Verified B2B Trade & Manufacturing. Connecting across Tamil Nadu.`,
+      bio: `${businessName.trim()} | Verified B2B Trade & Manufacturing. Registered on Shinegah Network.`,
       locationTag: `${district}, Tamil Nadu`,
       gstin: gstin.trim().toUpperCase() || '33AABCS1429B1Z2',
-      followersCount: 1,
-      followingCount: 12,
+      followersCount: 0,
+      followingCount: 0,
       postsCount: 0,
       validityDaysLeft: 365,
+      verificationStatus: 'pending', // MUST WAIT FOR SUPER ADMIN APPROVAL!
+      verificationTicket: ticketId,
+      registeredAt: 'Just now',
       isPrivateAccount: false,
       requiresFollowApproval: true,
-      approvedConnections: ['shinegah.in', 'salem_royal_silks'],
+      approvedConnections: ['shinegah.in'],
       followRequests: [],
       outlets: [
         {
           id: `out_${Date.now()}`,
-          name: `${businessName.trim()} - Main Outlet`,
-          address: `Industrial Estate, ${district} - 600001`,
+          name: `${businessName.trim()} - Main Unit`,
+          address: `Industrial Sector, ${district} - 600001`,
           phone: cleanPhone || '+91 94432 10987',
           timing: '09:00 AM - 08:00 PM (Mon-Sat)',
           isPrimary: true,
@@ -138,12 +172,21 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
       contentPreferences: [category, 'Manufacturing', 'Technology'],
     };
 
+    // Save to registered users list
+    const updated = [newUser, ...registeredUsers];
+    setRegisteredUsers(updated);
+    try {
+      localStorage.setItem('nbn_registered_users', JSON.stringify(updated));
+    } catch {}
+
     setTimeout(() => {
       setIsLoading(false);
-      onAuthenticated(newUser);
-    }, 600);
+      // USER MUST WAIT FOR ADMIN APPROVAL - DISPLAY PENDING VERIFICATION SCREEN!
+      setPendingUser(newUser);
+    }, 700);
   };
 
+  // Handle Login Attempt
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -157,134 +200,240 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
 
     setTimeout(() => {
       setIsLoading(false);
-      // Demo accounts or custom
       const idClean = loginIdentifier.trim().toLowerCase();
+
+      // Find user in registered registry
+      const foundUser = registeredUsers.find(
+        (u) =>
+          u.username.toLowerCase() === idClean ||
+          u.phone.replace(/\D/g, '') === idClean.replace(/\D/g, '') ||
+          u.email.toLowerCase() === idClean
+      );
+
+      if (foundUser) {
+        const status = foundUser.verificationStatus || 'approved';
+
+        if (status === 'pending') {
+          // If pending, user must wait for admin approval!
+          setPendingUser(foundUser);
+          return;
+        }
+
+        if (status === 'rejected') {
+          setErrorMsg('Your business registration was reviewed and rejected by Super Admin. Please contact admin hotline for assistance.');
+          return;
+        }
+
+        // Approved -> Enter App!
+        onAuthenticated(foundUser);
+        return;
+      }
+
+      // Default demo fallbacks if username contains 'salem' or 'shinegah'
       if (idClean.includes('salem')) {
-        onAuthenticated({
-          id: 'usr_salem_silks',
-          username: 'salem_royal_silks',
-          businessName: 'Salem Royal Silk Weaving Mills',
-          ownerName: 'Ramesh Kumar',
-          email: 'ramesh@salemsilks.com',
-          phone: '919443210001',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
-          coverUrl: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80',
-          taluk: 'Salem',
-          category: 'Textiles & Handloom Silk',
-          bio: 'Direct Manufacturer of Pure Zari Kanchipuram & Salem Silk Sarees. Wholesale export.',
-          locationTag: 'Salem, Tamil Nadu',
-          gstin: '33AABCS8899Z1Z4',
-          followersCount: 8420,
-          followingCount: 198,
-          postsCount: 18,
-          validityDaysLeft: 310,
-          isPrivateAccount: false,
-          requiresFollowApproval: true,
-          approvedConnections: ['shinegah.in', 'sri_venkateswara_traders'],
-          followRequests: [],
-          outlets: [
-            {
-              id: 'out_salem_1',
-              name: 'Salem Flagship Weaving Unit',
-              address: '14, Main Road, Shevapet, Salem - 636002',
-              phone: '+91 94432 10001',
-              timing: '09:00 AM - 09:00 PM',
-              isPrimary: true,
-              district: 'Salem',
-            }
-          ],
-          blockedUsers: [],
-          liveLocationEnabled: true,
-          mediaUploadQuality: 'high',
-          devicePermissions: {
-            camera: true,
-            microphone: true,
-            location: true,
-            contacts: true,
-            notifications: true,
-            talkBox: true,
-          },
-          contentPreferences: ['Textiles & Silk', 'Manufacturing'],
-        });
+        const salemUser = registeredUsers.find((u) => u.username === 'salem_royal_silks') || INITIAL_REGISTERED_USERS[1];
+        onAuthenticated(salemUser);
       } else {
-        // Default Shinegah
-        onAuthenticated({
-          id: 'usr_shinegah',
-          username: 'shinegah.in',
-          businessName: 'Shinegah™ Enterprise Network',
-          ownerName: 'Chandru S',
-          email: 'connect@shinegah.in',
-          phone: '917548820641',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-          coverUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
-          taluk: 'Chennai',
-          category: 'Technology • Enterprise Network • Innovation',
-          bio: 'Empowering Businesses to Grow Together ✨ | The Next-Gen Business Social Network | Verified B2B Trade Infrastructure',
-          locationTag: 'Chennai, Tamil Nadu',
-          website: 'https://shinegah.in',
-          gstin: '33AABCS1429B1Z2',
-          followersCount: 12500,
-          followingCount: 245,
-          postsCount: 24,
-          validityDaysLeft: 364,
-          isPrivateAccount: false,
-          requiresFollowApproval: true,
-          approvedConnections: ['salem_royal_silks', 'sri_venkateswara_traders', 'kongu_agro'],
-          followRequests: [
-            {
-              id: 'req_coimbatore_cnc',
-              username: 'coimbatore_precision_cnc',
-              businessName: 'Coimbatore Precision CNC Tools',
-              avatar: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=200&q=80',
-              category: 'CNC Machining & Tooling',
-              requestedAt: '12m ago',
-            },
-            {
-              id: 'req_erode_handloom',
-              username: 'erode_weaver_coop',
-              businessName: 'Erode Handloom Weavers Federation',
-              avatar: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80',
-              category: 'Textiles & Handloom Silk',
-              requestedAt: '1h ago',
-            }
-          ],
-          outlets: [
-            {
-              id: 'out_1',
-              name: 'Corporate HQ & Innovation Lab',
-              address: 'Plot 42, OMR IT Expressway, Taramani, Chennai - 600113',
-              phone: '+91 75488 20641',
-              timing: '09:00 AM - 07:00 PM (Mon-Sat)',
-              isPrimary: true,
-              district: 'Chennai',
-            },
-            {
-              id: 'out_2',
-              name: 'Western Hub & Enterprise Center',
-              address: '14, Fort Main Road, Salem Bazaar, Salem - 636001',
-              phone: '+91 94432 10987',
-              timing: '09:30 AM - 08:30 PM (Mon-Sat)',
-              isPrimary: false,
-              district: 'Salem',
-            }
-          ],
-          blockedUsers: ['spam_trader_01'],
-          liveLocationEnabled: true,
-          mediaUploadQuality: 'high',
-          devicePermissions: {
-            camera: true,
-            microphone: true,
-            location: true,
-            contacts: true,
-            notifications: true,
-            talkBox: true,
-          },
-          contentPreferences: ['Technology', 'Manufacturing', 'Retail'],
-        });
+        const shinegahUser = registeredUsers.find((u) => u.username === 'shinegah.in') || INITIAL_REGISTERED_USERS[0];
+        onAuthenticated(shinegahUser);
       }
     }, 500);
   };
 
+  // Live Refresh Approval Status from localStorage
+  const handleCheckApprovalStatus = () => {
+    if (!pendingUser) return;
+
+    try {
+      const saved = localStorage.getItem('nbn_registered_users');
+      if (saved) {
+        const currentList: BizUser[] = JSON.parse(saved);
+        const freshUser = currentList.find((u) => u.id === pendingUser.id || u.username === pendingUser.username);
+
+        if (freshUser) {
+          const freshStatus = freshUser.verificationStatus || 'pending';
+          
+          if (freshStatus === 'approved') {
+            setCheckStatusFeedback({
+              type: 'approved',
+              msg: '🎉 Congratulations! Your business profile has been approved by Super Admin!',
+            });
+            setTimeout(() => {
+              onAuthenticated(freshUser);
+            }, 1200);
+            return;
+          }
+
+          if (freshStatus === 'rejected') {
+            setCheckStatusFeedback({
+              type: 'rejected',
+              msg: 'Your application was rejected by Super Admin. Reason: Compliance / Incomplete credentials.',
+            });
+            return;
+          }
+        }
+      }
+    } catch {}
+
+    setCheckStatusFeedback({
+      type: 'pending',
+      msg: 'Status: Still Pending Review by Super Admin. (Tip: You can click "Open Super Admin Portal" below to approve this profile right now!)',
+    });
+  };
+
+  // =========================================================================
+  // VIEW: WAITING FOR SUPER ADMIN APPROVAL (MANDATORY GATE REQUESTED BY USER)
+  // =========================================================================
+  if (pendingUser) {
+    return (
+      <div className="min-h-screen white-glow-canvas flex flex-col justify-center items-center p-4 sm:p-6 select-none font-sans relative">
+        
+        {/* Radiant Ambient Light Orbs */}
+        <div className="fixed top-10 left-1/3 w-[600px] h-[600px] bg-white rounded-full blur-[140px] opacity-95 pointer-events-none" />
+
+        <div className="relative z-10 w-full max-w-xl apple-glass apple-specular-edge rounded-[38px] overflow-hidden shadow-[0_25px_60px_rgba(15,23,42,0.1),0_0_50px_rgba(255,255,255,1)] border-2 border-white p-6 sm:p-10 space-y-6 bg-white/95 text-center">
+          
+          {/* Glowing Hourglass & Verification Badge */}
+          <div className="w-20 h-20 rounded-3xl bg-amber-500/10 border-2 border-amber-400 text-amber-600 flex items-center justify-center mx-auto shadow-xl shadow-amber-500/10 relative">
+            <Clock className="w-10 h-10 animate-pulse text-amber-600" />
+            <div className="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-slate-950 text-white shadow-md">
+              <Shield className="w-4 h-4 text-amber-300" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black uppercase tracking-wider inline-block">
+              ⏳ AWAITING SUPER ADMIN APPROVAL
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              Business Registration Under Review
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
+              Your profile has been submitted to Shinegah™ Super Admin. To prevent brokers and ensure verified wholesale trade, an admin must approve your profile before you can access the platform.
+            </p>
+          </div>
+
+          {/* Application Details Summary Card */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2.5 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span className="text-slate-500">Verification Ticket #:</span>
+              <span className="font-mono font-black text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                {pendingUser.verificationTicket || 'SHN-VER-94821'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <span className="text-slate-500 block text-[10px]">Business Name</span>
+                <span className="font-black text-slate-900 text-sm">{pendingUser.businessName}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px]">Owner / Director</span>
+                <span className="font-extrabold text-slate-900 text-sm">{pendingUser.ownerName}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px]">Category</span>
+                <span className="font-bold text-slate-800">{pendingUser.category}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px]">District / Location</span>
+                <span className="font-bold text-slate-800">{pendingUser.taluk}, Tamil Nadu</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px]">GSTIN / Tax ID</span>
+                <span className="font-mono font-bold text-slate-800">{pendingUser.gstin || '33AABCS1429B1Z2'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px]">Mobile</span>
+                <span className="font-mono font-bold text-slate-800">{pendingUser.phone}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3-Milestone Verification Roadmap */}
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-2 text-left">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              Verification Milestones
+            </div>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>1. Registration Dossier Submitted</span>
+              </div>
+              <div className="flex items-center gap-2 text-amber-700 font-bold">
+                <Clock className="w-4 h-4 text-amber-600 animate-spin" />
+                <span>2. GSTIN & Corporate Entity Audit (In Progress)</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-400 font-medium">
+                <Lock className="w-4 h-4" />
+                <span>3. Super Admin Approval & Trade Feed Activation</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Feedback Message if checked */}
+          {checkStatusFeedback && (
+            <div className={`p-3 rounded-2xl text-xs font-bold text-left flex items-start gap-2 ${
+              checkStatusFeedback.type === 'approved'
+                ? 'bg-emerald-50 border border-emerald-300 text-emerald-800'
+                : checkStatusFeedback.type === 'rejected'
+                ? 'bg-rose-50 border border-rose-300 text-rose-800'
+                : 'bg-amber-50 border border-amber-300 text-amber-800'
+            }`}>
+              {checkStatusFeedback.type === 'approved' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              )}
+              <span>{checkStatusFeedback.msg}</span>
+            </div>
+          )}
+
+          {/* Primary Action Buttons */}
+          <div className="space-y-2.5 pt-2">
+            <button
+              type="button"
+              onClick={handleCheckApprovalStatus}
+              className="w-full py-3.5 bg-slate-950 hover:bg-black text-white rounded-full text-xs font-black shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Check Approval Status</span>
+            </button>
+
+            {/* Quick Link to Super Admin Console (For instant demo testing!) */}
+            {onOpenSuperAdmin && (
+              <button
+                type="button"
+                onClick={onOpenSuperAdmin}
+                className="w-full py-3 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <Shield className="w-4 h-4 text-amber-600" />
+                <span>Open Super Admin Portal to Approve This Profile</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setPendingUser(null);
+                setTab('login');
+              }}
+              className="text-xs text-slate-500 hover:text-slate-900 font-bold transition cursor-pointer pt-1"
+            >
+              ← Back to Sign In / Switch Account
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // VIEW: REGISTRATION & LOGIN FORM
+  // =========================================================================
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 overflow-hidden select-none font-sans">
       
@@ -294,39 +443,56 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
       <div className="fixed top-[40%] left-[30%] w-[500px] h-[500px] bg-slate-100 rounded-full blur-[120px] opacity-80 pointer-events-none" />
 
       {/* Main Glass Card Container */}
-      <div className="relative z-10 w-full max-w-xl apple-glass apple-specular-edge rounded-[40px] overflow-hidden shadow-[0_25px_60px_rgba(15,23,42,0.08),0_0_50px_rgba(255,255,255,1)] border-2 border-white p-6 sm:p-10 space-y-7">
+      <div className="relative z-10 w-full max-w-xl apple-glass apple-specular-edge rounded-[40px] overflow-hidden shadow-[0_25px_60px_rgba(15,23,42,0.08),0_0_50px_rgba(255,255,255,1)] border-2 border-white p-6 sm:p-10 space-y-7 bg-white/90">
         
+        {/* Top Super Admin Portal Button */}
+        {onOpenSuperAdmin && (
+          <div className="flex justify-end -mt-2 -mr-2">
+            <button
+              onClick={onOpenSuperAdmin}
+              className="px-3.5 py-1.5 rounded-full bg-slate-950 text-white text-[11px] font-black flex items-center gap-1.5 shadow-sm hover:bg-black transition cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-300" />
+              <span>Super Admin Portal</span>
+            </button>
+          </div>
+        )}
+
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-3">
-          <div className="scale-110 drop-shadow-sm">
-            <ShinegahLogo size="md" />
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Shinegah™ Business Gateway
+          <ShinegahLogo size="lg" />
+          
+          <div className="space-y-1">
+            <span className="px-3 py-1 rounded-full bg-slate-950 text-white text-[10px] font-mono font-black uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
+              <span>Verified B2B Enterprise Portal</span>
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              {tab === 'register' ? 'Register Your Business Profile' : 'Business Account Sign In'}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-md mt-1">
-              The Next-Gen Business Social Network. All enterprise owners must register or sign in to enter the portal.
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              {tab === 'register' 
+                ? 'Join 2,000+ verified manufacturers, wholesalers & enterprise leaders across Tamil Nadu.' 
+                : 'Access your verified B2B network, CRM leads, wholesale store & consignment orders.'}
             </p>
           </div>
         </div>
 
-        {/* Tab Segment Switcher (Apple White Glow Glass Pill) */}
-        <div className="p-1 rounded-full bg-white/70 border border-white shadow-inner flex items-center gap-1">
+        {/* Segmented Switcher (Register / Sign In) */}
+        <div className="p-1 rounded-2xl bg-white/80 border border-slate-200 grid grid-cols-2 gap-1 text-xs font-black shadow-sm">
           <button
             type="button"
             onClick={() => {
               setTab('register');
               setErrorMsg('');
             }}
-            className={`flex-1 py-3 rounded-full text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center justify-center gap-2 ${
+            className={`py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-2 ${
               tab === 'register'
                 ? 'bg-slate-950 text-white shadow-md'
                 : 'text-slate-600 hover:text-slate-950'
             }`}
           >
-            <Building2 className="w-4 h-4" />
-            <span>Business Registration</span>
+            <span>Register Profile</span>
           </button>
 
           <button
@@ -335,149 +501,120 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
               setTab('login');
               setErrorMsg('');
             }}
-            className={`flex-1 py-3 rounded-full text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center justify-center gap-2 ${
+            className={`py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-2 ${
               tab === 'login'
                 ? 'bg-slate-950 text-white shadow-md'
                 : 'text-slate-600 hover:text-slate-950'
             }`}
           >
-            <User className="w-4 h-4" />
-            <span>Member Sign In</span>
+            <span>Sign In</span>
           </button>
         </div>
 
-        {/* Error Alert if any */}
+        {/* Error Notification */}
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2 animate-shake">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-bold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* ========================================================================= */}
-        {/* 1. REGISTRATION FORM                                                      */}
-        {/* ========================================================================= */}
+        {/* 1. REGISTRATION FORM */}
         {tab === 'register' && (
           <form onSubmit={handleRegister} className="space-y-4">
             
-            {/* Business Trade Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-800 flex items-center justify-between">
-                <span>Business Trade Name *</span>
-                <span className="text-[10px] text-slate-500 font-normal">Official Brand</span>
-              </label>
-              <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Company / Business Name *</span>
+                </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Sri Venkateswara Steels & Alloys"
+                  placeholder="e.g. Kongu Precision Tools"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-sm"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
                 />
-                <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Managing Director / Owner *</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
+                />
               </div>
             </div>
 
-            {/* Owner Name + Username Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Owner / Director Name *
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800">
+                  Unique Handle (@username) *
                 </label>
                 <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs">@</span>
                   <input
                     type="text"
                     required
-                    placeholder="Chandru S"
-                    value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-sm"
-                  />
-                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Business Handle (@handle) *
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    placeholder="venkateswara_steels"
+                    placeholder="kongu_tools"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 shadow-sm"
+                    className="w-full pl-8 pr-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
                   />
-                  <span className="text-xs font-black text-slate-400 absolute left-4 top-1/2 -translate-y-1/2">@</span>
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Official Mobile Number *</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="919842100000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono"
+                />
               </div>
             </div>
 
-            {/* Mobile / WhatsApp + GSTIN */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Phone / WhatsApp *
-                </label>
-                <div className="relative">
-                  <input
-                    type="tel"
-                    required
-                    placeholder="917548820641"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 shadow-sm"
-                  />
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800 flex items-center justify-between">
-                  <span>GSTIN (Verified B2B)</span>
-                  <span className="text-[10px] text-emerald-600 font-bold">Recommended</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="33AABCS1429B1Z2"
-                    value={gstin}
-                    onChange={(e) => setGstin(e.target.value.toUpperCase())}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 shadow-sm"
-                  />
-                  <FileCheck className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                </div>
-              </div>
-            </div>
-
-            {/* Category + District Dropdowns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Primary Category *
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Industry Category</span>
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 shadow-sm cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
                 >
-                  {categories.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  District / Location *
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-slate-600" />
+                  <span>District / Headquarter</span>
                 </label>
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 shadow-sm cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
                 >
                   {districts.map((d) => (
                     <option key={d} value={d}>{d}</option>
@@ -486,11 +623,25 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
               </div>
             </div>
 
-            {/* Password */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Password *
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <FileCheck className="w-3.5 h-3.5 text-slate-600" />
+                <span>GSTIN / Business Registration Number</span>
+              </label>
+              <input
+                type="text"
+                placeholder="33AABCS1429B1Z2 (Optional)"
+                value={gstin}
+                onChange={(e) => setGstin(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-mono uppercase"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Set Password *</span>
                 </label>
                 <div className="relative">
                   <input
@@ -499,48 +650,51 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-sm"
+                    className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
                   />
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="p-1 text-slate-400 hover:text-slate-700 absolute right-3 top-1/2 -translate-y-1/2"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-800"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Confirm Password *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-sm"
-                  />
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-800">Confirm Password *</label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
+                />
               </div>
             </div>
 
-            {/* Register Action Button */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-950 text-xs space-y-1">
+              <div className="font-bold flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Super Admin Verification Required</span>
+              </div>
+              <p className="text-[11px] text-amber-800 leading-relaxed">
+                After submission, your account will enter the Super Admin Review Queue. You will wait until an administrator approves your profile before accessing feed, reels, and marketplace tools.
+              </p>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 rounded-full bg-slate-950 text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)] hover:bg-black hover:scale-[1.01] active:scale-[0.99] transition cursor-pointer mt-4"
+              className="w-full py-4 bg-slate-950 hover:bg-black text-white rounded-full text-xs font-black shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Registering Profile & Submitting for Verification...</span>
               ) : (
                 <>
-                  <span>Register Business & Enter Shinegah</span>
+                  <span>Submit Profile for Super Admin Approval</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -548,129 +702,93 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
           </form>
         )}
 
-        {/* ========================================================================= */}
-        {/* 2. SIGN IN FORM                                                           */}
-        {/* ========================================================================= */}
+        {/* 2. SIGN IN FORM */}
         {tab === 'login' && (
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-800">
-                Business Username, Phone or Email
+          <form onSubmit={handleLogin} className="space-y-4">
+            
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-800">
+                Business Username, Mobile or Email
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. shinegah.in or 917548820641"
-                  value={loginIdentifier}
-                  onChange={(e) => setLoginIdentifier(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-sm"
-                />
-                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              </div>
+              <input
+                type="text"
+                required
+                placeholder="e.g. shinegah.in / 917548820641"
+                value={loginIdentifier}
+                onChange={(e) => setLoginIdentifier(e.target.value)}
+                className="w-full px-3.5 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
+              />
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-extrabold text-slate-800">
-                  Password
-                </label>
-                <span className="text-[11px] text-slate-500 font-semibold hover:underline cursor-pointer">
-                  Forgot password?
-                </span>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3.5 rounded-2xl bg-white/80 border border-white/95 focus:bg-white focus:border-slate-400 focus:outline-none text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 shadow-sm"
-                />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="p-1 text-slate-400 hover:text-slate-700 absolute right-3 top-1/2 -translate-y-1/2"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-800">Password</label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                className="w-full px-3.5 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-slate-900 font-medium"
+              />
             </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-4 rounded-full bg-slate-950 text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(15,23,42,0.15)] hover:bg-black hover:scale-[1.01] active:scale-[0.99] transition cursor-pointer"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Sign In to Business Portal</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
 
             {/* Quick 1-Click Demo Accounts */}
-            <div className="pt-4 border-t border-white/80 space-y-2.5">
-              <span className="text-[11px] text-slate-500 font-bold block text-center uppercase tracking-wider">
-                Quick 1-Click Demo Logins
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                Instant Demo Account Logins:
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={() => {
                     setLoginIdentifier('shinegah.in');
                     setLoginPassword('user123');
-                    handleLogin({ preventDefault: () => {} } as any);
                   }}
-                  className="p-3 rounded-2xl bg-white/85 hover:bg-white border border-white flex items-center gap-2.5 text-left transition cursor-pointer shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 hover:border-slate-900 text-xs font-extrabold text-slate-900 shadow-sm cursor-pointer transition"
                 >
-                  <div className="w-7 h-7 rounded-full bg-slate-950 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    S
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-extrabold text-slate-900 truncate">Shinegah™ Enterprise</div>
-                    <div className="text-[10px] text-slate-500 truncate">@shinegah.in • Chennai</div>
-                  </div>
+                  @shinegah.in (Approved HQ)
                 </button>
-
                 <button
                   type="button"
                   onClick={() => {
                     setLoginIdentifier('salem_royal_silks');
                     setLoginPassword('user123');
-                    handleLogin({ preventDefault: () => {} } as any);
                   }}
-                  className="p-3 rounded-2xl bg-white/85 hover:bg-white border border-white flex items-center gap-2.5 text-left transition cursor-pointer shadow-sm"
+                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 hover:border-slate-900 text-xs font-extrabold text-slate-900 shadow-sm cursor-pointer transition"
                 >
-                  <div className="w-7 h-7 rounded-full bg-slate-950 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    R
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-extrabold text-slate-900 truncate">Salem Royal Silks</div>
-                    <div className="text-[10px] text-slate-500 truncate">@salem_royal_silks • Salem</div>
-                  </div>
+                  @salem_royal_silks (Approved)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginIdentifier('coimbatore_precision_forgings');
+                    setLoginPassword('user123');
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 hover:border-amber-900 text-xs font-extrabold text-amber-900 shadow-sm cursor-pointer transition"
+                >
+                  @coimbatore_forgings (Pending Approval)
                 </button>
               </div>
             </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-4 bg-slate-950 hover:bg-black text-white rounded-full text-xs font-black shadow-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span>Verifying Account Credentials...</span>
+              ) : (
+                <>
+                  <span>Sign In to Network</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
           </form>
         )}
 
-        {/* Bottom Trust Footer */}
-        <div className="pt-4 border-t border-white/80 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>256-Bit Encrypted B2B Network</span>
-          </div>
-          <span>NBN Shinegah v3.5</span>
-        </div>
-
       </div>
-
     </div>
   );
 };
