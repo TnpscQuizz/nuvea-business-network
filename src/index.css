@@ -3,25 +3,25 @@
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #f8fafc;
-    color: #1e293b;
+    background-color: #070913;
+    color: #f1f5f9;
   }
 }
 
-/* Custom scrollbars for category tables and horizontal lists */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: rgba(10, 15, 30, 0.6);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(255, 255, 255, 0.32);
 }
 
 /* Pulsing badge animation */
@@ -33,3 +33,75 @@
 .animate-pulse-subtle {
   animation: pulse-subtle 2.5s infinite ease-in-out;
 }
+
+/* ========================================================================= */
+/* APPLE LIQUID GLASS SPECULAR SHINE & REFLECTIVE EDGE STYLING               */
+/* Exact Apple iOS / macOS / visionOS glassmorphism with high-gloss edges     */
+/* ========================================================================= */
+
+.apple-glass {
+  background: rgba(13, 18, 38, 0.78);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.38);
+  border-left-color: rgba(255, 255, 255, 0.28);
+  border-right-color: rgba(255, 255, 255, 0.20);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.45),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset -1px 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5),
+    0 16px 45px -8px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+.apple-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 30%, transparent 65%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.apple-glass-shiny {
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-glass-shiny::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 35%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Glowing iridescent reflection along transparent borders */
+.apple-specular-edge {
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    inset 1px 0 1px rgba(255, 255, 255, 0.3),
+    inset -1px 0 1px rgba(255, 255, 255, 0.2),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Pulsing radar sonar ring for map */
+@keyframes radar-sonar {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+.animate-radar-sonar {
+  animation: radar-sonar 2.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+

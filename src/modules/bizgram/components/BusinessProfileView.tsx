@@ -45,7 +45,7 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
     <div className="max-w-4xl mx-auto space-y-6 pb-24 select-none font-sans">
       
       {/* 1. PROFILE HEADER CARD (EXACT MOCKUP) */}
-      <div className="bg-[#0e1428]/90 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+      <div className="apple-glass apple-specular-edge rounded-[32px] overflow-hidden shadow-2xl">
         
         {/* Cover Photo: Architectural Glass Corporate Building */}
         <div className="relative h-44 sm:h-56 w-full overflow-hidden bg-slate-900">

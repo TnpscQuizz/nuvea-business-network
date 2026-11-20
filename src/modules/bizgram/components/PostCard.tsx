@@ -66,7 +66,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
-    <article className="bg-[#0e1428]/90 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.5)] overflow-hidden transition hover:border-white/20 select-none">
+    <article className="apple-glass apple-specular-edge rounded-[32px] overflow-hidden transition select-none hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
       
       {/* 1. POST HEADER (MATCHING MOCKUP) */}
       <div className="p-4 flex items-center justify-between">

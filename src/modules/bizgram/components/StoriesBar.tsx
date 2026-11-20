@@ -65,7 +65,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
   return (
     <>
       {/* HORIZONTAL STORIES ROW (EXACT MOCKUP) */}
-      <div className="bg-[#0c1224]/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-3.5 sm:p-4 shadow-[0_8px_30px_rgba(0,0,0,0.45)] overflow-x-auto scrollbar-none flex items-center gap-4 sm:gap-5 select-none">
+      <div className="apple-glass apple-specular-edge rounded-[32px] p-3.5 sm:p-4 overflow-x-auto scrollbar-none flex items-center gap-4 sm:gap-5 select-none shadow-2xl">
         
         {/* 1. + CREATE STORY BUBBLE */}
         <div 

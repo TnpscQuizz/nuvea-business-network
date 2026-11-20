@@ -3,7 +3,7 @@ import {
   Home, Compass, Film, MessageCircle, Plus, BarChart3, 
   User, Shield, Settings, LogOut, Clock, CheckCircle2, 
   Sparkles, ExternalLink, Menu, X, ArrowRight, Phone, Tag, 
-  MapPin, Bell, Search, TrendingUp, ShieldCheck 
+  MapPin, Bell, Search, TrendingUp, ShieldCheck, Camera, Gift, Briefcase 
 } from 'lucide-react';
 import type { AppState, BizPost, BizStory, BizEnquiryMessage, BizUser } from '../../types';
 import { 
@@ -76,7 +76,9 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const [threads, setThreads] = useState(INITIAL_ENQUIRIES);
   const [selectedEnquiryPost, setSelectedEnquiryPost] = useState<BizPost | null>(null);
 
-  // Modals state
+  // Modals & Action Menu state
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [modalAction, setModalAction] = useState<'post' | 'reel' | 'update' | 'offer'>('post');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -677,8 +679,95 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       {/* ========================================================================= */}
       {/* 4. FLOATING CURVED FROSTED GLASS DOCK (EXACT MATCH FROM MOCKUP)          */}
       {/* ========================================================================= */}
+      
+      {/* FLOATING ACTION POPUP MENU (EXACT MOCKUP BOTTOM CENTER) */}
+      {isActionMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-end justify-center pb-24 px-4 select-none animate-in fade-in duration-200"
+          onClick={() => setIsActionMenuOpen(false)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-xs apple-glass apple-specular-edge rounded-[28px] p-2.5 space-y-2 shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
+          >
+            {/* 1. Create Post */}
+            <button
+              onClick={() => {
+                setIsActionMenuOpen(false);
+                setModalAction('post');
+                setIsCreateModalOpen(true);
+              }}
+              className="w-full p-2.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 flex items-center gap-3 transition cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center group-hover:scale-110 transition shadow-[0_0_15px_rgba(168,85,247,0.3)] shrink-0">
+                <Camera className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-black text-xs sm:text-sm text-white">Create Post</div>
+                <div className="text-[10px] text-slate-400">புகைப்படம் / தயாரிப்பு பதிவு</div>
+              </div>
+            </button>
+
+            {/* 2. Create Reel */}
+            <button
+              onClick={() => {
+                setIsActionMenuOpen(false);
+                setModalAction('reel');
+                setIsCreateModalOpen(true);
+              }}
+              className="w-full p-2.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 flex items-center gap-3 transition cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center group-hover:scale-110 transition shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0">
+                <Film className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-black text-xs sm:text-sm text-white">Create Reel</div>
+                <div className="text-[10px] text-slate-400">நேரடி வீடியோ அப்லோட் (9:16)</div>
+              </div>
+            </button>
+
+            {/* 3. Share Business Update */}
+            <button
+              onClick={() => {
+                setIsActionMenuOpen(false);
+                setModalAction('update');
+                setIsCreateModalOpen(true);
+              }}
+              className="w-full p-2.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 flex items-center gap-3 transition cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center group-hover:scale-110 transition shadow-[0_0_15px_rgba(99,102,241,0.3)] shrink-0">
+                <Briefcase className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-black text-xs sm:text-sm text-white">Share Business Update</div>
+                <div className="text-[10px] text-slate-400">நிறுவன முக்கிய அறிவிப்புகள்</div>
+              </div>
+            </button>
+
+            {/* 4. Post Offer */}
+            <button
+              onClick={() => {
+                setIsActionMenuOpen(false);
+                setModalAction('offer');
+                setIsCreateModalOpen(true);
+              }}
+              className="w-full p-2.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/10 flex items-center gap-3 transition cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center group-hover:scale-110 transition shadow-[0_0_15px_rgba(236,72,153,0.3)] shrink-0">
+                <Gift className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-black text-xs sm:text-sm text-white">Post Offer</div>
+                <div className="text-[10px] text-slate-400">மொத்த விலை சலுகை தள்ளுபடி</div>
+              </div>
+            </button>
+
+          </div>
+        </div>
+      )}
+
       <nav className="md:hidden fixed bottom-4 inset-x-4 z-40 select-none">
-        <div className="bg-[#0d1226]/85 backdrop-blur-3xl border border-white/15 rounded-full px-5 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] flex items-center justify-between">
+        <div className="apple-glass apple-specular-edge rounded-full px-5 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.85)] flex items-center justify-between">
           
           {/* 1. Home */}
           <button
@@ -704,11 +793,12 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
           {/* 3. Center Glowing Plus Circle Button (Exact Mockup) */}
           <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="w-13 h-13 -my-5 rounded-full p-[2.5px] bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_25px_rgba(79,70,229,0.7)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95"
+            onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+            className="w-13 h-13 -my-5 rounded-full p-[2.5px] bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_25px_rgba(79,70,229,0.7)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95 z-50"
+            title="Create Post or Reel"
           >
             <div className="w-full h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-inner">
-              <Plus className="w-6 h-6 stroke-[3]" />
+              <Plus className={`w-6 h-6 stroke-[3] transition-transform duration-300 ${isActionMenuOpen ? 'rotate-45' : ''}`} />
             </div>
           </button>
 
@@ -721,7 +811,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           >
             <MessageCircle className="w-5 h-5" />
             <span className="text-[9px]">Inbox</span>
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-sm">
               5
             </span>
           </button>
@@ -749,6 +839,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onCreatePost={handleCreatePost}
+        initialAction={modalAction}
         currentUser={{
           businessName: currentUser.businessName,
           ownerName: currentUser.ownerName,

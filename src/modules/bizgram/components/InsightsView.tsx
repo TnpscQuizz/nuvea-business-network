@@ -21,7 +21,7 @@ export const InsightsView: React.FC<InsightsViewProps> = ({
     <div className="max-w-md sm:max-w-xl mx-auto space-y-5 pb-24 select-none font-sans">
       
       {/* BUSINESS GROWTH CARD (EXACT MOCKUP) */}
-      <div className="bg-[#0e1428]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.5)] space-y-5">
+      <div className="apple-glass apple-specular-edge rounded-[32px] p-5 sm:p-6 space-y-5 shadow-2xl">
         
         {/* Top Header: Business Growth + This Month dropdown */}
         <div className="flex items-center justify-between">
