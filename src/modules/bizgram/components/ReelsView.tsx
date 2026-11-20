@@ -325,7 +325,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
         {/* Profile + Follow Bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-white/50 to-white/10 shadow-sm">
+            <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-blue-500 via-purple-500 to-amber-500 shadow-[0_0_12px_rgba(249,115,22,0.35)]">
               <img
                 src={currentReel.avatar}
                 alt={currentReel.businessName}

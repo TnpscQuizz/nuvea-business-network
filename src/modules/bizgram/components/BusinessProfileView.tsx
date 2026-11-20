@@ -311,10 +311,10 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
           {/* Avatar + Main Action Buttons */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             
-            {/* Avatar with White Verified Badge + Click to Upload Photo */}
+            {/* Avatar with Minute Shinegah Signature Aura + Click to Upload Photo */}
             <div 
               onClick={() => avatarInputRef.current?.click()}
-              className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full p-[3px] bg-gradient-to-tr from-white to-slate-200 shadow-xl shrink-0 cursor-pointer group"
+              className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full p-[3px] bg-gradient-to-tr from-blue-600/50 via-purple-600/40 to-amber-500/60 shadow-[0_4px_25px_rgba(37,99,235,0.22),0_8px_30px_rgba(249,115,22,0.2)] shrink-0 cursor-pointer group"
               title="Click to change profile picture"
             >
               <div className="w-full h-full rounded-full overflow-hidden bg-white border-2 border-white shadow-sm relative">

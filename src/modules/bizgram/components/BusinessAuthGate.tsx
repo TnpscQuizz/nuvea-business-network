@@ -288,8 +288,10 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
     return (
       <div className="min-h-screen white-glow-canvas flex flex-col justify-center items-center p-4 sm:p-6 select-none font-sans relative">
         
-        {/* Radiant Ambient Light Orbs */}
+        {/* Radiant Ambient Light Orbs with Minute Shinegah Aura */}
+        <div className="fixed top-[-10%] left-[-10%] w-[550px] h-[550px] bg-gradient-to-br from-blue-600/10 via-indigo-600/08 to-transparent rounded-full blur-[150px] pointer-events-none" />
         <div className="fixed top-10 left-1/3 w-[600px] h-[600px] bg-white rounded-full blur-[140px] opacity-95 pointer-events-none" />
+        <div className="fixed bottom-[-10%] right-[-10%] w-[550px] h-[550px] bg-gradient-to-tr from-amber-500/10 via-orange-500/08 to-transparent rounded-full blur-[160px] pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-xl apple-glass apple-specular-edge rounded-[38px] overflow-hidden shadow-[0_25px_60px_rgba(15,23,42,0.1),0_0_50px_rgba(255,255,255,1)] border-2 border-white p-6 sm:p-10 space-y-6 bg-white/95 text-center">
           
@@ -437,9 +439,10 @@ export const BusinessAuthGate: React.FC<BusinessAuthGateProps> = ({
   return (
     <div className="min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 overflow-hidden select-none font-sans">
       
-      {/* Radiant Ambient Light Orbs for Pure White Glow */}
-      <div className="fixed top-[-10%] left-[-10%] w-[650px] h-[650px] bg-white rounded-full blur-[140px] opacity-95 pointer-events-none" />
-      <div className="fixed bottom-[-15%] right-[-10%] w-[700px] h-[700px] bg-white rounded-full blur-[150px] opacity-95 pointer-events-none" />
+      {/* Radiant Ambient Light Orbs with Minute Shinegah Aura */}
+      <div className="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-blue-600/10 via-purple-600/08 to-transparent rounded-full blur-[150px] opacity-95 pointer-events-none" />
+      <div className="fixed top-[-5%] left-1/4 w-[650px] h-[650px] bg-white rounded-full blur-[140px] opacity-95 pointer-events-none" />
+      <div className="fixed bottom-[-15%] right-[-10%] w-[650px] h-[650px] bg-gradient-to-tr from-amber-500/12 via-orange-500/08 to-transparent rounded-full blur-[160px] opacity-95 pointer-events-none" />
       <div className="fixed top-[40%] left-[30%] w-[500px] h-[500px] bg-slate-100 rounded-full blur-[120px] opacity-80 pointer-events-none" />
 
       {/* Main Glass Card Container */}

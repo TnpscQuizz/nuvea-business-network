@@ -103,8 +103,10 @@ export const SuperAdminConsole: React.FC<SuperAdminConsoleProps> = ({
     return (
       <div className="min-h-screen white-glow-canvas flex flex-col items-center justify-center p-4 select-none font-sans relative">
         
-        {/* Glow ambient */}
+        {/* Glow ambient with Minute Shinegah Aura */}
+        <div className="fixed -top-20 -left-10 w-[500px] h-[500px] bg-gradient-to-br from-blue-600/10 via-purple-600/08 to-transparent rounded-full blur-[150px] pointer-events-none -z-10" />
         <div className="fixed top-10 left-1/3 w-[500px] h-[500px] bg-white rounded-full blur-[140px] pointer-events-none -z-10" />
+        <div className="fixed bottom-0 right-10 w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/10 via-orange-500/08 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
 
         <div className="max-w-md w-full apple-glass apple-specular-edge rounded-[36px] p-6 sm:p-8 shadow-2xl border-2 border-white space-y-6 bg-white/90">
           
@@ -191,8 +193,13 @@ export const SuperAdminConsole: React.FC<SuperAdminConsoleProps> = ({
 
   // 2. AUTHENTICATED DEDICATED SUPER ADMIN PORTAL
   return (
-    <div className="min-h-screen white-glow-canvas p-4 sm:p-6 lg:p-8 select-none font-sans space-y-6">
+    <div className="min-h-screen white-glow-canvas p-4 sm:p-6 lg:p-8 select-none font-sans space-y-6 relative overflow-x-hidden">
       
+      {/* Radiant Ambient Light Orbs with Minute Shinegah Aura */}
+      <div className="fixed -top-28 -left-20 w-[550px] h-[550px] bg-gradient-to-br from-blue-600/08 via-indigo-600/06 to-transparent rounded-full blur-[150px] pointer-events-none -z-10" />
+      <div className="fixed top-1/4 -right-10 w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/08 via-rose-500/06 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="fixed bottom-0 left-10 w-[550px] h-[550px] bg-slate-200/50 rounded-full blur-[160px] pointer-events-none -z-10" />
+
       {/* TOP ADMIN HEADER BAR */}
       <div className="max-w-7xl mx-auto apple-glass apple-specular-edge rounded-[32px] p-5 sm:p-6 shadow-xl border-2 border-white flex flex-col md:flex-row items-center justify-between gap-4 bg-white/95">
         <div className="flex items-center gap-3.5">

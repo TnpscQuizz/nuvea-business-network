@@ -80,7 +80,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         
         {/* Creator Info */}
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-white to-slate-200 border border-white shadow-sm shrink-0">
+          <div className="relative w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-blue-500/40 via-purple-500/35 to-amber-500/45 shadow-[0_0_8px_rgba(37,99,235,0.15)] shrink-0">
             <img 
               src={post.avatar} 
               alt={post.businessName}

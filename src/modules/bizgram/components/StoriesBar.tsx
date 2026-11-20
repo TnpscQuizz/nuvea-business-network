@@ -68,7 +68,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
           onClick={onOpenCreateStory}
           className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
         >
-          <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-white to-slate-200 border border-white group-hover:scale-105 transition shadow-sm">
+          <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-blue-500/35 via-purple-500/30 to-amber-500/40 border border-white group-hover:scale-105 transition shadow-sm">
             <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 border border-white">
               <img 
                 src={currentUserAvatar} 
@@ -93,8 +93,8 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
             onClick={() => setActiveStoryIndex(idx)}
             className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
           >
-            <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-white to-slate-200 border border-white group-hover:scale-105 transition shadow-sm">
-              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 border border-white flex items-center justify-center">
+            <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-blue-600 via-purple-600 to-amber-500 shadow-[0_0_12px_rgba(37,99,235,0.22),0_0_10px_rgba(249,115,22,0.18)] group-hover:scale-105 transition">
+              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 border-2 border-white flex items-center justify-center">
                 {story.avatar ? (
                   <img 
                     src={story.avatar} 

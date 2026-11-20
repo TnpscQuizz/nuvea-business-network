@@ -454,10 +454,21 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   return (
     <div className="white-glow-canvas text-slate-900 min-h-screen flex flex-col md:flex-row selection:bg-black selection:text-white font-sans relative overflow-x-hidden">
       
-      {/* Radiant White Ambient Glow Light Orbs (Pure White Glow Transparent) */}
+      {/* Radiant White Glow Transparent Ambient Light Orbs with Minute Shinegah Signature Aura */}
+      {/* 1. Top-Left Delicate Royal Cobalt Blue Glow (Minutely Visible behind Glass) */}
+      <div className="fixed -top-28 -left-20 w-[550px] h-[550px] bg-gradient-to-br from-blue-600/10 via-indigo-600/08 to-transparent rounded-full blur-[150px] pointer-events-none -z-10" />
+
+      {/* 2. Top-Center Radiant White Apple Luminous Core */}
       <div className="fixed -top-20 left-1/4 w-[600px] h-[600px] bg-white rounded-full blur-[140px] pointer-events-none -z-10 opacity-95" />
-      <div className="fixed top-1/3 -right-20 w-[500px] h-[500px] bg-white rounded-full blur-[130px] pointer-events-none -z-10 opacity-90" />
-      <div className="fixed bottom-0 left-10 w-[550px] h-[550px] bg-slate-200/60 rounded-full blur-[160px] pointer-events-none -z-10" />
+
+      {/* 3. Center-Right Delicate Violet / Magenta Aura */}
+      <div className="fixed top-1/3 -right-20 w-[520px] h-[520px] bg-gradient-to-bl from-purple-600/08 via-pink-600/06 to-transparent rounded-full blur-[140px] pointer-events-none -z-10" />
+
+      {/* 4. Bottom-Right Warm Sunset Amber & Orange Radiant Aura */}
+      <div className="fixed bottom-0 right-10 w-[520px] h-[520px] bg-gradient-to-tr from-amber-500/10 via-orange-500/08 to-transparent rounded-full blur-[160px] pointer-events-none -z-10" />
+
+      {/* 5. Bottom-Left Soft White/Slate Feathering */}
+      <div className="fixed -bottom-20 left-10 w-[550px] h-[550px] bg-slate-200/50 rounded-full blur-[160px] pointer-events-none -z-10" />
 
       {/* ========================================================================= */}
       {/* 1. LEFT DESKTOP SIDEBAR (APPLE WHITE GLOW TRANSPARENT GLASS)              */}
@@ -1166,10 +1177,10 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             <span className="text-[9px]">{t.search}</span>
           </button>
 
-          {/* 3. Center Glowing Apple Liquid Glass Sphere (No Blue) */}
+          {/* 3. Center Glowing Apple Liquid Glass Sphere (Minute Shinegah Prismatic Aura) */}
           <button
             onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-            className="w-14 h-14 -my-5 rounded-full p-[2px] bg-gradient-to-tr from-white to-white/70 border border-white shadow-[0_0_35px_rgba(255,255,255,1),0_10px_25px_rgba(15,23,42,0.15)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95 z-50"
+            className="w-14 h-14 -my-5 rounded-full p-[2px] bg-gradient-to-tr from-blue-600/40 via-purple-600/35 to-amber-500/45 border border-white shadow-[0_0_35px_rgba(255,255,255,1),0_10px_25px_rgba(15,23,42,0.15),0_0_20px_rgba(37,99,235,0.2),0_0_15px_rgba(249,115,22,0.18)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95 z-50"
             title="Create Post or Reel"
           >
             <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white font-black text-2xl shadow-md">
