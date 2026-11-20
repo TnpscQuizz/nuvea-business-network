@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Heart, ThumbsDown, MessageCircle, Send, Volume2, VolumeX, 
   Play, CheckCircle2, MapPin, Search, ChevronUp, ChevronDown, 
-  Sparkles, Share2, Tag, Bookmark 
+  Sparkles, Share2, Tag, Bookmark, Zap 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
 import { translations, type Language } from '../data/translations';
@@ -13,6 +13,7 @@ interface ReelsViewProps {
   onLike: (reelId: string) => void;
   onSendEnquiry: (reel: BizPost) => void;
   onShareWhatsApp: (reel: BizPost) => void;
+  onBuyNow?: (reel: BizPost) => void;
 }
 
 export const ReelsView: React.FC<ReelsViewProps> = ({
@@ -21,6 +22,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
   onLike,
   onSendEnquiry,
   onShareWhatsApp,
+  onBuyNow,
 }) => {
   const t = translations[lang] || translations.en;
   const [activeTab, setActiveTab] = useState<'for_you' | 'business' | 'trending'>('for_you');
@@ -363,14 +365,23 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           </div>
         )}
 
-        {/* Primary Action Button: Enquire Now (Apple Crisp White Button - No Blue) */}
-        <button
-          onClick={() => onSendEnquiry(currentReel)}
-          className="w-full py-3 apple-btn-primary rounded-full flex items-center justify-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
-        >
-          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5" />
-          <span>{t.enquire}</span>
-        </button>
+        {/* Action Buttons: Enquire & Instant Buy Now */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <button
+            onClick={() => onSendEnquiry(currentReel)}
+            className="py-2.5 px-3 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-xl border border-white/30 flex items-center justify-center gap-1.5 text-xs font-bold transition cursor-pointer"
+          >
+            <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5" />
+            <span>{t.enquire}</span>
+          </button>
+          <button
+            onClick={() => onBuyNow ? onBuyNow(currentReel) : onSendEnquiry(currentReel)}
+            className="py-2.5 px-3 rounded-full bg-white hover:bg-slate-100 text-slate-950 font-black shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center justify-center gap-1.5 text-xs transition cursor-pointer"
+          >
+            <Zap className="w-3.5 h-3.5 fill-slate-950" />
+            <span>Buy Now</span>
+          </button>
+        </div>
 
       </div>
 

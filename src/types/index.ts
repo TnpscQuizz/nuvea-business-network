@@ -214,6 +214,50 @@ export interface BizFollowRequest {
   requestedAt: string;
 }
 
+export interface BizProduct {
+  id: string;
+  sellerId: string;
+  sellerName: string;
+  name: string;
+  category: string;
+  price: number; // Unit wholesale price in INR
+  moq: number; // Minimum Order Quantity
+  unit: string; // e.g. "pieces", "meters", "tons", "sets"
+  image: string;
+  description: string;
+  inStock: boolean;
+  gstRate: number; // e.g. 18
+  sampleAvailable: boolean;
+  samplePrice?: number;
+}
+
+export interface BizOrder {
+  id: string;
+  orderNumber: string; // e.g. "SHN-ORD-88219"
+  buyerId: string;
+  buyerName: string;
+  buyerPhone: string;
+  buyerAddress: string;
+  buyerGstin?: string;
+  sellerId: string;
+  sellerName: string;
+  productId: string;
+  productName: string;
+  productImage: string;
+  qty: number;
+  unitPrice: number;
+  subtotal: number;
+  gstAmount: number;
+  totalAmount: number;
+  paymentMethod: 'upi_razorpay' | 'net_banking' | 'invoice_credit' | 'pod';
+  paymentStatus: 'paid' | 'pending' | 'escrow_hold';
+  status: 'placed' | 'confirmed' | 'processing' | 'dispatched' | 'delivered';
+  trackingNumber?: string;
+  courierPartner?: string;
+  estimatedDelivery?: string;
+  createdAt: string;
+}
+
 export type BizUser = {
   id: string;
   username: string; // Unique Instagram-style handle (e.g. "chandru_nuvea")
@@ -243,6 +287,9 @@ export type BizUser = {
   referralsReceived?: BizReferralSlip[]; // Pillar 5: Networking & Referrals
   trustScore?: number; // Pillar 7: Trust Score (e.g. 98%)
   elevationTier?: 'Silver' | 'Gold' | 'Diamond'; // Pillar 5: Elevation Engine
+  products?: BizProduct[]; // Phase 1: Mini Store Catalog
+  ordersPlaced?: BizOrder[]; // Phase 2: User Order History ("My Purchases")
+  ordersReceived?: BizOrder[]; // Phase 2: Business User Dashboard ("Sales & Order Management")
   blockedUsers: string[];
   liveLocationEnabled: boolean;
   mediaUploadQuality: 'high' | 'data_saver';

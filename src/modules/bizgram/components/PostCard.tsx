@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { 
   Heart, ThumbsDown, MessageCircle, Send, Bookmark, MoreHorizontal, 
-  Volume2, VolumeX, CheckCircle2, MapPin, Share2, Sparkles, Tag 
+  Volume2, VolumeX, CheckCircle2, MapPin, Share2, Sparkles, Tag, Zap 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
 import { translations, type Language } from '../data/translations';
@@ -12,6 +12,7 @@ interface PostCardProps {
   onLike: (postId: string) => void;
   onSendEnquiry: (post: BizPost) => void;
   onShareWhatsApp: (post: BizPost) => void;
+  onBuyNow?: (post: BizPost) => void;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
@@ -20,6 +21,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   onLike,
   onSendEnquiry,
   onShareWhatsApp,
+  onBuyNow,
 }) => {
   const t = translations[lang] || translations.en;
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -248,14 +250,24 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         </div>
 
-        {/* Right: Crisp Apple Obsidian ENQUIRE Button */}
-        <button
-          onClick={() => onSendEnquiry(post)}
-          className="px-5 py-2 apple-btn-primary rounded-full text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
-        >
-          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5 text-white" />
-          <span>{t.enquire}</span>
-        </button>
+        {/* Right: Crisp Apple Obsidian ENQUIRE & BUY NOW Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onSendEnquiry(post)}
+            className="px-3.5 py-1.5 rounded-full border border-slate-300 hover:border-slate-900 bg-white/70 hover:bg-white text-slate-900 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm transition"
+          >
+            <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5 text-slate-800" />
+            <span>{t.enquire}</span>
+          </button>
+          <button
+            onClick={() => onBuyNow ? onBuyNow(post) : onSendEnquiry(post)}
+            className="px-4 py-1.5 apple-btn-primary rounded-full text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+            title="Instant B2B Checkout"
+          >
+            <Zap className="w-3.5 h-3.5 fill-white" />
+            <span>Buy Now</span>
+          </button>
+        </div>
 
       </div>
 

@@ -6,7 +6,7 @@ import {
   MapPin, Bell, Search, TrendingUp, ShieldCheck, Camera, Gift, Briefcase,
   Eye, Users, Send, ChevronRight, ChevronDown
 } from 'lucide-react';
-import type { AppState, BizPost, BizStory, BizEnquiryMessage, BizUser } from '../../types';
+import type { AppState, BizPost, BizStory, BizEnquiryMessage, BizUser, BizProduct, BizOrder } from '../../types';
 import { 
   INITIAL_BIZ_POSTS, 
   INITIAL_BIZ_STORIES, 
@@ -27,6 +27,7 @@ import { AuthModal } from './components/AuthModal';
 import { RegistrationModal } from '../../components/RegistrationModal';
 import { SearchView } from './components/SearchView';
 import { BusinessAuthGate } from './components/BusinessAuthGate';
+import { InstantCheckoutModal, type CheckoutItem } from './components/InstantCheckoutModal';
 
 interface BizGramAppProps {
   state: AppState;
@@ -77,7 +78,15 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       const saved = localStorage.getItem('nbn_biz_current_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.username === 'shinegah.in') return parsed;
+        if (parsed.username === 'shinegah.in') {
+          return {
+            ...DEFAULT_CURRENT_USER,
+            ...parsed,
+            products: parsed.products && parsed.products.length > 0 ? parsed.products : DEFAULT_CURRENT_USER.products,
+            ordersPlaced: parsed.ordersPlaced && parsed.ordersPlaced.length > 0 ? parsed.ordersPlaced : DEFAULT_CURRENT_USER.ordersPlaced,
+            ordersReceived: parsed.ordersReceived && parsed.ordersReceived.length > 0 ? parsed.ordersReceived : DEFAULT_CURRENT_USER.ordersReceived,
+          };
+        }
       }
       return DEFAULT_CURRENT_USER;
     } catch {
@@ -103,6 +112,11 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const [threads, setThreads] = useState(INITIAL_ENQUIRIES);
   const [selectedEnquiryPost, setSelectedEnquiryPost] = useState<BizPost | null>(null);
 
+  // E-Commerce Instant Checkout & Orders state (Phase 1 & 2)
+  const [checkoutItem, setCheckoutItem] = useState<CheckoutItem | null>(null);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [orderPlacedToast, setOrderPlacedToast] = useState<{ orderNumber: string; productName: string } | null>(null);
+
   // Modals & Action Menu state
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [modalAction, setModalAction] = useState<'post' | 'reel' | 'update' | 'offer'>('post');
@@ -110,6 +124,72 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // Handle Buy Now from Post or Reel
+  const handleBuyNowFromPost = (post: BizPost) => {
+    let price = 18500;
+    if (post.priceTag) {
+      const digits = post.priceTag.replace(/[^0-9]/g, '');
+      if (digits) price = parseInt(digits, 10);
+    }
+    setCheckoutItem({
+      id: post.id,
+      name: `${post.businessName} - ${post.caption.slice(0, 45)}...`,
+      sellerId: post.memberId,
+      sellerName: post.businessName,
+      price,
+      moq: 5,
+      unit: 'Consignment Lots',
+      image: post.thumbnailUrl || post.mediaUrl,
+      gstRate: 18,
+      sampleAvailable: true,
+      samplePrice: Math.round(price * 0.15),
+    });
+    setIsCheckoutModalOpen(true);
+  };
+
+  // Handle Buy Now from Wholesale Product
+  const handleBuyNowFromProduct = (prod: BizProduct) => {
+    setCheckoutItem({
+      id: prod.id,
+      name: prod.name,
+      sellerId: prod.sellerId,
+      sellerName: prod.sellerName,
+      price: prod.price,
+      moq: prod.moq,
+      unit: prod.unit,
+      image: prod.image,
+      gstRate: prod.gstRate,
+      sampleAvailable: prod.sampleAvailable,
+      samplePrice: prod.samplePrice,
+    });
+    setIsCheckoutModalOpen(true);
+  };
+
+  // Handle Order Placed successfully
+  const handleOrderPlaced = (newOrder: BizOrder) => {
+    const updatedPlaced = [newOrder, ...(currentUser.ordersPlaced || [])];
+    let updatedReceived = currentUser.ordersReceived || [];
+    if (newOrder.sellerId === currentUser.id) {
+      updatedReceived = [newOrder, ...updatedReceived];
+    }
+
+    const updatedUser: BizUser = {
+      ...currentUser,
+      ordersPlaced: updatedPlaced,
+      ordersReceived: updatedReceived,
+    };
+
+    setCurrentUser(updatedUser);
+    localStorage.setItem('nbn_biz_current_user', JSON.stringify(updatedUser));
+
+    setOrderPlacedToast({
+      orderNumber: newOrder.orderNumber,
+      productName: newOrder.productName,
+    });
+
+    setTimeout(() => setOrderPlacedToast(null), 5000);
+  };
 
   // Save currentUser to localStorage
   useEffect(() => {
@@ -594,6 +674,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                     onLike={handleLike}
                     onSendEnquiry={handleSendEnquiry}
                     onShareWhatsApp={handleShareWhatsApp}
+                    onBuyNow={handleBuyNowFromPost}
                   />
                 ))}
               </div>
@@ -798,6 +879,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             onLike={handleLike}
             onSendEnquiry={handleSendEnquiry}
             onShareWhatsApp={handleShareWhatsApp}
+            onBuyNow={handleBuyNowFromPost}
           />
         )}
 
@@ -834,6 +916,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             }}
             onUpdateUser={(updated) => setCurrentUser(updated)}
             onLogout={handleLogout}
+            onBuyProduct={handleBuyNowFromProduct}
+            onSendEnquiry={handleSendEnquiry}
           />
         )}
 
@@ -1053,6 +1137,42 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           alert('Membership updated successfully.');
         }}
       />
+
+      {/* Instant B2B Checkout Modal (Phase 1 & Phase 2) */}
+      <InstantCheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        item={checkoutItem}
+        buyerUser={currentUser}
+        onOrderSuccess={handleOrderPlaced}
+        lang={currentLang}
+      />
+
+      {/* Live Order Confirmation Toast Notification */}
+      {orderPlacedToast && (
+        <div className="fixed top-20 right-4 sm:right-6 z-50 apple-glass apple-specular-edge rounded-2xl p-4 border border-white shadow-2xl flex items-center gap-3 animate-in slide-in-from-top duration-300 max-w-sm bg-white/95">
+          <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-md">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+              <span>Order Placed Successfully!</span>
+              <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                {orderPlacedToast.orderNumber}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-600 truncate mt-0.5">
+              {orderPlacedToast.productName}
+            </p>
+          </div>
+          <button
+            onClick={() => setOrderPlacedToast(null)}
+            className="p-1 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
     </div>
   );
