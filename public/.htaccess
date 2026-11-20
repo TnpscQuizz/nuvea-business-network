@@ -1,0 +1,65 @@
+# ----------------------------------------------------------------------
+# Shinegah™ Production .htaccess configuration for Hostinger (LiteSpeed)
+# ----------------------------------------------------------------------
+
+# 1. Prioritize index.html
+DirectoryIndex index.html index.php index.htm
+
+# 2. Disable stale HTML cache on LiteSpeed / Hostinger Edge CDN
+<IfModule LiteSpeed>
+  CacheLookup off
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-LiteSpeed-Purge "*"
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+  
+  # Allow Byte-Range streaming for MP4 videos
+  <FilesMatch "\.(mp4|webm|ogg)$">
+    Header set Accept-Ranges "bytes"
+  </FilesMatch>
+</IfModule>
+
+# 3. Canonical HTTPS and non-WWW Rewrite
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Redirect www to non-www
+  RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+
+  # Redirect HTTP to HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# 4. React SPA Routing (Prevent 404 on page refresh)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# 5. Gzip Compression for Fast Loading
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# 6. Asset Caching
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
