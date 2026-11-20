@@ -140,7 +140,33 @@ export type BizPost = {
   createdAt: string;
   isReel?: boolean;
   status?: 'approved' | 'pending' | 'rejected';
+  tradeIntent?: 'need' | 'offer' | 'collaborate' | 'general'; // Pillar 4: I NEED / I OFFER / I COLLABORATE
+  isSponsored?: boolean; // Pillar 9: Subscription & Advertisements
 };
+
+export interface BizReview {
+  id: string;
+  reviewerBizName: string;
+  reviewerAvatar: string;
+  rating: number;
+  date: string;
+  text: string;
+  verifiedTrade: boolean;
+  dealAmount?: string;
+  category?: string;
+}
+
+export interface BizReferralSlip {
+  id: string;
+  fromBizName: string;
+  toBizName: string;
+  clientName: string;
+  clientPhone: string;
+  requirement: string;
+  estimatedValue: string;
+  status: 'submitted' | 'contacted' | 'quoted' | 'deal_won';
+  date: string;
+}
 
 export type BizStory = {
   id: string;
@@ -213,6 +239,10 @@ export type BizUser = {
   approvedConnections?: string[]; // Usernames/IDs who can chat
   followRequests?: BizFollowRequest[]; // Pending follow requests
   outlets?: BizOutlet[]; // Physical business outlets / branches
+  reviews?: BizReview[]; // Pillar 7: Reviews & Trust
+  referralsReceived?: BizReferralSlip[]; // Pillar 5: Networking & Referrals
+  trustScore?: number; // Pillar 7: Trust Score (e.g. 98%)
+  elevationTier?: 'Silver' | 'Gold' | 'Diamond'; // Pillar 5: Elevation Engine
   blockedUsers: string[];
   liveLocationEnabled: boolean;
   mediaUploadQuality: 'high' | 'data_saver';

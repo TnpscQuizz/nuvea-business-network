@@ -48,6 +48,7 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
   const [quoteItems, setQuoteItems] = useState('25 x Pure Handloom Silk Sarees');
   const [quoteAmount, setQuoteAmount] = useState<number>(42500);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [leadPipelineStatus, setLeadPipelineStatus] = useState<'new_lead' | 'quoted' | 'negotiation' | 'deal_won'>('quoted');
 
   const activeThread = threads.find((t) => t.threadId === selectedThreadId) || threads[0];
   
@@ -252,6 +253,39 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
               <Phone className="w-4 h-4 text-slate-900" />
             </a>
           </div>
+        </div>
+
+        {/* PILLAR 6: CRM LEAD STAGE PIPELINE */}
+        <div className="px-4 py-2 border-b border-white/80 bg-white/50 flex items-center justify-between text-xs overflow-x-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider shrink-0">
+              CRM Stage:
+            </span>
+            <div className="flex items-center gap-1 shrink-0">
+              {[
+                { id: 'new_lead', label: '📥 New Inquiry' },
+                { id: 'quoted', label: '📄 Quoted' },
+                { id: 'negotiation', label: '🤝 In Negotiation' },
+                { id: 'deal_won', label: '🎉 Deal Won' },
+              ].map((stage) => (
+                <button
+                  key={stage.id}
+                  type="button"
+                  onClick={() => setLeadPipelineStatus(stage.id as any)}
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition cursor-pointer ${
+                    leadPipelineStatus === stage.id
+                      ? 'bg-slate-950 text-white shadow-sm'
+                      : 'bg-white/70 text-slate-600 hover:bg-white'
+                  }`}
+                >
+                  {stage.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <span className="text-[11px] font-mono text-emerald-700 font-bold hidden sm:inline shrink-0">
+            Est. Deal: ₹{quoteAmount ? quoteAmount.toLocaleString('en-IN') : '42,500'}
+          </span>
         </div>
 
         {/* GST Quotation Generator Drawer */}

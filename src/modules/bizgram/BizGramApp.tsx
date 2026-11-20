@@ -68,6 +68,9 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   // Navigation Tab State (Feed, Mandatory Search, Reels, Messages, Profile, Admin)
   const [activeTab, setActiveTab] = useState<'feed' | 'search' | 'reels' | 'messages' | 'profile' | 'admin'>('feed');
 
+  // Trade Intent Filter for Home Feed (Pillar 4: I NEED / I OFFER / I COLLABORATE)
+  const [feedIntentFilter, setFeedIntentFilter] = useState<'all' | 'need' | 'offer' | 'collaborate'>('all');
+
   // Logged-in BizUser state (Shinegah Profile)
   const [currentUser, setCurrentUser] = useState<BizUser>(() => {
     try {
@@ -246,6 +249,10 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
   const publicPosts = nonBlockedPosts
     .filter((p) => p.status === 'approved' || !p.status);
+
+  const displayedFeedPosts = publicPosts.filter(
+    (p) => feedIntentFilter === 'all' || p.tradeIntent === feedIntentFilter
+  );
 
   const publicReels = publicPosts.filter((p) => p.type === 'video');
 
@@ -554,9 +561,32 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 }}
               />
 
+              {/* PILLAR 4: I NEED / I OFFER / I COLLABORATE TRADE MATCH FILTER BAR */}
+              <div className="flex items-center gap-1.5 p-1 rounded-full apple-glass border border-white shadow-sm overflow-x-auto text-xs font-black">
+                {[
+                  { id: 'all', label: 'All B2B Posts' },
+                  { id: 'need', label: '🔵 I NEED (Requirements)' },
+                  { id: 'offer', label: '🟢 I OFFER (Wholesale Deals)' },
+                  { id: 'collaborate', label: '🟣 I COLLABORATE (Joint Ventures)' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setFeedIntentFilter(item.id as any)}
+                    className={`px-3.5 py-1.5 rounded-full transition cursor-pointer whitespace-nowrap ${
+                      feedIntentFilter === item.id
+                        ? 'bg-slate-950 text-white shadow-md'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-white/70'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
               {/* FEED POSTS LIST */}
               <div className="space-y-6">
-                {publicPosts.map((post) => (
+                {displayedFeedPosts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}

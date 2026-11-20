@@ -48,6 +48,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const [category, setCategory] = useState(currentUser.category || 'Manufacturing');
   const [wholesalePrice, setWholesalePrice] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
+  const [tradeIntent, setTradeIntent] = useState<'need' | 'offer' | 'collaborate' | 'general'>('offer');
+  const [isSponsored, setIsSponsored] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progressPercent, setProgressPercent] = useState(0);
   const [progressStage, setProgressStage] = useState('Encoding 4K Ultra-Glass Master...');
@@ -202,6 +204,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       createdAt: `Just now • ${location}`,
       isReel: mediaType === 'video',
       status: 'approved',
+      tradeIntent,
+      isSponsored,
     };
 
     setTimeout(() => {
@@ -396,6 +400,100 @@ export const CreateModal: React.FC<CreateModalProps> = ({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* PILLAR 4: TRADE INTENT SELECTOR (I NEED / I OFFER / I COLLABORATE) */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center justify-between">
+              <span>Trade Intent (Pillar 4 Matching) *</span>
+              <span className="text-[10px] text-slate-500 font-mono">B2B Deal Category</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTradeIntent('need');
+                  if (!title || title.includes('🔍') || title.includes('📦') || title.includes('🤝')) {
+                    setTitle('🔍 Buy Requirement (RFQ): ');
+                  }
+                }}
+                className={`p-2.5 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-1 transition cursor-pointer border shadow-sm ${
+                  tradeIntent === 'need'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]'
+                    : 'bg-white/80 text-slate-700 hover:bg-white border-white'
+                }`}
+              >
+                <span className="text-base">🔵</span>
+                <span>I NEED</span>
+                <span className="text-[9px] font-normal opacity-85">Buy / RFQ</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTradeIntent('offer');
+                  if (!title || title.includes('🔍') || title.includes('📦') || title.includes('🤝')) {
+                    setTitle('📦 Wholesale Supply: ');
+                  }
+                }}
+                className={`p-2.5 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-1 transition cursor-pointer border shadow-sm ${
+                  tradeIntent === 'offer'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-[1.02]'
+                    : 'bg-white/80 text-slate-700 hover:bg-white border-white'
+                }`}
+              >
+                <span className="text-base">🟢</span>
+                <span>I OFFER</span>
+                <span className="text-[9px] font-normal opacity-85">Wholesale Deals</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTradeIntent('collaborate');
+                  if (!title || title.includes('🔍') || title.includes('📦') || title.includes('🤝')) {
+                    setTitle('🤝 B2B Partnership: ');
+                  }
+                }}
+                className={`p-2.5 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-1 transition cursor-pointer border shadow-sm ${
+                  tradeIntent === 'collaborate'
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-[1.02]'
+                    : 'bg-white/80 text-slate-700 hover:bg-white border-white'
+                }`}
+              >
+                <span className="text-base">🟣</span>
+                <span>I COLLABORATE</span>
+                <span className="text-[9px] font-normal opacity-85">JV & Franchise</span>
+              </button>
+            </div>
+          </div>
+
+          {/* PILLAR 9: SPONSORED B2B ADVERTISEMENT BOOST */}
+          <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="text-xs font-black text-amber-950">
+                  Boost as Sponsored B2B Advertisement
+                </div>
+                <div className="text-[10px] text-amber-800">
+                  Guaranteed top placement across 38 Tamil Nadu districts.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSponsored(!isSponsored)}
+              className={`w-11 h-6 rounded-full transition cursor-pointer p-0.5 ${
+                isSponsored ? 'bg-amber-600' : 'bg-slate-300'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                isSponsored ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </button>
           </div>
 
           {/* SECTION 2: TITLE */}

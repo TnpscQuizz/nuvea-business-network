@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { 
-  Heart, MessageCircle, Send, Bookmark, MoreHorizontal, 
+  Heart, ThumbsDown, MessageCircle, Send, Bookmark, MoreHorizontal, 
   Volume2, VolumeX, CheckCircle2, MapPin, Share2, Sparkles, Tag 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
@@ -27,6 +27,8 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [isMuted, setIsMuted] = useState(true);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(post.isDisliked || false);
+  const [dislikesCount, setDislikesCount] = useState(post.dislikes || 0);
   const [quickComment, setQuickComment] = useState('');
   const [commentsList, setCommentsList] = useState<string[]>([
     'Excellent quality standards! Interested in wholesale consignment.',
@@ -102,13 +104,36 @@ export const PostCard: React.FC<PostCardProps> = ({
           </div>
         </div>
 
-        {/* 3-dots Menu */}
-        <button 
-          onClick={() => onShareWhatsApp(post)}
-          className="p-2 text-slate-400 hover:text-slate-900 rounded-full hover:bg-white/60 transition cursor-pointer"
-        >
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        {/* Trade Intent & Sponsored Badges (Pillar 4 & Pillar 9) */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {post.isSponsored && (
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black border border-amber-200 shadow-sm flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-600" />
+              <span>SPONSORED B2B AD</span>
+            </span>
+          )}
+          {post.tradeIntent === 'need' && (
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 text-[10px] font-black border border-blue-200 shadow-sm flex items-center gap-1">
+              <span>🔵 I NEED</span>
+            </span>
+          )}
+          {post.tradeIntent === 'offer' && (
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-black border border-emerald-200 shadow-sm flex items-center gap-1">
+              <span>🟢 I OFFER</span>
+            </span>
+          )}
+          {post.tradeIntent === 'collaborate' && (
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-black border border-purple-200 shadow-sm flex items-center gap-1">
+              <span>🟣 I COLLABORATE</span>
+            </span>
+          )}
+          <button 
+            onClick={() => onShareWhatsApp(post)}
+            className="p-2 text-slate-400 hover:text-slate-900 rounded-full hover:bg-white/60 transition cursor-pointer"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+        </div>
 
       </div>
 
@@ -184,6 +209,23 @@ export const PostCard: React.FC<PostCardProps> = ({
               }`} 
             />
             <span className="text-slate-800">{post.likes >= 1000 ? `${(post.likes / 1000).toFixed(1)}K` : post.likes}</span>
+          </button>
+
+          {/* Dislike (User requested Dislike) */}
+          <button
+            onClick={() => {
+              setIsDisliked(!isDisliked);
+              setDislikesCount(prev => isDisliked ? prev - 1 : prev + 1);
+            }}
+            className="flex items-center gap-1.5 hover:text-slate-950 transition cursor-pointer"
+            title="Dislike"
+          >
+            <ThumbsDown 
+              className={`w-4 h-4 transition ${
+                isDisliked ? 'text-amber-500 fill-amber-500' : 'text-slate-500 hover:text-slate-900'
+              }`} 
+            />
+            <span className="text-slate-800">{dislikesCount}</span>
           </button>
 
           {/* Comment */}

@@ -38,7 +38,7 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
   onLogout,
 }) => {
   const t = translations[lang] || translations.en;
-  const [activeTab, setActiveTab] = useState<'posts' | 'reels' | 'outlets' | 'requests' | 'products' | 'about' | 'settings'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'reels' | 'outlets' | 'requests' | 'reviews' | 'referrals' | 'settings'>('posts');
   const [isFollowing, setIsFollowing] = useState(true);
 
   // Hidden file inputs for direct device photo upload
@@ -506,6 +506,28 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
           <span>{t.requestsTab} {pendingRequestsCount > 0 && `(${pendingRequestsCount})`}</span>
         </button>
 
+        {/* PILLAR 7: REVIEWS & TRUST */}
+        <button
+          onClick={() => setActiveTab('reviews')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold transition cursor-pointer shrink-0 ${
+            activeTab === 'reviews' ? 'bg-slate-950 text-white shadow-md' : 'text-slate-600 hover:text-slate-950'
+          }`}
+        >
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+          <span>Reviews ({(currentUser.reviews || []).length})</span>
+        </button>
+
+        {/* PILLAR 5: NETWORKING & REFERRALS */}
+        <button
+          onClick={() => setActiveTab('referrals')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold transition cursor-pointer shrink-0 ${
+            activeTab === 'referrals' ? 'bg-slate-950 text-white shadow-md' : 'text-slate-600 hover:text-slate-950'
+          }`}
+        >
+          <Briefcase className="w-3.5 h-3.5" />
+          <span>Referrals ({(currentUser.referralsReceived || []).length})</span>
+        </button>
+
         <button
           onClick={() => setActiveTab('settings')}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold transition cursor-pointer shrink-0 ${
@@ -725,6 +747,160 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT: PILLAR 7 - REVIEWS & TRUST                                   */}
+      {/* ========================================================================= */}
+      {activeTab === 'reviews' && (
+        <div className="space-y-4">
+          {/* Trust Score Banner */}
+          <div className="apple-glass apple-specular-edge rounded-3xl p-5 border-2 border-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md">
+                ★
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-black text-slate-900">4.9 / 5.0</span>
+                  <span className="text-xs font-bold text-slate-500">
+                    ({(currentUser.reviews || []).length} Verified Client Reviews)
+                  </span>
+                </div>
+                <div className="text-xs text-slate-600 flex items-center gap-2 pt-0.5">
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Level 3 GST Verified</span>
+                  </span>
+                  <span>•</span>
+                  <span>99% Trust Score</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => alert('To maintain authentic B2B integrity, reviews are submitted by verified trading partners after quotation completion.')}
+              className="px-5 py-2.5 rounded-full bg-slate-950 text-white text-xs font-extrabold shadow-md hover:bg-black transition cursor-pointer"
+            >
+              + Write B2B Review
+            </button>
+          </div>
+
+          {/* Reviews List */}
+          <div className="space-y-3">
+            {(currentUser.reviews || []).map((rev) => (
+              <div
+                key={rev.id}
+                className="apple-glass apple-specular-edge rounded-3xl p-5 border-2 border-white space-y-3 shadow-md"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={rev.reviewerAvatar}
+                      alt={rev.reviewerBizName}
+                      className="w-10 h-10 rounded-full object-cover border border-white shadow-sm"
+                    />
+                    <div>
+                      <div className="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
+                        <span>{rev.reviewerBizName}</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-slate-900 fill-slate-200" />
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-mono">
+                        {rev.category} • {rev.date}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center text-amber-500 text-xs font-black gap-0.5">
+                      {'★'.repeat(Math.floor(rev.rating))}
+                      <span className="ml-1 text-slate-900">{rev.rating}</span>
+                    </div>
+                    {rev.dealAmount && (
+                      <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-1">
+                        Verified Order: {rev.dealAmount}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  "{rev.text}"
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT: PILLAR 5 - NETWORKING & REFERRAL SLIPS                       */}
+      {/* ========================================================================= */}
+      {activeTab === 'referrals' && (
+        <div className="space-y-4">
+          <div className="apple-glass apple-specular-edge rounded-3xl p-5 border-2 border-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-slate-950 text-white flex items-center justify-center font-bold shadow-md">
+                <Briefcase className="w-6 h-6 text-amber-300" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm sm:text-base text-slate-900">
+                  B2B Referral Exchange & Elevation Engine
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Pass client requirements, track pipeline closure, and earn networking elevation scores.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => alert('Referral slip passed to Western Tamil Nadu chapter network.')}
+              className="px-5 py-2.5 rounded-full bg-slate-950 text-white text-xs font-extrabold shadow-md hover:bg-black transition cursor-pointer"
+            >
+              + Pass Business Referral
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {(currentUser.referralsReceived || []).map((ref) => (
+              <div
+                key={ref.id}
+                className="apple-glass apple-specular-edge rounded-3xl p-5 border-2 border-white space-y-3 shadow-md"
+              >
+                <div className="flex items-center justify-between border-b border-white/80 pb-2.5">
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+                      Referred By
+                    </span>
+                    <span className="font-extrabold text-sm text-slate-900">
+                      {ref.fromBizName}
+                    </span>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                    ref.status === 'deal_won' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {ref.status === 'deal_won' ? '🎉 Deal Won' : '📄 Quoted'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700">
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Client Name:</span>
+                    <span className="font-bold text-slate-900">{ref.clientName}</span> ({ref.clientPhone})
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Estimated Value:</span>
+                    <span className="font-mono font-bold text-emerald-700 text-sm">{ref.estimatedValue}</span>
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-600 bg-white/60 p-3 rounded-2xl border border-white">
+                  <strong>Requirement:</strong> {ref.requirement}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

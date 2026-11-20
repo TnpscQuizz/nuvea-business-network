@@ -24,6 +24,7 @@ export const SearchView: React.FC<SearchViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDistrict, setSelectedDistrict] = useState('All');
+  const [selectedIntent, setSelectedIntent] = useState<'all' | 'need' | 'offer' | 'collaborate'>('all');
   const [hoveredVideoId, setHoveredVideoId] = useState<string | null>(null);
 
   const categories = [
@@ -79,7 +80,11 @@ export const SearchView: React.FC<SearchViewProps> = ({
       selectedDistrict === 'All' ||
       p.taluk.toLowerCase().includes(selectedDistrict.toLowerCase());
 
-    return matchQuery && matchCategory && matchDistrict;
+    const matchIntent =
+      selectedIntent === 'all' ||
+      p.tradeIntent === selectedIntent;
+
+    return matchQuery && matchCategory && matchDistrict && matchIntent;
   });
 
   return (
@@ -87,6 +92,29 @@ export const SearchView: React.FC<SearchViewProps> = ({
       
       {/* 1. MANDATORY SEARCH BAR & LOCATION SELECTOR (APPLE WHITE GLOW GLASS) */}
       <div className="apple-glass apple-specular-edge rounded-[36px] p-4 sm:p-5 space-y-4 border-2 border-white shadow-xl">
+        
+        {/* PILLAR 4: I NEED / I OFFER / I COLLABORATE QUICK INTENT FILTER */}
+        <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/70 border border-white shadow-inner overflow-x-auto text-xs font-black">
+          {[
+            { id: 'all', label: 'All B2B Matches' },
+            { id: 'need', label: '🔵 I NEED (Requirements)' },
+            { id: 'offer', label: '🟢 I OFFER (Wholesale Deals)' },
+            { id: 'collaborate', label: '🟣 I COLLABORATE (Joint Ventures)' },
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setSelectedIntent(item.id as any)}
+              className={`px-3.5 py-1.5 rounded-full transition cursor-pointer whitespace-nowrap ${
+                selectedIntent === item.id
+                  ? 'bg-slate-950 text-white shadow-md'
+                  : 'text-slate-600 hover:text-slate-950'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
         
         <div className="flex items-center gap-2">
           {/* Main Search Input */}
@@ -219,10 +247,27 @@ export const SearchView: React.FC<SearchViewProps> = ({
                   </div>
                 )}
 
-                {/* Location Pill in Top Left */}
-                <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-white/85 text-slate-900 backdrop-blur-md text-[10px] font-bold border border-white shadow-sm flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-slate-700" />
-                  <span>{post.taluk}</span>
+                {/* Trade Intent & Location Pill in Top Left (Pillar 4 & Pillar 3) */}
+                <div className="absolute top-3 left-3 flex items-center gap-1 flex-wrap z-10">
+                  {post.tradeIntent === 'need' && (
+                    <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-black shadow-sm">
+                      🔵 NEED
+                    </span>
+                  )}
+                  {post.tradeIntent === 'offer' && (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black shadow-sm">
+                      🟢 OFFER
+                    </span>
+                  )}
+                  {post.tradeIntent === 'collaborate' && (
+                    <span className="px-2 py-0.5 rounded-full bg-purple-600 text-white text-[9px] font-black shadow-sm">
+                      🟣 JV
+                    </span>
+                  )}
+                  <div className="px-2 py-0.5 rounded-full bg-white/85 text-slate-900 backdrop-blur-md text-[10px] font-bold border border-white shadow-sm flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-slate-700" />
+                    <span>{post.taluk}</span>
+                  </div>
                 </div>
 
                 {/* Bottom Overlay with Business Name & Enquire CTA */}
