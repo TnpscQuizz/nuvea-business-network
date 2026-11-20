@@ -25,6 +25,8 @@ import { SuperAdminConsole } from './components/SuperAdminConsole';
 import { ProfileSettingsModal } from './components/ProfileSettingsModal';
 import { AuthModal } from './components/AuthModal';
 import { RegistrationModal } from '../../components/RegistrationModal';
+import { SearchView } from './components/SearchView';
+import { BusinessAuthGate } from './components/BusinessAuthGate';
 
 interface BizGramAppProps {
   state: AppState;
@@ -39,6 +41,11 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   lang: initialLang,
   onExit,
 }) => {
+  // Authentication Gate State (Mandatory registration / login before entering home screen)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('nbn_biz_authenticated') === 'true';
+  });
+
   // Language State: English by default, togglable in Settings
   const [currentLang, setCurrentLang] = useState<Language>(() => {
     const saved = localStorage.getItem('nbn_biz_lang');
@@ -53,8 +60,13 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     localStorage.setItem('nbn_biz_lang', newLang);
   };
 
-  // Navigation Tab State (Reels replaces Discover as requested)
-  const [activeTab, setActiveTab] = useState<'feed' | 'reels' | 'messages' | 'profile' | 'admin'>('feed');
+  const handleLogout = () => {
+    localStorage.removeItem('nbn_biz_authenticated');
+    setIsAuthenticated(false);
+  };
+
+  // Navigation Tab State (Feed, Mandatory Search, Reels, Messages, Profile, Admin)
+  const [activeTab, setActiveTab] = useState<'feed' | 'search' | 'reels' | 'messages' | 'profile' | 'admin'>('feed');
 
   // Logged-in BizUser state (Shinegah Profile)
   const [currentUser, setCurrentUser] = useState<BizUser>(() => {
@@ -237,6 +249,20 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
   const publicReels = publicPosts.filter((p) => p.type === 'video');
 
+  // Mandatory Business Authentication Gate (User must register/login before entering home screen)
+  if (!isAuthenticated) {
+    return (
+      <BusinessAuthGate
+        lang={currentLang}
+        onAuthenticated={(user) => {
+          setCurrentUser(user);
+          setIsAuthenticated(true);
+          localStorage.setItem('nbn_biz_authenticated', 'true');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="white-glow-canvas text-slate-900 min-h-screen flex flex-col md:flex-row selection:bg-black selection:text-white font-sans relative overflow-x-hidden">
       
@@ -287,7 +313,20 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               <span>{t.home}</span>
             </button>
 
-            {/* 2. Reels (Replaces Discover as Requested!) */}
+            {/* 2. Mandatory Search */}
+            <button
+              onClick={() => setActiveTab('search')}
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
+                activeTab === 'search'
+                  ? 'bg-slate-950 text-white shadow-md font-extrabold'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
+              }`}
+            >
+              <Search className="w-5 h-5" />
+              <span>{t.search}</span>
+            </button>
+
+            {/* 3. Reels (Full Screen Instagram Reels) */}
             <button
               onClick={() => setActiveTab('reels')}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
@@ -429,7 +468,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       {/* ========================================================================= */}
       {/* 2. MOBILE TOP NAVBAR (APPLE WHITE GLOW TRANSPARENT GLASS)                 */}
       {/* ========================================================================= */}
-      <header className="md:hidden sticky top-0 z-40 apple-glass border-b border-white/80 px-4 h-16 flex items-center justify-between shadow-sm">
+      <header className={`md:hidden sticky top-0 z-40 apple-glass border-b border-white/80 px-4 h-16 flex items-center justify-between shadow-sm ${activeTab === 'reels' ? 'hidden' : 'flex'}`}>
         
         {/* Shinegah Logo */}
         <div 
@@ -445,16 +484,17 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         {/* Right Search, Bell (badge 3) & Avatar */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setActiveTab('reels')}
-            className="p-1.5 text-slate-600 hover:text-slate-950 transition"
-            title="Reels"
+            onClick={() => setActiveTab('search')}
+            className="p-1.5 text-slate-600 hover:text-slate-950 transition cursor-pointer"
+            title="Search"
           >
-            <Film className="w-5 h-5" />
+            <Search className="w-5 h-5" />
           </button>
 
           <button
             onClick={() => setActiveTab('messages')}
-            className="relative p-1.5 text-slate-600 hover:text-slate-950 transition"
+            className="relative p-1.5 text-slate-600 hover:text-slate-950 transition cursor-pointer"
+            title="Messages"
           >
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-sm">
@@ -479,7 +519,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       {/* ========================================================================= */}
       {/* 3. MAIN CONTENT VIEWPORT CONTAINER                                        */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-w-0 max-w-full overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8">
+      <main className={`flex-1 min-w-0 max-w-full overflow-y-auto ${activeTab === 'reels' ? 'p-0 md:px-6 md:py-6' : 'px-3 sm:px-6 lg:px-8 py-4 sm:py-6'} pb-24 md:pb-8`}>
         
         {/* VIEW 1: HOME FEED */}
         {activeTab === 'feed' && (
@@ -490,7 +530,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               
               {/* TOP SEARCH BAR IN FEED */}
               <div 
-                onClick={() => setActiveTab('reels')}
+                onClick={() => setActiveTab('search')}
                 className="apple-glass apple-specular-edge rounded-2xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:border-white transition shadow-sm"
               >
                 <Search className="w-4 h-4 text-slate-500" />
@@ -704,6 +744,22 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           </div>
         )}
 
+        {/* VIEW: MANDATORY SEARCH & EXPLORE (USER REQUESTED MANDATORY SEARCH!) */}
+        {activeTab === 'search' && (
+          <SearchView
+            posts={publicPosts}
+            lang={currentLang}
+            onSelectPost={(post) => {
+              if (post.type === 'video') {
+                setActiveTab('reels');
+              } else {
+                handleSendEnquiry(post);
+              }
+            }}
+            onSendEnquiry={handleSendEnquiry}
+          />
+        )}
+
         {/* VIEW 2: FULLSCREEN 9:16 REELS (REPLACES DISCOVER AS REQUESTED!) */}
         {activeTab === 'reels' && (
           <ReelsView
@@ -715,11 +771,12 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           />
         )}
 
-        {/* VIEW 3: ENQUIRIES & CHAT (100% TRANSPARENT GLASS INBOX) */}
+        {/* VIEW 3: ENQUIRIES & CHAT (100% TRANSPARENT GLASS INBOX WITH FOLLOW GATE) */}
         {activeTab === 'messages' && (
           <EnquiryChat
             threads={threads}
             lang={currentLang}
+            approvedConnections={currentUser.approvedConnections}
             onSendMessage={handleSendMessageInChat}
           />
         )}
@@ -746,6 +803,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               }
             }}
             onUpdateUser={(updated) => setCurrentUser(updated)}
+            onLogout={handleLogout}
           />
         )}
 
@@ -853,8 +911,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         </div>
       )}
 
-      {/* MOBILE BOTTOM DOCK (REELS REPLACES DISCOVER) */}
-      <nav className="md:hidden fixed bottom-4 inset-x-4 z-40 select-none">
+      {/* MOBILE BOTTOM DOCK (HOME | SEARCH | PLUS | REELS | PROFILE) */}
+      <nav className={`md:hidden fixed bottom-4 inset-x-4 z-40 select-none ${activeTab === 'reels' ? 'opacity-90' : ''}`}>
         <div className="apple-glass apple-specular-edge rounded-full px-5 py-2.5 shadow-[0_15px_40px_rgba(15,23,42,0.1),0_0_35px_rgba(255,255,255,0.9)] flex items-center justify-between">
           
           {/* 1. Home */}
@@ -868,15 +926,15 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             <span className="text-[9px]">{t.home}</span>
           </button>
 
-          {/* 2. Reels (Replaces Discover as Requested!) */}
+          {/* 2. Mandatory Search */}
           <button
-            onClick={() => setActiveTab('reels')}
+            onClick={() => setActiveTab('search')}
             className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
-              activeTab === 'reels' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
+              activeTab === 'search' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
             }`}
           >
-            <Film className="w-5 h-5" />
-            <span className="text-[9px]">{t.reels}</span>
+            <Search className="w-5 h-5" />
+            <span className="text-[9px]">{t.search}</span>
           </button>
 
           {/* 3. Center Glowing Apple Liquid Glass Sphere (No Blue) */}
@@ -890,18 +948,15 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             </div>
           </button>
 
-          {/* 4. Inbox (Badge 5) */}
+          {/* 4. Reels */}
           <button
-            onClick={() => setActiveTab('messages')}
-            className={`relative flex flex-col items-center gap-0.5 transition cursor-pointer ${
-              activeTab === 'messages' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
+            onClick={() => setActiveTab('reels')}
+            className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
+              activeTab === 'reels' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
             }`}
           >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-[9px]">{t.inbox}</span>
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-sm">
-              5
-            </span>
+            <Film className="w-5 h-5" />
+            <span className="text-[9px]">{t.reels}</span>
           </button>
 
           {/* 5. Profile */}
@@ -945,6 +1000,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         onClose={() => setIsSettingsModalOpen(false)}
         currentUser={currentUser}
         onUpdateUser={(updated) => setCurrentUser(updated)}
+        onLogout={handleLogout}
       />
 
       {/* Auth / Switch Account Modal */}

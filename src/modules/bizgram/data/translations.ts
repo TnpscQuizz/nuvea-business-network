@@ -4,12 +4,13 @@ export const translations = {
   en: {
     // Navigation
     home: 'Home',
+    search: 'Search',
     reels: 'Reels',
     inbox: 'Inbox',
     profile: 'Profile',
     settings: 'Settings',
     admin: 'Admin Console',
-    searchPlaceholder: 'Search businesses, products...',
+    searchPlaceholder: 'Search businesses, products, locations, tags...',
     
     // Stories
     createStory: 'Create Story',
@@ -22,16 +23,25 @@ export const translations = {
     enquire: 'Enquire',
     follow: 'Follow',
     following: 'Following',
+    requested: 'Requested',
+    accept: 'Accept',
+    decline: 'Decline',
     share: 'Share',
     like: 'Like',
+    dislike: 'Dislike',
     comment: 'Comment',
     send: 'Send',
     save: 'Save',
     cancel: 'Cancel',
     create: 'Create',
     editProfile: 'Edit Profile',
+    editCover: 'Change Banner',
+    editAvatar: 'Change Photo',
     switchAccount: 'Switch',
     logout: 'Log Out',
+    outletsTab: 'Outlets',
+    addOutlet: 'Add Outlet',
+    requestsTab: 'Requests',
     
     // Create Modal
     createTitle: 'Create Post / Reel',
@@ -128,12 +138,13 @@ export const translations = {
   ta: {
     // Navigation
     home: 'முகப்பு',
+    search: 'தேடல்',
     reels: 'ரீல்ஸ்',
     inbox: 'செய்திகள்',
     profile: 'சுயவிவரம்',
     settings: 'அமைப்புகள்',
     admin: 'அட்மின் கன்சோல்',
-    searchPlaceholder: 'வணிகங்கள், தயாரிப்புகளைத் தேடுங்கள்...',
+    searchPlaceholder: 'வணிகங்கள், தயாரிப்புகள், இடங்களைத் தேடுங்கள்...',
     
     // Stories
     createStory: 'ஸ்டோரி சேர்',
@@ -146,16 +157,25 @@ export const translations = {
     enquire: 'விசாரிக்க',
     follow: 'பின்தொடர்',
     following: 'பின்தொடர்கிறீர்கள்',
+    requested: 'கோரப்பட்டது',
+    accept: 'ஏற்கவும்',
+    decline: 'மறுக்கவும்',
     share: 'பகிர்',
     like: 'விருப்பம்',
+    dislike: 'விருப்பமின்மை',
     comment: 'கருத்து',
     send: 'அனுப்பு',
     save: 'சேமி',
     cancel: 'ரத்து',
     create: 'உருவாக்கு',
     editProfile: 'விவரம் மாற்று',
+    editCover: 'பேனர் மாற்று',
+    editAvatar: 'படம் மாற்று',
     switchAccount: 'கணக்கு மாற்று',
     logout: 'வெளியேறு',
+    outletsTab: 'கிளைகள்',
+    addOutlet: 'கிளை சேர்',
+    requestsTab: 'கோரிக்கைகள்',
     
     // Create Modal
     createTitle: 'பதிவு / ரீல்ஸ் உருவாக்கம்',

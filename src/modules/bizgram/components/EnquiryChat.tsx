@@ -24,6 +24,8 @@ interface EnquiryChatProps {
   threads: Thread[];
   activeThreadId?: string;
   lang?: Language;
+  approvedConnections?: string[];
+  onApproveConnection?: (threadId: string) => void;
   onSendMessage: (threadId: string, text: string, quotationData?: any) => void;
 }
 
@@ -31,13 +33,16 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
   threads,
   activeThreadId: initialActiveThreadId,
   lang = 'en',
+  approvedConnections = ['salem_royal_silks', 'sri_venkateswara_traders', 'kongu_agro', 'th_ramesh', 'th_priya', 'th_murugan'],
+  onApproveConnection,
   onSendMessage,
 }) => {
   const t = translations[lang] || translations.en;
-  const [activeFilter, setActiveFilter] = useState<'All' | 'Connections' | 'Enquiries' | 'Notifications'>('All');
+  const [activeFilter, setActiveFilter] = useState<'All' | 'Connections' | 'Enquiries' | 'Notifications' | 'Requests'>('All');
   const [selectedThreadId, setSelectedThreadId] = useState<string>(
     initialActiveThreadId || threads[0]?.threadId || ''
   );
+  const [localApproved, setLocalApproved] = useState<string[]>(approvedConnections);
   const [inputText, setInputText] = useState('');
   const [showQuoteDrawer, setShowQuoteDrawer] = useState(false);
   const [quoteItems, setQuoteItems] = useState('25 x Pure Handloom Silk Sarees');
@@ -45,6 +50,13 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const activeThread = threads.find((t) => t.threadId === selectedThreadId) || threads[0];
+  
+  // Check if thread connection is approved (User requested follow approval gate for chat!)
+  const isThreadApproved = 
+    !activeThread || 
+    localApproved.includes(activeThread.threadId) || 
+    localApproved.includes(activeThread.memberId) ||
+    activeThread.verified;
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -401,22 +413,45 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
           ))}
         </div>
 
-        {/* Bottom Message Input Bar */}
-        <form onSubmit={handleSend} className="p-3 sm:p-4 border-t border-white/80 bg-white/40 backdrop-blur-2xl flex items-center gap-2.5">
-          <input
-            type="text"
-            placeholder={t.typeMessagePlaceholder}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            className="flex-1 px-4 py-3 bg-white/80 border border-white rounded-full text-xs sm:text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-900 transition shadow-sm"
-          />
-          <button
-            type="submit"
-            className="p-3 rounded-full apple-btn-primary transition cursor-pointer shrink-0 shadow-md"
-          >
-            <Send className="w-4 h-4 text-white" />
-          </button>
-        </form>
+        {/* Bottom Message Input Bar / Follow Approval Gate */}
+        {!isThreadApproved ? (
+          <div className="p-4 border-t border-white/80 bg-white/70 backdrop-blur-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-700">
+              <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>
+                <strong>Connection Approval Required:</strong> You can exchange messages & send quotations after accepting their follow request.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (activeThread) {
+                  setLocalApproved((prev) => [...prev, activeThread.threadId]);
+                  onApproveConnection?.(activeThread.threadId);
+                }
+              }}
+              className="px-4 py-2 rounded-full bg-slate-950 text-white font-extrabold text-xs hover:bg-black transition cursor-pointer shadow-md shrink-0"
+            >
+              Accept Connection & Chat
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSend} className="p-3 sm:p-4 border-t border-white/80 bg-white/40 backdrop-blur-2xl flex items-center gap-2.5">
+            <input
+              type="text"
+              placeholder={t.typeMessagePlaceholder}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              className="flex-1 px-4 py-3 bg-white/80 border border-white rounded-full text-xs sm:text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-900 transition shadow-sm"
+            />
+            <button
+              type="submit"
+              className="p-3 rounded-full apple-btn-primary transition cursor-pointer shrink-0 shadow-md"
+            >
+              <Send className="w-4 h-4 text-white" />
+            </button>
+          </form>
+        )}
 
       </div>
 

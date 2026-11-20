@@ -15,13 +15,13 @@ export function App() {
 
   if (!state) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+      <div className="min-h-screen flex items-center justify-center text-slate-900 select-none">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-12 h-12 border-4 border-slate-950 border-t-transparent rounded-full animate-spin mx-auto" />
           <div>
-            <div className="font-black text-lg text-amber-400">NBN BizGram</div>
-            <p className="text-xs font-semibold text-slate-400 mt-1">
-              வணிக இன்ஸ்டாகிராம் தளம் ஏற்றப்படுகிறது...
+            <div className="font-black text-lg text-slate-900 tracking-tight">Shinegah™ Enterprise Network</div>
+            <p className="text-xs font-semibold text-slate-500 mt-1">
+              Loading Verified Business Social Portal...
             </p>
           </div>
         </div>

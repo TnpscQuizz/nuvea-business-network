@@ -133,6 +133,8 @@ export type BizPost = {
   phone: string;
   likes: number;
   isLiked?: boolean;
+  dislikes?: number;
+  isDisliked?: boolean;
   enquiriesCount: number;
   commentsCount: number;
   createdAt: string;
@@ -167,6 +169,25 @@ export type BizEnquiryMessage = {
   timestamp: string;
 };
 
+export interface BizOutlet {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  timing: string;
+  isPrimary: boolean;
+  district?: string;
+}
+
+export interface BizFollowRequest {
+  id: string;
+  username: string;
+  businessName: string;
+  avatar: string;
+  category: string;
+  requestedAt: string;
+}
+
 export type BizUser = {
   id: string;
   username: string; // Unique Instagram-style handle (e.g. "chandru_nuvea")
@@ -176,15 +197,22 @@ export type BizUser = {
   phone: string;
   password?: string;
   avatar: string;
+  coverUrl?: string; // Customizable & editable background banner
   taluk: string;
   category: string;
   bio?: string;
   locationTag?: string;
+  website?: string;
+  gstin?: string;
   followersCount: number;
   followingCount: number;
   postsCount: number;
   validityDaysLeft: number;
   isPrivateAccount: boolean;
+  requiresFollowApproval?: boolean; // Must approve follower requests
+  approvedConnections?: string[]; // Usernames/IDs who can chat
+  followRequests?: BizFollowRequest[]; // Pending follow requests
+  outlets?: BizOutlet[]; // Physical business outlets / branches
   blockedUsers: string[];
   liveLocationEnabled: boolean;
   mediaUploadQuality: 'high' | 'data_saver';

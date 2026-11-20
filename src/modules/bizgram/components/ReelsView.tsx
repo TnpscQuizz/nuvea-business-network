@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Heart, MessageCircle, Send, Volume2, VolumeX, 
+  Heart, ThumbsDown, MessageCircle, Send, Volume2, VolumeX, 
   Play, CheckCircle2, MapPin, Search, ChevronUp, ChevronDown, 
-  Sparkles, Share2, Tag 
+  Sparkles, Share2, Tag, Bookmark 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
 import { translations, type Language } from '../data/translations';
@@ -29,6 +29,8 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
   const [isPlaying, setIsPlaying] = useState(true);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [dislikedMap, setDislikedMap] = useState<Record<string, boolean>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const filteredReels = reels.length > 0 ? reels : [
@@ -42,10 +44,11 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
       category: 'Enterprise Network',
       type: 'video' as const,
       mediaUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-code-on-a-laptop-keyboard-41253-large.mp4',
-      caption: 'Business is Better Together... ✨ Verified trade & B2B networking at scale.',
+      caption: 'Business is Better Together... ✨ Verified trade & B2B networking at scale across Tamil Nadu.',
       actionText: '✈️ Enquire',
       phone: '917548820641',
       likes: 24800,
+      dislikes: 14,
       enquiriesCount: 482,
       commentsCount: 1100,
       createdAt: 'Just now',
@@ -55,6 +58,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
   ];
 
   const currentReel = filteredReels[activeIndex] || filteredReels[0];
+  const isCurrentDisliked = dislikedMap[currentReel.id] || false;
 
   // Keyboard navigation
   useEffect(() => {
@@ -105,11 +109,19 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
     setTimeout(() => setShowHeartAnim(false), 800);
   };
 
+  const handleToggleDislike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDislikedMap((prev) => ({
+      ...prev,
+      [currentReel.id]: !prev[currentReel.id]
+    }));
+  };
+
   return (
-    <div className="relative w-full max-w-sm sm:max-w-md mx-auto h-[86vh] rounded-[36px] overflow-hidden apple-glass apple-specular-edge shadow-[0_20px_50px_rgba(15,23,42,0.12),0_0_40px_rgba(255,255,255,1)] flex flex-col justify-between select-none border-2 border-white">
+    <div className="relative w-full h-[100dvh] md:h-[88vh] md:max-w-md mx-auto overflow-hidden md:rounded-[38px] apple-glass apple-specular-edge shadow-[0_20px_50px_rgba(15,23,42,0.12),0_0_45px_rgba(255,255,255,1)] flex flex-col justify-between select-none border-0 md:border-2 md:border-white bg-black">
       
       {/* 1. TOP TABS: For You | Business | Trending | 🔍 */}
-      <div className="absolute top-0 inset-x-0 p-4 pt-5 z-30 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/40 to-transparent">
+      <div className="absolute top-0 inset-x-0 p-4 pt-6 md:pt-5 z-30 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/45 to-transparent">
         <div className="flex items-center gap-5 text-xs sm:text-sm font-extrabold tracking-tight">
           <button
             onClick={() => setActiveTab('for_you')}
@@ -137,9 +149,19 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           </button>
         </div>
 
-        <button className="p-2 text-white/80 hover:text-white transition cursor-pointer rounded-full hover:bg-white/10">
-          <Search className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Mute / Unmute Button in Top Corner */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMuted(!isMuted);
+            }}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition cursor-pointer"
+            title="Audio toggle"
+          >
+            {isMuted ? <VolumeX className="w-4 h-4 text-slate-300" /> : <Volume2 className="w-4 h-4 text-white" />}
+          </button>
+        </div>
       </div>
 
       {/* 2. REELS VIDEO VIEWPORT */}
@@ -173,7 +195,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
         {/* Center Watermark Glass Pill */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="flex flex-col items-center gap-1 opacity-70 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
-            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md p-1 border border-white/20 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md p-1 border border-white/20 flex items-center justify-center shadow-lg">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div className="text-xs font-black text-white tracking-wider">
@@ -202,8 +224,8 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
         )}
       </div>
 
-      {/* 3. RIGHT ACTION COLUMN (❤️ 24.8K, 💬 482, ↗️ 1.1K) */}
-      <div className="absolute right-3.5 bottom-28 z-30 flex flex-col items-center gap-4">
+      {/* 3. INTERACTIVE ACTION COLUMN (❤️ Likes, 👎 Dislike, 💬 Comment, ↗️ Share, 🔖 Save) */}
+      <div className="absolute right-3.5 bottom-24 md:bottom-28 z-30 flex flex-col items-center gap-3.5">
         
         {/* Like */}
         <button
@@ -212,28 +234,48 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
             onLike(currentReel.id);
           }}
           className="flex flex-col items-center gap-1 group cursor-pointer"
+          title="Like"
         >
-          <div className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white group-hover:bg-white/[0.18] transition border border-white/20 shadow-lg">
-            <Heart className={`w-5 h-5 ${currentReel.isLiked ? 'text-rose-500 fill-rose-500' : 'text-white'}`} />
+          <div className={`p-3 rounded-full backdrop-blur-2xl text-white group-hover:scale-110 transition border border-white/25 shadow-lg ${
+            currentReel.isLiked ? 'bg-rose-500/80 border-rose-400' : 'bg-white/[0.12] hover:bg-white/[0.22]'
+          }`}>
+            <Heart className={`w-5 h-5 ${currentReel.isLiked ? 'text-white fill-white' : 'text-white'}`} />
           </div>
           <span className="text-[10px] font-bold text-white drop-shadow-md">
-            24.8K
+            {currentReel.isLiked ? (currentReel.likes || 24800) + 1 : currentReel.likes || '24.8K'}
           </span>
         </button>
 
-        {/* Comment */}
+        {/* Dislike (User requested Dislike feature!) */}
+        <button
+          onClick={handleToggleDislike}
+          className="flex flex-col items-center gap-1 group cursor-pointer"
+          title="Dislike"
+        >
+          <div className={`p-3 rounded-full backdrop-blur-2xl text-white group-hover:scale-110 transition border border-white/25 shadow-lg ${
+            isCurrentDisliked ? 'bg-slate-700/80 border-slate-400' : 'bg-white/[0.12] hover:bg-white/[0.22]'
+          }`}>
+            <ThumbsDown className={`w-5 h-5 ${isCurrentDisliked ? 'text-amber-300 fill-amber-300' : 'text-white'}`} />
+          </div>
+          <span className="text-[10px] font-bold text-white drop-shadow-md">
+            {isCurrentDisliked ? (currentReel.dislikes || 14) + 1 : currentReel.dislikes || 14}
+          </span>
+        </button>
+
+        {/* Comment / Enquiry */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onSendEnquiry(currentReel);
           }}
           className="flex flex-col items-center gap-1 group cursor-pointer"
+          title="Comments"
         >
-          <div className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white group-hover:bg-white/[0.18] transition border border-white/20 shadow-lg">
+          <div className="p-3 rounded-full bg-white/[0.12] backdrop-blur-2xl text-white group-hover:bg-white/[0.22] group-hover:scale-110 transition border border-white/25 shadow-lg">
             <MessageCircle className="w-5 h-5 text-white" />
           </div>
           <span className="text-[10px] font-bold text-white drop-shadow-md">
-            482
+            {currentReel.enquiriesCount || 482}
           </span>
         </button>
 
@@ -244,8 +286,9 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
             onShareWhatsApp(currentReel);
           }}
           className="flex flex-col items-center gap-1 group cursor-pointer"
+          title="Share"
         >
-          <div className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white group-hover:bg-white/[0.18] transition border border-white/20 shadow-lg">
+          <div className="p-3 rounded-full bg-white/[0.12] backdrop-blur-2xl text-white group-hover:bg-white/[0.22] group-hover:scale-110 transition border border-white/25 shadow-lg">
             <Share2 className="w-5 h-5 text-white" />
           </div>
           <span className="text-[10px] font-bold text-white drop-shadow-md">
@@ -253,26 +296,34 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           </span>
         </button>
 
-        {/* Mute / Unmute */}
+        {/* Save / Bookmark */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setIsMuted(!isMuted);
+            setIsSaved(!isSaved);
           }}
-          className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white hover:bg-white/[0.18] transition border border-white/20 cursor-pointer shadow-lg"
+          className="flex flex-col items-center gap-1 group cursor-pointer"
+          title="Save"
         >
-          {isMuted ? <VolumeX className="w-5 h-5 text-slate-400" /> : <Volume2 className="w-5 h-5 text-white" />}
+          <div className={`p-3 rounded-full backdrop-blur-2xl text-white group-hover:scale-110 transition border border-white/25 shadow-lg ${
+            isSaved ? 'bg-amber-500/80' : 'bg-white/[0.12] hover:bg-white/[0.22]'
+          }`}>
+            <Bookmark className={`w-5 h-5 ${isSaved ? 'text-white fill-white' : 'text-white'}`} />
+          </div>
+          <span className="text-[10px] font-bold text-white drop-shadow-md">
+            {isSaved ? 'Saved' : 'Save'}
+          </span>
         </button>
 
       </div>
 
       {/* 4. BOTTOM INFO OVERLAY: Avatar, @shinegah.in, Follow button, Caption, Enquire */}
-      <div className="absolute bottom-0 inset-x-0 p-4 pt-12 z-30 bg-gradient-to-t from-black via-black/85 to-transparent space-y-3">
+      <div className="absolute bottom-0 inset-x-0 p-4 pt-12 pb-6 md:pb-4 z-30 bg-gradient-to-t from-black via-black/85 to-transparent space-y-3">
         
         {/* Profile + Follow Bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full p-[2px] bg-gradient-to-tr from-white/40 to-white/10">
+            <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-white/50 to-white/10 shadow-sm">
               <img
                 src={currentReel.avatar}
                 alt={currentReel.businessName}
@@ -324,7 +375,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
       </div>
 
       {/* Up / Down Navigation Controls */}
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20 opacity-0 hover:opacity-100 transition">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-20 opacity-0 md:hover:opacity-100 transition hidden md:flex">
         <button
           onClick={handlePrev}
           disabled={activeIndex === 0}

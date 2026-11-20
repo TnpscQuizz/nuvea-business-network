@@ -49,6 +49,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const [wholesalePrice, setWholesalePrice] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [progressStage, setProgressStage] = useState('Encoding 4K Ultra-Glass Master...');
 
   // Synchronize initialAction presets when modal opens
   React.useEffect(() => {
@@ -169,6 +171,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     }
 
     setIsSubmitting(true);
+    setProgressPercent(15);
+    setProgressStage('Encoding 4K Ultra-Glass Master...');
 
     const fullCaption = `${title.trim()}\n\n${description.trim()}\n\n${hashtags.trim()}`;
 
@@ -191,6 +195,8 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       phone: currentUser.phone || '917548820641',
       likes: 1,
       isLiked: false,
+      dislikes: 0,
+      isDisliked: false,
       enquiriesCount: 0,
       commentsCount: 0,
       createdAt: `Just now • ${location}`,
@@ -199,10 +205,25 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     };
 
     setTimeout(() => {
+      setProgressPercent(45);
+      setProgressStage('Applying Specular B2B Verification Watermark...');
+    }, 400);
+
+    setTimeout(() => {
+      setProgressPercent(80);
+      setProgressStage('Broadcasting to Tamil Nadu Wholesale Network...');
+    }, 900);
+
+    setTimeout(() => {
+      setProgressPercent(100);
+      setProgressStage('Published to Network Successfully! ✨');
+    }, 1400);
+
+    setTimeout(() => {
       onCreatePost(newPost);
       setIsSubmitting(false);
       onClose();
-    }, 400);
+    }, 1800);
   };
 
   return (
@@ -235,8 +256,52 @@ export const CreateModal: React.FC<CreateModalProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+        {/* Ultra-Classic Luxury Glass Loading View (Matches user's request!) */}
+        {isSubmitting ? (
+          <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-6 my-auto">
+            {/* Concentric Pulsing Apple Glass Ring */}
+            <div className="relative w-28 h-28 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-4 border-slate-900/10 animate-ping opacity-60" />
+              <div className="absolute inset-2 rounded-full border-4 border-slate-900/20 border-t-slate-950 animate-spin" />
+              <div className="w-16 h-16 rounded-3xl bg-slate-950 text-white flex items-center justify-center shadow-2xl">
+                {progressPercent === 100 ? (
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400 animate-bounce" />
+                ) : (
+                  <Sparkles className="w-8 h-8 fill-white text-white animate-pulse" />
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 max-w-sm w-full">
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-mono text-2xl font-black text-slate-900">
+                  {progressPercent}%
+                </span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {progressPercent === 100 ? 'Completed' : 'Uploading'}
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-2.5 rounded-full bg-slate-200/80 overflow-hidden p-0.5 border border-white">
+                <div
+                  className="h-full rounded-full bg-slate-950 transition-all duration-300 ease-out shadow-sm"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+
+              <p className="text-xs font-extrabold text-slate-800 min-h-[20px] transition">
+                {progressStage}
+              </p>
+            </div>
+
+            <div className="text-[11px] text-slate-400 font-mono">
+              Direct Device Master • Hardware Accelerated Glass View
+            </div>
+          </div>
+        ) : (
+          /* Scrollable Form Body */
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           
           {/* SECTION 1: DIRECT VIDEO / IMAGE UPLOAD (COMPUTER OR PHONE) */}
           <div className="space-y-2">
@@ -492,6 +557,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
           </div>
 
         </form>
+        )}
 
       </div>
     </div>
