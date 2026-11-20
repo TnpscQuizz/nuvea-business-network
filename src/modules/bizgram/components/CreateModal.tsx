@@ -5,12 +5,14 @@ import {
   ChevronDown, Layers, FileText, Smartphone, Laptop 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
+import { translations, type Language } from '../data/translations';
 
 interface CreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreatePost: (post: BizPost) => void;
   initialAction?: 'post' | 'reel' | 'update' | 'offer';
+  lang?: Language;
   currentUser: {
     businessName: string;
     ownerName: string;
@@ -26,8 +28,10 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   onClose,
   onCreatePost,
   initialAction = 'post',
+  lang = 'en',
   currentUser,
 }) => {
+  const t = translations[lang] || translations.en;
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Media Upload State (Direct Computer / Phone file upload)
@@ -36,10 +40,10 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const [mediaType, setMediaType] = useState<'video' | 'image'>(initialAction === 'reel' ? 'video' : 'video');
   const [isDragging, setIsDragging] = useState(false);
   
-  // Form fields as requested by user
+  // Form fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [hashtags, setHashtags] = useState('#B2B #TamilNadu #Wholesale');
+  const [hashtags, setHashtags] = useState('#B2B #Wholesale #Manufacturing');
   const [location, setLocation] = useState(currentUser.taluk || 'Chennai');
   const [category, setCategory] = useState(currentUser.category || 'Manufacturing');
   const [wholesalePrice, setWholesalePrice] = useState('');
@@ -51,12 +55,12 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     if (isOpen) {
       if (initialAction === 'reel') {
         setMediaType('video');
-        if (!title) setTitle('பிரத்தியேக தயாரிப்பு செயல்முறை நேரடி வீடியோ (Direct Reel)');
+        if (!title) setTitle('Direct Product Manufacturing Process Video (9:16)');
       } else if (initialAction === 'offer') {
-        if (!title) setTitle('🎁 பிரத்தியேக மொத்த விற்பனை தள்ளுபடி சலுகை (Exclusive Wholesale Offer)');
-        if (!wholesalePrice) setWholesalePrice('₹1,450 / piece (MOQ: 50 pcs)');
+        if (!title) setTitle('🎁 Exclusive Wholesale Volume Discount Offer');
+        if (!wholesalePrice) setWholesalePrice('$1,450 / piece (MOQ: 50 pcs)');
       } else if (initialAction === 'update') {
-        if (!title) setTitle('🏢 நிறுவன வணிக விரிவாக்க அறிவிப்பு (Business Expansion Update)');
+        if (!title) setTitle('🏢 Enterprise Expansion & Capacity Addition Update');
       }
     }
   }, [isOpen, initialAction]);
@@ -82,24 +86,24 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     'Retail',
     'Services',
     'Digital',
-    'ஜவுளி & பட்டு (Textiles)',
-    'வேளாண் இயந்திரங்கள் (Agro Tech)',
-    'தங்கம் & வெள்ளி (Jewellery)',
-    'இரும்பு & கட்டுமானம் (Steel & Infra)',
-    'CNC & ஆட்டோமொபைல் (Machinery)',
-    'உணவு & பால்பண்ணை (Food & Dairy)',
-    'லாஜிஸ்டிக்ஸ் & பேக்கிங் (Logistics)'
+    'Textiles & Handloom Silk',
+    'Agricultural Machinery',
+    'Jewellery & Precious Metals',
+    'Steel & Infrastructure',
+    'CNC Machining & Automotive',
+    'Food Processing & Dairy',
+    'Logistics & Packaging'
   ];
 
   const trendingHashtags = [
     '#B2B', 
-    '#TamilNadu', 
     '#Wholesale', 
-    '#SalemSilks', 
-    '#AgroMachinery', 
     '#Manufacturing', 
-    '#DirectFromWeaver', 
-    '#Construction'
+    '#DirectFromMill', 
+    '#SteelInfra', 
+    '#AgroMachinery', 
+    '#SilkWeavers', 
+    '#OEM'
   ];
 
   // Handle Local File Selection (Computer / Phone)
@@ -155,12 +159,12 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     e.preventDefault();
 
     if (!selectedFile && !previewUrl) {
-      alert('தயவுசெய்து உங்கள் கணினி அல்லது போனிலிருந்து வீடியோ அல்லது புகைப்படத்தை அப்லோட் செய்யவும்.');
+      alert('Please upload a video or image directly from your device.');
       return;
     }
 
     if (!title.trim()) {
-      alert('தயவுசெய்து பதிவின் தலைப்பை (Title) உள்ளிடவும்.');
+      alert('Please enter a title for your post.');
       return;
     }
 
@@ -172,7 +176,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       id: `post_${Date.now()}`,
       memberId: 'usr_shinegah',
       businessName: currentUser.businessName || 'Shinegah Business',
-      ownerName: currentUser.ownerName || 'Chandru',
+      ownerName: currentUser.ownerName || 'Chandru S',
       avatar: currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       taluk: location,
       category,
@@ -180,7 +184,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       mediaUrl: previewUrl || 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-code-on-a-laptop-keyboard-41253-large.mp4',
       thumbnailUrl: mediaType === 'image' ? previewUrl : 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
       caption: fullCaption,
-      priceTag: wholesalePrice ? `Wholesale ${wholesalePrice}` : 'B2B Special',
+      priceTag: wholesalePrice ? `Wholesale ${wholesalePrice}` : 'B2B Trade',
       wholesalePrice: wholesalePrice || undefined,
       retailPrice: retailPrice || undefined,
       actionText: '✈️ Enquire',
@@ -191,37 +195,34 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       commentsCount: 0,
       createdAt: `Just now • ${location}`,
       isReel: mediaType === 'video',
-      status: 'pending', // Requires admin approval
+      status: 'approved',
     };
 
     setTimeout(() => {
       onCreatePost(newPost);
       setIsSubmitting(false);
-      alert('வாழ்த்துக்கள்! உங்கள் வீடியோ போஸ்ட் வெற்றிகரமாக அப்லோட் செய்யப்பட்டது. அட்மின் தணிக்கைக்குப் பிறகு லைவ் ஆகும்.');
       onClose();
-    }, 600);
+    }, 400);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-2xl select-none font-sans">
       
       {/* Apple-style Glass Modal Container with Specular Edge Highlights */}
-      <div className="relative w-full max-w-lg max-h-[92vh] overflow-hidden rounded-[32px] apple-glass apple-specular-edge flex flex-col">
+      <div className="relative w-full max-w-lg max-h-[92vh] overflow-hidden rounded-[36px] apple-glass apple-specular-edge flex flex-col shadow-2xl">
         
         {/* Apple Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.03]">
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-              <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white">
-                <Sparkles className="w-4 h-4 text-blue-400" />
-              </div>
+            <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-md">
+              <Sparkles className="w-4 h-4 fill-black text-black" />
             </div>
             <div>
               <h3 className="font-black text-base text-white tracking-tight leading-none">
-                Create Post / Reel
+                {t.createTitle}
               </h3>
               <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                நேரடி வீடியோ அப்லோட் & வணிக பதிவு
+                {t.createSubtitle}
               </p>
             </div>
           </div>
@@ -241,11 +242,11 @@ export const CreateModal: React.FC<CreateModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-slate-300">
               <span className="flex items-center gap-1.5">
-                <Film className="w-4 h-4 text-blue-400" />
-                <span>1. வீடியோ / மீடியா அப்லோட் (Device Direct Upload):</span>
+                <Film className="w-4 h-4 text-white" />
+                <span>{t.uploadSection}</span>
               </span>
-              <span className="text-[10px] text-blue-400 font-mono">
-                {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB` : 'MP4, MOV, JPG, PNG'}
+              <span className="text-[10px] text-slate-400 font-mono">
+                {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB` : 'Direct Device File'}
               </span>
             </div>
 
@@ -265,27 +266,27 @@ export const CreateModal: React.FC<CreateModalProps> = ({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`relative h-44 sm:h-48 rounded-2xl border-2 border-dashed transition flex flex-col items-center justify-center gap-3 p-4 text-center cursor-pointer group ${
+                className={`relative h-44 sm:h-48 rounded-3xl border border-dashed transition flex flex-col items-center justify-center gap-3 p-4 text-center cursor-pointer group ${
                   isDragging 
-                    ? 'border-blue-400 bg-blue-600/20' 
-                    : 'border-white/20 bg-white/[0.02] hover:bg-white/[0.06] hover:border-blue-400/60'
+                    ? 'border-white bg-white/[0.12]' 
+                    : 'border-white/20 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/40'
                 }`}
               >
-                <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-blue-600/30 to-purple-600/30 border border-white/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                  <Upload className="w-6 h-6 stroke-[2.2]" />
+                <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition shadow-inner">
+                  <Upload className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
                   <div className="font-bold text-xs sm:text-sm text-white">
-                    போன் அல்லது கம்ப்யூட்டரிலிருந்து வீடியோவை தேர்வு செய்க
+                    {t.deviceUploadPrompt}
                   </div>
                   <div className="text-[11px] text-slate-400 mt-1">
-                    Drag & drop files here or click to browse from device
+                    {t.uploadFormats}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400 pt-1">
-                  <span className="flex items-center gap-1"><Smartphone className="w-3 h-3 text-cyan-400" /> Mobile Camera</span>
+                <div className="flex items-center gap-2 text-[10px] text-slate-400 pt-1 font-medium">
+                  <span className="flex items-center gap-1"><Smartphone className="w-3 h-3 text-white" /> Mobile</span>
                   <span>•</span>
-                  <span className="flex items-center gap-1"><Laptop className="w-3 h-3 text-purple-400" /> PC Storage</span>
+                  <span className="flex items-center gap-1"><Laptop className="w-3 h-3 text-white" /> PC / Mac</span>
                 </div>
               </div>
             ) : (
@@ -319,10 +320,13 @@ export const CreateModal: React.FC<CreateModalProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setSelectedFile(null); setPreviewUrl(''); }}
-                    className="p-1 rounded-full bg-rose-600/80 text-white hover:bg-rose-600 transition"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setPreviewUrl('');
+                    }}
+                    className="p-1 rounded-full bg-black/70 text-rose-400 hover:text-white transition cursor-pointer"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -331,56 +335,56 @@ export const CreateModal: React.FC<CreateModalProps> = ({
 
           {/* SECTION 2: TITLE (தலைப்பு) */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
-              <span>2. தலைப்பு (Title):</span>
-              <span className="text-[10px] text-slate-500">முக்கியமான பொருள் அல்லது சலுகை</span>
+            <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
+              <span>{t.titleLabel}</span>
+              <span className="text-rose-400">*</span>
             </label>
             <input
               type="text"
               required
-              placeholder="எ.கா: அசல் காஞ்சிபுரம் பட்டு சேலைகள் தறி உற்பத்தி (Salem Silks)"
+              placeholder={t.titlePlaceholder}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/15 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition"
+              className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/15 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-white transition shadow-inner"
             />
           </div>
 
           {/* SECTION 3: DESCRIPTION (விளக்கம்) */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-300">
-              3. விரிவான விளக்கம் (Description):
+              {t.descLabel}
             </label>
             <textarea
               rows={3}
-              required
-              placeholder="தயாரிப்பின் தரம், குறைந்தபட்ச ஆர்டர் அளவு (MOQ), வாரண்டி மற்றும் உங்கள் வணிக அனுபவ விவரங்களை உள்ளிடவும்..."
+              placeholder={t.descPlaceholder}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 rounded-2xl bg-white/[0.04] border border-white/15 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition resize-none leading-relaxed"
+              className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/15 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-white transition shadow-inner resize-none leading-relaxed"
             />
           </div>
 
           {/* SECTION 4: HASHTAGS (ஹேஷ்டேக்) */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Hash className="w-3.5 h-3.5 text-blue-400" />
-              <span>4. ஹேஷ்டேக் (Hashtags):</span>
-            </label>
+            <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+              <span>{t.tagsLabel}</span>
+              <span className="text-[10px] text-slate-400 font-normal">Click chips to add</span>
+            </div>
+            
             <input
               type="text"
-              placeholder="#B2B #TamilNadu #Wholesale #SalemSilks"
               value={hashtags}
               onChange={(e) => setHashtags(e.target.value)}
-              className="w-full px-4 py-2 rounded-2xl bg-white/[0.04] border border-white/15 text-xs font-mono text-cyan-300 placeholder-slate-500 focus:outline-none focus:border-blue-400"
+              className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/15 text-xs text-white font-mono placeholder-slate-500 focus:outline-none focus:border-white"
             />
-            {/* Quick Trending Hashtag Suggestion Chips */}
-            <div className="flex flex-wrap gap-1.5 pt-0.5">
+
+            {/* Quick Clickable Hashtags Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap">
               {trendingHashtags.map((tag) => (
                 <button
-                  type="button"
                   key={tag}
+                  type="button"
                   onClick={() => handleAddHashtag(tag)}
-                  className="px-2 py-0.5 rounded-full bg-white/5 hover:bg-blue-600/30 text-[10px] text-slate-300 hover:text-white border border-white/10 transition cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 text-slate-300 text-[10px] font-mono transition cursor-pointer"
                 >
                   {tag}
                 </button>
@@ -388,22 +392,24 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             </div>
           </div>
 
-          {/* SECTION 5: LOCATION & CATEGORY (லொகேஷன் & பிரிவு) */}
+          {/* SECTION 5 & 6: LOCATION & CATEGORY SELECTION */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             
             {/* Location Selector */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                <span>5. இருப்பிடம் (Location):</span>
+                <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                <span>{t.locationLabel}</span>
               </label>
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full p-2.5 rounded-2xl bg-[#090e1f] border border-white/15 text-xs text-white focus:outline-none focus:border-blue-400 cursor-pointer"
+                className="w-full px-3 py-2.5 rounded-2xl bg-[#121218] border border-white/15 text-xs text-white focus:outline-none focus:border-white cursor-pointer"
               >
                 {locationsList.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
+                  <option key={loc} value={loc} className="bg-slate-900 text-white">
+                    {loc}
+                  </option>
                 ))}
               </select>
             </div>
@@ -411,51 +417,53 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             {/* Category Selector */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                <Tag className="w-3.5 h-3.5 text-purple-400" />
-                <span>6. வணிகப் பிரிவு (Category):</span>
+                <Tag className="w-3.5 h-3.5 text-slate-400" />
+                <span>{t.categoryLabel}</span>
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-2.5 rounded-2xl bg-[#090e1f] border border-white/15 text-xs text-white focus:outline-none focus:border-blue-400 cursor-pointer"
+                className="w-full px-3 py-2.5 rounded-2xl bg-[#121218] border border-white/15 text-xs text-white focus:outline-none focus:border-white cursor-pointer truncate"
               >
                 {categoriesList.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat} className="bg-slate-900 text-white">
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
 
           </div>
 
-          {/* SECTION 6: WHOLESALE & RETAIL PRICING */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* SECTION 7: WHOLESALE & RETAIL PRICING */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">மொத்த விலை (Wholesale):</label>
+              <label className="text-[11px] font-bold text-slate-300">{t.wholesaleLabel}</label>
               <input
                 type="text"
-                placeholder="₹1,850 / piece"
+                placeholder={t.wholesalePlaceholder}
                 value={wholesalePrice}
                 onChange={(e) => setWholesalePrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs text-white font-mono focus:outline-none focus:border-blue-400"
+                className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs text-white font-mono focus:outline-none focus:border-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">சில்லறை விலை (Retail):</label>
+              <label className="text-[11px] font-bold text-slate-300">{t.retailLabel}</label>
               <input
                 type="text"
-                placeholder="₹2,600 / piece"
+                placeholder={t.retailPlaceholder}
                 value={retailPrice}
                 onChange={(e) => setRetailPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs text-white font-mono focus:outline-none focus:border-blue-400"
+                className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/15 text-xs text-white font-mono focus:outline-none focus:border-white"
               />
             </div>
           </div>
 
           {/* Admin Verification Notice */}
-          <div className="p-3 rounded-2xl bg-blue-950/40 border border-blue-500/30 text-[11px] text-blue-200 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
-            <span>அனைத்து போஸ்ட்டுகளும் அட்மின் தணிக்கைக்குப் பிறகு 100% B2B ஃபீடில் தெரியும்.</span>
+          <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-[11px] text-slate-300 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
+            <span>{t.adminVerificationNote}</span>
           </div>
 
           {/* Actions Bottom Bar */}
@@ -465,18 +473,18 @@ export const CreateModal: React.FC<CreateModalProps> = ({
               onClick={onClose}
               className="flex-1 py-3 bg-white/10 hover:bg-white/15 text-slate-300 font-bold text-xs rounded-2xl transition cursor-pointer"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-400 text-white font-black text-xs sm:text-sm rounded-2xl shadow-[0_0_25px_rgba(37,99,235,0.5)] transition transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+              className="flex-1 py-3 apple-btn-primary rounded-2xl text-xs font-black cursor-pointer flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
-                <span>அப்லோட் ஆகிறது...</span>
+                <span>Publishing...</span>
               ) : (
                 <>
-                  <span>Share to Shinegah Feed</span>
+                  <span>{t.sharePostBtn}</span>
                   <Sparkles className="w-4 h-4" />
                 </>
               )}

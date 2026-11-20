@@ -2,58 +2,48 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #070913;
-    color: #f1f5f9;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #050508;
+    color: #f8fafc;
   }
 }
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 15, 30, 0.6);
+  background: rgba(0, 0, 0, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.32);
-}
-
-/* Pulsing badge animation */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.03); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2.5s infinite ease-in-out;
+  background: rgba(255, 255, 255, 0.38);
 }
 
 /* ========================================================================= */
-/* APPLE LIQUID GLASS SPECULAR SHINE & REFLECTIVE EDGE STYLING               */
-/* Exact Apple iOS / macOS / visionOS glassmorphism with high-gloss edges     */
+/* LUXURY APPLE LIQUID GLASS SPECULAR SHINE & REFLECTIVE EDGE STYLING        */
+/* Pure Obsidian/Platinum Glass - Strictly NO Blue Tints                     */
 /* ========================================================================= */
 
 .apple-glass {
-  background: rgba(13, 18, 38, 0.78);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-top-color: rgba(255, 255, 255, 0.38);
-  border-left-color: rgba(255, 255, 255, 0.28);
+  background: rgba(16, 16, 22, 0.72);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.42);
+  border-left-color: rgba(255, 255, 255, 0.30);
   border-right-color: rgba(255, 255, 255, 0.20);
   border-bottom-color: rgba(255, 255, 255, 0.08);
   box-shadow: 
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.45),
     inset 1px 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset -1px 0 1px 0 rgba(255, 255, 255, 0.20),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5),
-    0 16px 45px -8px rgba(0, 0, 0, 0.7);
+    inset -1px 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.6),
+    0 20px 50px -10px rgba(0, 0, 0, 0.85);
   position: relative;
 }
 
@@ -62,7 +52,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 30%, transparent 65%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 28%, transparent 60%);
   pointer-events: none;
   z-index: 1;
 }
@@ -75,33 +65,62 @@
 .apple-glass-shiny::after {
   content: '';
   position: absolute;
-  top: -60%;
-  left: -60%;
-  width: 220%;
-  height: 220%;
-  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 35%, transparent 55%);
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 35%, transparent 60%);
   pointer-events: none;
   z-index: 1;
 }
 
-/* Glowing iridescent reflection along transparent borders */
+/* Glowing iridescent specular border */
 .apple-specular-edge {
   box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.5),
-    inset 1px 0 1px rgba(255, 255, 255, 0.3),
-    inset -1px 0 1px rgba(255, 255, 255, 0.2),
-    0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(255, 255, 255, 0.4);
+    inset 0 1px 1px rgba(255, 255, 255, 0.55),
+    inset 1px 0 1px rgba(255, 255, 255, 0.35),
+    inset -1px 0 1px rgba(255, 255, 255, 0.25),
+    0 15px 45px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.48);
 }
 
-/* Pulsing radar sonar ring for map */
+/* Apple Crisp White Primary Button */
+.apple-btn-primary {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 800;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.apple-btn-primary:hover {
+  background: #f1f5f9;
+  transform: scale(1.02);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+}
+.apple-btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Apple Frosted Secondary Button */
+.apple-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: all 0.2s ease;
+}
+.apple-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Pulsing radar sonar */
 @keyframes radar-sonar {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(2.8); opacity: 0; }
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.6); opacity: 0; }
 }
 
 .animate-radar-sonar {
-  animation: radar-sonar 2.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  animation: radar-sonar 2.6s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
-

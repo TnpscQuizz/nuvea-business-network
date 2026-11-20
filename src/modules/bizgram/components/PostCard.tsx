@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { 
   Heart, MessageCircle, Send, Bookmark, MoreHorizontal, 
-  Volume2, VolumeX, CheckCircle2, MapPin, Share2, Sparkles 
+  Volume2, VolumeX, CheckCircle2, MapPin, Share2, Sparkles, Tag 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
+import { translations, type Language } from '../data/translations';
 
 interface PostCardProps {
   post: BizPost;
+  lang?: Language;
   onLike: (postId: string) => void;
   onSendEnquiry: (post: BizPost) => void;
   onShareWhatsApp: (post: BizPost) => void;
@@ -14,20 +16,21 @@ interface PostCardProps {
 
 export const PostCard: React.FC<PostCardProps> = ({
   post,
+  lang = 'en',
   onLike,
   onSendEnquiry,
   onShareWhatsApp,
 }) => {
+  const t = translations[lang] || translations.en;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [quickComment, setQuickComment] = useState('');
   const [commentsList, setCommentsList] = useState<string[]>([
-    'அருமையான தொழில் முயற்சி! வாழ்த்துக்கள்.',
-    'மொத்த விலை விவரம் அனுப்ப முடியுமா?'
+    'Excellent quality standards! Interested in wholesale consignment.',
+    'Could you share your latest product catalog?'
   ]);
 
   const handleMediaClick = () => {
@@ -66,28 +69,28 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
-    <article className="apple-glass apple-specular-edge rounded-[32px] overflow-hidden transition select-none hover:shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+    <article className="apple-glass apple-specular-edge rounded-[36px] overflow-hidden transition select-none hover:shadow-[0_25px_60px_rgba(0,0,0,0.85)]">
       
-      {/* 1. POST HEADER (MATCHING MOCKUP) */}
+      {/* 1. POST HEADER */}
       <div className="p-4 flex items-center justify-between">
         
         {/* Creator Info */}
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 shrink-0">
+          <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-white/40 via-white/20 to-white/5 shrink-0">
             <img 
               src={post.avatar} 
               alt={post.businessName}
-              className="w-full h-full rounded-full object-cover border border-slate-900"
+              className="w-full h-full rounded-full object-cover border border-black"
             />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-sm text-white tracking-tight leading-tight">
+              <span className="font-extrabold text-sm text-white tracking-tight leading-tight">
                 {post.businessName}
               </span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 fill-blue-500/30" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/20" />
             </div>
-            <div className="text-[11px] text-slate-400 flex items-center gap-1">
+            <div className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
               <span>{post.createdAt}</span>
               {post.taluk && !post.createdAt.includes(post.taluk) && (
                 <>
@@ -102,7 +105,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         {/* 3-dots Menu */}
         <button 
           onClick={() => onShareWhatsApp(post)}
-          className="p-1.5 text-slate-400 hover:text-white rounded-full transition cursor-pointer"
+          className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/10 transition cursor-pointer"
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
@@ -116,9 +119,9 @@ export const PostCard: React.FC<PostCardProps> = ({
         </p>
       </div>
 
-      {/* 3. POST MEDIA CONTAINER WITH CAROUSEL BADGE 1/4 */}
+      {/* 3. POST MEDIA CONTAINER */}
       <div 
-        className="relative aspect-[4/3] sm:aspect-[16/10] bg-slate-950 overflow-hidden cursor-pointer"
+        className="relative aspect-[4/3] sm:aspect-[16/10] bg-black overflow-hidden cursor-pointer"
         onClick={handleMediaClick}
         onDoubleClick={handleDoubleTap}
       >
@@ -141,7 +144,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           />
         )}
 
-        {/* 1/4 Carousel Indicator Tag (Exact Mockup) */}
+        {/* 1/4 Carousel Indicator Tag */}
         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20">
           1/4
         </div>
@@ -150,9 +153,9 @@ export const PostCard: React.FC<PostCardProps> = ({
         {post.type === 'video' && (
           <button
             onClick={toggleMute}
-            className="absolute bottom-3 right-3 p-2 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/90 transition shadow-lg cursor-pointer"
+            className="absolute bottom-3 right-3 p-2 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/90 transition shadow-lg cursor-pointer border border-white/20"
           >
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-blue-400" />}
+            {isMuted ? <VolumeX className="w-4 h-4 text-slate-300" /> : <Volume2 className="w-4 h-4 text-white" />}
           </button>
         )}
 
@@ -164,8 +167,8 @@ export const PostCard: React.FC<PostCardProps> = ({
         )}
       </div>
 
-      {/* 4. POST ACTION BAR (MATCHING MOCKUP: ❤️ 1.2K  💬 142  ↗️ 87  [✈️ Enquire]) */}
-      <div className="p-3.5 sm:p-4 flex items-center justify-between border-t border-white/5 bg-[#0b1021]/60">
+      {/* 4. POST ACTION BAR (❤️ 1.2K  💬 142  ↗️ 87  [✈️ Enquire]) */}
+      <div className="p-3.5 sm:p-4 flex items-center justify-between border-t border-white/5 bg-white/[0.02]">
         
         {/* Left: Like, Comment, Share */}
         <div className="flex items-center gap-4 text-slate-300 text-xs font-semibold">
@@ -188,7 +191,7 @@ export const PostCard: React.FC<PostCardProps> = ({
             onClick={() => setShowComments(!showComments)}
             className="flex items-center gap-1.5 hover:text-white transition cursor-pointer"
           >
-            <MessageCircle className="w-4 h-4 text-slate-400 hover:text-blue-400" />
+            <MessageCircle className="w-4 h-4 text-slate-400 hover:text-white" />
             <span>{post.commentsCount || 142}</span>
           </button>
 
@@ -197,30 +200,30 @@ export const PostCard: React.FC<PostCardProps> = ({
             onClick={() => onShareWhatsApp(post)}
             className="flex items-center gap-1.5 hover:text-white transition cursor-pointer"
           >
-            <Share2 className="w-4 h-4 text-slate-400 hover:text-indigo-400" />
+            <Share2 className="w-4 h-4 text-slate-400 hover:text-white" />
             <span>87</span>
           </button>
 
         </div>
 
-        {/* Right: Vibrant Glowing ENQUIRE Button (Exact Mockup) */}
+        {/* Right: Crisp Apple White ENQUIRE Button (Strictly No Blue) */}
         <button
           onClick={() => onSendEnquiry(post)}
-          className="px-5 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-400 text-white font-bold text-xs rounded-full shadow-[0_0_18px_rgba(37,99,235,0.5)] flex items-center gap-1.5 cursor-pointer transition transform hover:scale-105 active:scale-95"
+          className="px-5 py-2 apple-btn-primary rounded-full text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
         >
-          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5" />
-          <span>Enquire</span>
+          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5 text-black" />
+          <span>{t.enquire}</span>
         </button>
 
       </div>
 
       {/* 5. COMMENTS DRAWER */}
       {showComments && (
-        <div className="p-4 border-t border-white/5 bg-[#080d1c] space-y-3">
+        <div className="p-4 border-t border-white/10 bg-black/40 space-y-3">
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {commentsList.map((c, i) => (
               <div key={i} className="text-xs text-slate-300 flex items-start gap-2">
-                <span className="font-bold text-blue-400">வணிகர்:</span>
+                <span className="font-bold text-white">Member:</span>
                 <span>{c}</span>
               </div>
             ))}
@@ -229,16 +232,16 @@ export const PostCard: React.FC<PostCardProps> = ({
           <form onSubmit={handlePostComment} className="flex gap-2">
             <input
               type="text"
-              placeholder="கருத்து அல்லது விலை கேட்க..."
+              placeholder="Write a comment or price inquiry..."
               value={quickComment}
               onChange={(e) => setQuickComment(e.target.value)}
-              className="flex-1 px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-400"
+              className="flex-1 px-3.5 py-2 bg-white/5 border border-white/15 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-white"
             />
             <button
               type="submit"
-              className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+              className="px-4 py-2 bg-white text-black font-extrabold rounded-xl text-xs transition cursor-pointer hover:bg-slate-200"
             >
-              பதிவிடு
+              Post
             </button>
           </form>
         </div>

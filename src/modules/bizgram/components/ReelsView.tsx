@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Heart, MessageCircle, Send, Volume2, VolumeX, 
   Play, CheckCircle2, MapPin, Search, ChevronUp, ChevronDown, 
-  Sparkles, Share2 
+  Sparkles, Share2, Tag 
 } from 'lucide-react';
 import type { BizPost } from '../../../types';
+import { translations, type Language } from '../data/translations';
 
 interface ReelsViewProps {
   reels: BizPost[];
+  lang?: Language;
   onLike: (reelId: string) => void;
   onSendEnquiry: (reel: BizPost) => void;
   onShareWhatsApp: (reel: BizPost) => void;
@@ -15,10 +17,12 @@ interface ReelsViewProps {
 
 export const ReelsView: React.FC<ReelsViewProps> = ({
   reels,
+  lang = 'en',
   onLike,
   onSendEnquiry,
   onShareWhatsApp,
 }) => {
+  const t = translations[lang] || translations.en;
   const [activeTab, setActiveTab] = useState<'for_you' | 'business' | 'trending'>('for_you');
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -32,13 +36,13 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
       id: 'demo_reel_1',
       memberId: 'usr_shinegah',
       businessName: 'Shinegah',
-      ownerName: 'Chandru',
+      ownerName: 'Chandru S',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       taluk: 'Chennai',
-      category: 'Business Network',
+      category: 'Enterprise Network',
       type: 'video' as const,
       mediaUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-code-on-a-laptop-keyboard-41253-large.mp4',
-      caption: 'Business is Better Together... ❤️ Connect, Collaborate & Grow on Shinegah!',
+      caption: 'Business is Better Together... ✨ Verified trade & B2B networking at scale.',
       actionText: '✈️ Enquire',
       phone: '917548820641',
       likes: 24800,
@@ -102,45 +106,45 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
   };
 
   return (
-    <div className="relative w-full max-w-sm sm:max-w-md mx-auto h-[86vh] rounded-3xl overflow-hidden bg-slate-950 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col justify-between select-none">
+    <div className="relative w-full max-w-sm sm:max-w-md mx-auto h-[86vh] rounded-[36px] overflow-hidden apple-glass apple-specular-edge shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex flex-col justify-between select-none">
       
-      {/* 1. TOP TABS: For You | Business | Trending | 🔍 (EXACT MOCKUP) */}
-      <div className="absolute top-0 inset-x-0 p-4 z-30 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent">
-        <div className="flex items-center gap-5 text-sm font-bold">
+      {/* 1. TOP TABS: For You | Business | Trending | 🔍 */}
+      <div className="absolute top-0 inset-x-0 p-4 pt-5 z-30 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/40 to-transparent">
+        <div className="flex items-center gap-5 text-xs sm:text-sm font-extrabold tracking-tight">
           <button
             onClick={() => setActiveTab('for_you')}
             className={`transition cursor-pointer ${
-              activeTab === 'for_you' ? 'text-white border-b-2 border-white pb-0.5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'for_you' ? 'text-white border-b-2 border-white pb-0.5' : 'text-slate-400 hover:text-white'
             }`}
           >
-            For You
+            {t.forYou}
           </button>
           <button
             onClick={() => setActiveTab('business')}
             className={`transition cursor-pointer ${
-              activeTab === 'business' ? 'text-white border-b-2 border-white pb-0.5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'business' ? 'text-white border-b-2 border-white pb-0.5' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Business
+            {t.businessTab}
           </button>
           <button
             onClick={() => setActiveTab('trending')}
             className={`transition cursor-pointer ${
-              activeTab === 'trending' ? 'text-white border-b-2 border-white pb-0.5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'trending' ? 'text-white border-b-2 border-white pb-0.5' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Trending
+            {t.trendingTab}
           </button>
         </div>
 
-        <button className="p-2 text-white/80 hover:text-white transition cursor-pointer">
-          <Search className="w-5 h-5" />
+        <button className="p-2 text-white/80 hover:text-white transition cursor-pointer rounded-full hover:bg-white/10">
+          <Search className="w-4 h-4" />
         </button>
       </div>
 
       {/* 2. REELS VIDEO VIEWPORT */}
       <div 
-        className="relative w-full h-full flex items-center justify-center cursor-pointer"
+        className="relative w-full h-full flex items-center justify-center cursor-pointer bg-black"
         onDoubleClick={handleDoubleTap}
         onClick={() => {
           const vid = videoRefs.current[activeIndex];
@@ -166,16 +170,16 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           className="w-full h-full object-cover"
         />
 
-        {/* Center Shinegah Watermark (Exact Mockup) */}
+        {/* Center Watermark Glass Pill */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center gap-1.5 opacity-80 drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md p-1 border border-white/20 flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-indigo-400" />
+          <div className="flex flex-col items-center gap-1 opacity-70 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md p-1 border border-white/20 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <div className="text-sm font-black text-white tracking-wider">
-              Shinegah
+            <div className="text-xs font-black text-white tracking-wider">
+              Shinegah™
             </div>
-            <div className="text-[10px] text-slate-300 font-semibold tracking-wider">
+            <div className="text-[9px] text-slate-300 font-medium">
               Grow Together ✨
             </div>
           </div>
@@ -183,8 +187,8 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
 
         {/* Play / Pause Overlay Icon */}
         {!isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-            <div className="p-4 rounded-full bg-white/20 backdrop-blur-md text-white">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
+            <div className="p-4 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-2xl">
               <Play className="w-8 h-8 fill-white ml-1" />
             </div>
           </div>
@@ -199,7 +203,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
       </div>
 
       {/* 3. RIGHT ACTION COLUMN (❤️ 24.8K, 💬 482, ↗️ 1.1K) */}
-      <div className="absolute right-3.5 bottom-24 z-30 flex flex-col items-center gap-5">
+      <div className="absolute right-3.5 bottom-28 z-30 flex flex-col items-center gap-4">
         
         {/* Like */}
         <button
@@ -209,10 +213,10 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           }}
           className="flex flex-col items-center gap-1 group cursor-pointer"
         >
-          <div className="p-2.5 rounded-full bg-black/50 backdrop-blur-md text-white group-hover:bg-rose-600/30 transition border border-white/10">
-            <Heart className={`w-6 h-6 ${currentReel.isLiked ? 'text-rose-500 fill-rose-500' : 'text-white'}`} />
+          <div className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white group-hover:bg-white/[0.18] transition border border-white/20 shadow-lg">
+            <Heart className={`w-5 h-5 ${currentReel.isLiked ? 'text-rose-500 fill-rose-500' : 'text-white'}`} />
           </div>
-          <span className="text-[11px] font-bold text-white drop-shadow-md">
+          <span className="text-[10px] font-bold text-white drop-shadow-md">
             24.8K
           </span>
         </button>
@@ -225,10 +229,10 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           }}
           className="flex flex-col items-center gap-1 group cursor-pointer"
         >
-          <div className="p-2.5 rounded-full bg-black/50 backdrop-blur-md text-white group-hover:bg-blue-600/30 transition border border-white/10">
-            <MessageCircle className="w-6 h-6 text-white" />
+          <div className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white group-hover:bg-white/[0.18] transition border border-white/20 shadow-lg">
+            <MessageCircle className="w-5 h-5 text-white" />
           </div>
-          <span className="text-[11px] font-bold text-white drop-shadow-md">
+          <span className="text-[10px] font-bold text-white drop-shadow-md">
             482
           </span>
         </button>
@@ -241,10 +245,10 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
           }}
           className="flex flex-col items-center gap-1 group cursor-pointer"
         >
-          <div className="p-2.5 rounded-full bg-black/50 backdrop-blur-md text-white group-hover:bg-indigo-600/30 transition border border-white/10">
-            <Share2 className="w-6 h-6 text-white" />
+          <div className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white group-hover:bg-white/[0.18] transition border border-white/20 shadow-lg">
+            <Share2 className="w-5 h-5 text-white" />
           </div>
-          <span className="text-[11px] font-bold text-white drop-shadow-md">
+          <span className="text-[10px] font-bold text-white drop-shadow-md">
             1.1K
           </span>
         </button>
@@ -255,20 +259,20 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
             e.stopPropagation();
             setIsMuted(!isMuted);
           }}
-          className="p-2.5 rounded-full bg-black/50 backdrop-blur-md text-white transition border border-white/10 cursor-pointer"
+          className="p-3 rounded-full bg-white/[0.08] backdrop-blur-2xl text-white hover:bg-white/[0.18] transition border border-white/20 cursor-pointer shadow-lg"
         >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 text-blue-400" />}
+          {isMuted ? <VolumeX className="w-5 h-5 text-slate-400" /> : <Volume2 className="w-5 h-5 text-white" />}
         </button>
 
       </div>
 
       {/* 4. BOTTOM INFO OVERLAY: Avatar, @shinegah.in, Follow button, Caption, Enquire */}
-      <div className="absolute bottom-0 inset-x-0 p-4 pt-10 z-30 bg-gradient-to-t from-black via-black/80 to-transparent space-y-3">
+      <div className="absolute bottom-0 inset-x-0 p-4 pt-12 z-30 bg-gradient-to-t from-black via-black/85 to-transparent space-y-3">
         
         {/* Profile + Follow Bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full p-[2px] bg-gradient-to-tr from-cyan-400 to-purple-600">
+            <div className="w-9 h-9 rounded-full p-[2px] bg-gradient-to-tr from-white/40 to-white/10">
               <img
                 src={currentReel.avatar}
                 alt={currentReel.businessName}
@@ -276,37 +280,45 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="font-mono text-xs font-bold text-white">
+              <span className="font-mono text-xs font-bold text-white tracking-tight">
                 @{currentReel.businessName === 'Shinegah' ? 'shinegah.in' : currentReel.businessName.toLowerCase().replace(/\s+/g, '_')}
               </span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/20" />
             </div>
           </div>
 
           <button
             onClick={() => setIsFollowing(!isFollowing)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition cursor-pointer shadow-md ${
               isFollowing
-                ? 'bg-white/20 text-white border border-white/30'
-                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-md'
+                ? 'bg-white/15 text-white border border-white/25 hover:bg-white/20'
+                : 'bg-white text-black hover:bg-slate-200 shadow-[0_0_15px_rgba(255,255,255,0.3)]'
             }`}
           >
-            {isFollowing ? 'Following' : 'Follow'}
+            {isFollowing ? t.following : t.follow}
           </button>
         </div>
 
         {/* Caption */}
-        <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed">
+        <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed font-normal">
           {currentReel.caption}
         </p>
 
-        {/* Dual Button: Enquiry */}
+        {/* Pricing tag chip if present */}
+        {currentReel.priceTag && (
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-300 font-bold">
+            <Tag className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{currentReel.priceTag}</span>
+          </div>
+        )}
+
+        {/* Primary Action Button: Enquire Now (Apple Crisp White Button - No Blue) */}
         <button
           onClick={() => onSendEnquiry(currentReel)}
-          className="w-full py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-400 text-white font-bold text-xs rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] flex items-center justify-center gap-2 transition cursor-pointer"
+          className="w-full py-3 apple-btn-primary rounded-full flex items-center justify-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
         >
-          <Send className="w-3.5 h-3.5 rotate-45" />
-          <span>Enquire Now (விலை & விபரம் கேட்க)</span>
+          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5" />
+          <span>{t.enquire}</span>
         </button>
 
       </div>
@@ -316,14 +328,14 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
         <button
           onClick={handlePrev}
           disabled={activeIndex === 0}
-          className="p-1.5 rounded-full bg-black/60 text-white hover:bg-black/90 disabled:opacity-30 transition"
+          className="p-2 rounded-full bg-black/60 text-white hover:bg-black/90 disabled:opacity-30 transition border border-white/10"
         >
           <ChevronUp className="w-4 h-4" />
         </button>
         <button
           onClick={handleNext}
           disabled={activeIndex === filteredReels.length - 1}
-          className="p-1.5 rounded-full bg-black/60 text-white hover:bg-black/90 disabled:opacity-30 transition"
+          className="p-2 rounded-full bg-black/60 text-white hover:bg-black/90 disabled:opacity-30 transition border border-white/10"
         >
           <ChevronDown className="w-4 h-4" />
         </button>
