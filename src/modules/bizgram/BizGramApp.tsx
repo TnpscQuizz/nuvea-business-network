@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, Search, Film, MessageCircle, PlusSquare, BarChart3, 
+  Home, Compass, Film, MessageCircle, Plus, BarChart3, 
   User, Shield, Settings, LogOut, Clock, CheckCircle2, 
   Sparkles, ExternalLink, Menu, X, ArrowRight, Phone, Tag, 
-  MapPin, Bell, Lock, UserCheck 
+  MapPin, Bell, Search, TrendingUp, ShieldCheck 
 } from 'lucide-react';
 import type { AppState, BizPost, BizStory, BizEnquiryMessage, BizUser } from '../../types';
 import { 
@@ -12,6 +12,7 @@ import {
   INITIAL_ENQUIRIES,
   DEFAULT_CURRENT_USER 
 } from './data/bizGramData';
+import { ShinegahLogo } from './components/ShinegahLogo';
 import { StoriesBar } from './components/StoriesBar';
 import { PostCard } from './components/PostCard';
 import { ReelsView } from './components/ReelsView';
@@ -38,29 +39,32 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   lang,
   onExit,
 }) => {
-  // Navigation Tab State
+  // Navigation Tab State (home, discover, reels, messages, insights, profile, admin)
   const [activeTab, setActiveTab] = useState<
     'feed' | 'explore' | 'reels' | 'messages' | 'insights' | 'profile' | 'admin'
   >('feed');
 
-  // Logged-in BizUser state (Instagram Style Handle, Security, Permissions)
+  // Logged-in BizUser state (Shinegah Profile)
   const [currentUser, setCurrentUser] = useState<BizUser>(() => {
     try {
       const saved = localStorage.getItem('nbn_biz_current_user');
-      return saved ? JSON.parse(saved) : DEFAULT_CURRENT_USER;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.username === 'shinegah.in') return parsed;
+      }
+      return DEFAULT_CURRENT_USER;
     } catch {
       return DEFAULT_CURRENT_USER;
     }
   });
 
-  // Posts, Stories and Enquiries state
+  // Posts state
   const [posts, setPosts] = useState<BizPost[]>(() => {
     try {
       const saved = localStorage.getItem('nbn_biz_posts');
       if (saved) {
         const parsed: BizPost[] = JSON.parse(saved);
-        // If saved cache has fewer than 24 posts, update with 24 posts from INITIAL_BIZ_POSTS
-        if (parsed.length >= 24) return parsed;
+        if (parsed.length >= 24 && parsed[0]?.businessName === 'Shinegah') return parsed;
       }
       return INITIAL_BIZ_POSTS;
     } catch {
@@ -78,7 +82,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Save currentUser to localStorage whenever updated
+  // Save currentUser to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('nbn_biz_current_user', JSON.stringify(currentUser));
@@ -87,7 +91,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     }
   }, [currentUser]);
 
-  // Save posts to localStorage whenever updated
+  // Save posts to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('nbn_biz_posts', JSON.stringify(posts));
@@ -145,15 +149,15 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     
     const newMsg: BizEnquiryMessage = {
       id: `msg_${Date.now()}`,
-      threadId: 'th_001',
+      threadId: 'th_ramesh',
       senderId: currentUser.id,
       senderName: `${currentUser.ownerName} (@${currentUser.username})`,
-      text: customMsg || `வணக்கம்! "${post.businessName}" அவர்களின் "${post.caption.slice(0, 40)}..." ரீல்ஸைப் பார்த்து விசாரிக்கிறேன். இதன் விலை மற்றும் சலுகை விவரம் கூறவும்.`,
+      text: customMsg || `Hello! Enquiring regarding "${post.businessName}" - "${post.caption.slice(0, 40)}...". Please share the wholesale pricing and details.`,
       attachedPostId: post.id,
       attachedPostTitle: post.caption.slice(0, 45),
       attachedPostThumb: post.thumbnailUrl || post.mediaUrl,
       attachedPrice: post.priceTag,
-      timestamp: 'இப்போது',
+      timestamp: 'Just now',
     };
 
     setThreads((prev) =>
@@ -162,7 +166,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           return {
             ...th,
             lastMessage: newMsg.text,
-            lastTime: 'இப்போது',
+            lastTime: 'Just now',
             messages: [...th.messages, newMsg],
           };
         }
@@ -183,7 +187,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       text,
       isQuotation: !!quotationData,
       quotationData,
-      timestamp: 'இப்போது',
+      timestamp: 'Just now',
     };
 
     setThreads((prev) =>
@@ -191,8 +195,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         if (th.threadId === threadId) {
           return {
             ...th,
-            lastMessage: quotationData ? 'அதிகாரப்பூர்வ விலைப்பட்டியல் அனுப்பப்பட்டது' : text,
-            lastTime: 'இப்போது',
+            lastMessage: quotationData ? 'Quotation Sent' : text,
+            lastTime: 'Just now',
             messages: [...th.messages, newMsg],
           };
         }
@@ -204,60 +208,56 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   // Handle WhatsApp Share
   const handleShareWhatsApp = (post: BizPost) => {
     const text = encodeURIComponent(
-      `வணக்கம்! NBN BizGram-ல் "${post.businessName}" அவர்களின் வணிக பதிவு:\n\n"${post.caption}"\nவிலை: ${post.priceTag || 'தொடர்பு கொள்ளவும்'}\n\nதொடர்புக்கு: https://adcfe2ac20fec0.app.lhr.life/`
+      `வணக்கம்! Shinegah B2B Network-ல் "${post.businessName}" அவர்களின் வணிக பதிவு:\n\n"${post.caption}"\nவிலை: ${post.priceTag || 'தொடர்பு கொள்ளவும்'}\n\nhttps://shinegah.in`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
-  // Filter approved posts, exclude blocked users, and rank according to user's content preferences
+  // Filter approved posts, exclude blocked users
   const nonBlockedPosts = posts.filter(
     (p) => !currentUser.blockedUsers?.some((b) => p.businessName.toLowerCase().includes(b.toLowerCase()))
   );
 
   const publicPosts = nonBlockedPosts
-    .filter((p) => p.status === 'approved' || !p.status)
-    .sort((a, b) => {
-      const aPreferred = currentUser.contentPreferences?.some((pref) => a.category.includes(pref));
-      const bPreferred = currentUser.contentPreferences?.some((pref) => b.category.includes(pref));
-      if (aPreferred && !bPreferred) return -1;
-      if (!aPreferred && bPreferred) return 1;
-      return 0;
-    });
+    .filter((p) => p.status === 'approved' || !p.status);
 
   const publicReels = publicPosts.filter((p) => p.type === 'video');
 
   return (
-    <div className="bg-[#fafafa] text-slate-900 min-h-screen flex flex-col md:flex-row selection:bg-amber-300 selection:text-slate-900 font-sans">
+    <div className="bg-[#070913] text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-blue-600 selection:text-white font-sans relative overflow-x-hidden">
       
+      {/* Ambient Glowing Aurora Background Orbs */}
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="fixed bottom-10 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-[160px] pointer-events-none -z-10" />
+      <div className="fixed top-1/2 right-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-[150px] pointer-events-none -z-10" />
+
       {/* ========================================================================= */}
-      {/* 1. LEFT DESKTOP SIDEBAR (EXACT INSTAGRAM WEB FORMAT)                      */}
+      {/* 1. LEFT DESKTOP SIDEBAR (FUTURISTIC DARK GLASS NEON)                      */}
       {/* ========================================================================= */}
-      <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 h-screen sticky top-0 bg-white border-r border-slate-200/80 p-4 lg:p-6 shrink-0 z-40 select-none">
+      <aside className="hidden md:flex flex-col justify-between w-68 lg:w-72 h-screen sticky top-0 bg-[#0a0f20]/90 backdrop-blur-2xl border-r border-white/10 p-5 lg:p-6 shrink-0 z-40 select-none shadow-[4px_0_30px_rgba(0,0,0,0.5)]">
         
         {/* Brand Header */}
         <div className="space-y-6">
           
           <div 
             onClick={() => setActiveTab('feed')} 
-            className="flex items-center gap-3 cursor-pointer group"
+            className="cursor-pointer group space-y-3"
           >
-            <div className="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-2xl shadow-md group-hover:scale-105 transition">
-              N
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-black text-xl text-slate-950 tracking-tight leading-none">
-                  NBN <span className="text-amber-500">BizGram</span>
-                </span>
-                <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-500/20" />
+            <ShinegahLogo size="md" />
+
+            {/* Pill: Built for Businesses. Designed for Growth (Exact Mockup) */}
+            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2.5 shadow-inner">
+              <div className="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
+                <TrendingUp className="w-4 h-4" />
               </div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">
-                Business Instagram
-              </p>
+              <div className="text-[10px] leading-tight text-slate-300">
+                <span className="font-bold text-white block">Built for Businesses.</span>
+                <span className="text-slate-400">Designed for Growth.</span>
+              </div>
             </div>
           </div>
 
-          {/* Navigation Links (Instagram Style) */}
+          {/* Navigation Links */}
           <nav className="space-y-1.5">
             
             {/* 1. Home / Feed */}
@@ -265,28 +265,28 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('feed')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'feed'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Home className={`w-5 h-5 ${activeTab === 'feed' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>முகப்பு (Home)</span>
+              <Home className="w-5 h-5" />
+              <span>Home</span>
             </button>
 
-            {/* 2. Explore / Search */}
+            {/* 2. Discover (Explore & 3x8 Grid) */}
             <button
               onClick={() => setActiveTab('explore')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'explore'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Search className={`w-5 h-5 ${activeTab === 'explore' ? 'text-amber-400' : 'text-slate-600'}`} />
+              <Compass className="w-5 h-5" />
               <div className="flex items-center gap-2">
-                <span>தேடுக (3x8 Grid)</span>
-                <span className="bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full">
-                  24 ரீல்ஸ்
+                <span>Discover</span>
+                <span className="bg-blue-500/30 text-blue-300 text-[9px] font-black px-1.5 py-0.2 rounded-full border border-blue-400/30">
+                  24 Reels
                 </span>
               </div>
             </button>
@@ -296,94 +296,83 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('reels')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'reels'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Film className={`w-5 h-5 ${activeTab === 'reels' ? 'text-amber-400' : 'text-slate-600'}`} />
+              <Film className="w-5 h-5" />
               <div className="flex items-center gap-2">
-                <span>ரீல்ஸ் (Reels)</span>
-                <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">
+                <span>Reels</span>
+                <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full shadow-sm">
                   HOT
                 </span>
               </div>
             </button>
 
-            {/* 4. Messages / Enquiries */}
+            {/* 4. Messages / Inbox */}
             <button
               onClick={() => setActiveTab('messages')}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'messages'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-3.5">
-                <MessageCircle className={`w-5 h-5 ${activeTab === 'messages' ? 'text-amber-400' : 'text-slate-600'}`} />
-                <span>விசாரணைகள் (Chat)</span>
+                <MessageCircle className="w-5 h-5" />
+                <span>Inbox</span>
               </div>
               <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                3
+                5
               </span>
             </button>
 
-            {/* 5. Create / Upload */}
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-800 hover:bg-amber-50 hover:text-amber-900 border border-transparent hover:border-amber-300 transition cursor-pointer text-sm font-black group"
-            >
-              <div className="w-6 h-6 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs group-hover:scale-105 transition">
-                +
-              </div>
-              <span>பதிவேற்றுக (Create)</span>
-            </button>
-
-            {/* 6. Insights */}
+            {/* 5. Business Growth (Insights) */}
             <button
               onClick={() => setActiveTab('insights')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'insights'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <BarChart3 className={`w-5 h-5 ${activeTab === 'insights' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>புள்ளிவிவரம் (Insights)</span>
+              <BarChart3 className="w-5 h-5" />
+              <span>Growth</span>
             </button>
 
-            {/* 7. Profile */}
+            {/* 6. Profile */}
             <button
               onClick={() => setActiveTab('profile')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'profile'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <User className={`w-5 h-5 ${activeTab === 'profile' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>புரொபைல் (@{currentUser.username})</span>
+              <User className="w-5 h-5" />
+              <span>Profile</span>
             </button>
 
-            {/* 8. Profile Settings */}
+            {/* 7. Settings */}
             <button
               onClick={() => setIsSettingsModalOpen(true)}
-              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-100 transition cursor-pointer text-sm font-bold"
+              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-400 hover:bg-white/5 hover:text-white transition cursor-pointer text-sm font-bold"
             >
-              <Settings className="w-5 h-5 text-slate-600" />
-              <span>செக்யூரிட்டி & செட்டிங்ஸ்</span>
+              <Settings className="w-5 h-5" />
+              <span>Settings</span>
             </button>
 
-            {/* 9. Super Admin Console */}
+            {/* 8. Super Admin Console */}
             <button
               onClick={() => setActiveTab('admin')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'admin'
-                  ? 'bg-slate-950 text-white shadow-md'
-                  : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-950'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Shield className={`w-5 h-5 ${activeTab === 'admin' ? 'text-amber-400' : 'text-slate-600'}`} />
-              <span>அட்மின் தணிக்கை (Admin)</span>
+              <Shield className="w-5 h-5" />
+              <span>Admin Console</span>
             </button>
 
           </nav>
@@ -391,25 +380,25 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         </div>
 
         {/* Bottom Profile Summary Card & Validity Timer */}
-        <div className="pt-4 border-t border-slate-100 space-y-3">
+        <div className="pt-4 border-t border-white/10 space-y-3">
           
           <div 
             onClick={() => setActiveTab('profile')}
-            className="flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-100/80 transition cursor-pointer"
+            className="flex items-center gap-3 p-2 rounded-2xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/10"
           >
-            <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 shrink-0">
+            <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 shrink-0">
               <img
                 src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
                 alt="Profile"
-                className="w-full h-full rounded-full object-cover border border-white"
+                className="w-full h-full rounded-full object-cover border border-slate-900"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-black text-slate-900 truncate flex items-center gap-1">
+              <div className="text-xs font-black text-white truncate flex items-center gap-1">
                 <span>@{currentUser.username}</span>
-                <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
               </div>
-              <div className="text-[11px] text-slate-500 truncate">
+              <div className="text-[10px] text-slate-400 truncate">
                 {currentUser.businessName}
               </div>
             </div>
@@ -418,29 +407,30 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 e.stopPropagation();
                 setIsAuthModalOpen(true);
               }}
-              className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer"
-              title="கணக்கை மாற்று / உள்நுழை"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
+              title="Switch Account"
             >
               <LogOut className="w-4 h-4" />
             </button>
           </div>
 
           {/* 1-Year Validity Live Card */}
-          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-slate-900 text-[11px] font-bold flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
+          <div className="p-2.5 rounded-xl bg-blue-950/40 border border-blue-500/30 text-white text-[11px] font-bold flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-slate-300">
               <span>⏳</span>
-              <span>1 வருடம் வேலிடிட்டி:</span>
+              <span>Validity:</span>
             </div>
-            <span className="bg-slate-950 text-amber-400 font-mono text-[10px] px-1.5 py-0.5 rounded font-black">
-              {currentUser.validityDaysLeft || 364} நாட்கள்
+            <span className="bg-blue-600/40 text-blue-300 font-mono text-[10px] px-2 py-0.5 rounded-lg font-black border border-blue-400/40">
+              {currentUser.validityDaysLeft || 364} Days
             </span>
           </div>
 
           <button
-            onClick={() => setIsRegisterModalOpen(true)}
-            className="w-full py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.4)] transition flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span>💳 ₹1 மெம்பர்ஷிப் புதுப்பிப்பு</span>
+            <Plus className="w-4 h-4" />
+            <span>Create New Post</span>
           </button>
 
         </div>
@@ -448,47 +438,50 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       </aside>
 
       {/* ========================================================================= */}
-      {/* 2. MOBILE TOP NAVBAR                                                      */}
+      {/* 2. MOBILE TOP NAVBAR (MATCHING CENTER PHONE SCREEN IN MOCKUP)            */}
       {/* ========================================================================= */}
-      <header className="md:hidden sticky top-0 z-40 bg-white border-b border-slate-200 px-4 h-15 flex items-center justify-between shadow-2xs">
+      <header className="md:hidden sticky top-0 z-40 bg-[#070913]/90 backdrop-blur-2xl border-b border-white/10 px-4 h-16 flex items-center justify-between shadow-lg">
         
+        {/* Shinegah Logo */}
         <div 
           onClick={() => setActiveTab('feed')}
           className="flex items-center gap-2 cursor-pointer"
         >
-          <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-lg shadow-sm">
-            N
-          </div>
-          <span className="font-black text-lg text-slate-950 tracking-tight">
-            NBN <span className="text-amber-500">BizGram</span>
+          <ShinegahLogo size="sm" showText={false} />
+          <span className="font-black text-lg text-white tracking-tight">
+            Shinegah<span className="text-indigo-400 text-xs">™</span>
           </span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Right Search, Bell (badge 3) & Avatar */}
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setIsSettingsModalOpen(true)}
-            className="p-1.5 text-slate-700 hover:text-amber-600 transition cursor-pointer"
-            title="செட்டிங்ஸ்"
+            onClick={() => setActiveTab('explore')}
+            className="p-1.5 text-slate-300 hover:text-white transition"
           >
-            <Settings className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="p-1.5 text-slate-800 hover:text-amber-600 transition cursor-pointer"
-            title="Create Post"
-          >
-            <PlusSquare className="w-5 h-5" />
+            <Search className="w-5 h-5" />
           </button>
 
           <button
             onClick={() => setActiveTab('messages')}
-            className="relative p-1.5 text-slate-800 hover:text-amber-600 transition cursor-pointer"
-            title="Messages"
+            className="relative p-1.5 text-slate-300 hover:text-white transition"
           >
-            <MessageCircle className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white" />
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border border-black">
+              3
+            </span>
           </button>
+
+          <div 
+            onClick={() => setActiveTab('profile')}
+            className="w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-cyan-400 to-purple-600 cursor-pointer"
+          >
+            <img
+              src={currentUser.avatar}
+              alt="Avatar"
+              className="w-full h-full rounded-full object-cover border border-slate-900"
+            />
+          </div>
         </div>
 
       </header>
@@ -496,27 +489,38 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       {/* ========================================================================= */}
       {/* 3. MAIN CONTENT VIEWPORT CONTAINER                                        */}
       {/* ========================================================================= */}
-      <main className="flex-1 min-w-0 max-w-full overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 md:pb-6">
+      <main className="flex-1 min-w-0 max-w-full overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8">
         
-        {/* VIEW 1: HOME FEED */}
+        {/* VIEW 1: HOME FEED (MATCHING CENTER PHONE SCREEN) */}
         {activeTab === 'feed' && (
           <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Center Feed Column (8 cols on lg) */}
+            {/* Center Feed Column (7 cols on lg) */}
             <div className="lg:col-span-7 space-y-6">
               
-              {/* TOP STORIES BAR */}
+              {/* TOP SEARCH BAR IN FEED (FROM MOCKUP) */}
+              <div 
+                onClick={() => setActiveTab('explore')}
+                className="bg-[#0e1428]/90 backdrop-blur-2xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-3 cursor-pointer hover:border-white/20 transition shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+              >
+                <Search className="w-4 h-4 text-slate-400" />
+                <span className="text-xs sm:text-sm text-slate-400 font-medium">
+                  Search businesses, products...
+                </span>
+              </div>
+
+              {/* STORIES CAROUSEL (+ Create Story, Business Updates, Offers, Events, Networking) */}
               <StoriesBar
                 stories={stories}
                 currentUserAvatar={currentUser.avatar}
                 onOpenCreateStory={() => setIsCreateModalOpen(true)}
                 onSendStoryReply={(story, text) => {
-                  handleSendMessageInChat('th_001', `[ஸ்டோரி பதில்]: ${text}`);
+                  handleSendMessageInChat('th_ramesh', `[Story Reply]: ${text}`);
                   setActiveTab('messages');
                 }}
               />
 
-              {/* POSTS FEED LIST (APPROVED PUBLIC POSTS) */}
+              {/* FEED POSTS LIST */}
               <div className="space-y-6">
                 {publicPosts.map((post) => (
                   <PostCard
@@ -534,106 +538,61 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             {/* Right Desktop Sidebar (5 cols on lg) */}
             <div className="hidden lg:block lg:col-span-5 space-y-5 sticky top-6">
               
-              {/* My Profile Quick Preview */}
-              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'}
-                      alt={currentUser.businessName}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-amber-400"
-                    />
-                    <div className="min-w-0">
-                      <div className="font-black text-sm text-slate-900 flex items-center gap-1">
-                        <span className="truncate">@{currentUser.username}</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                      </div>
-                      <div className="text-xs text-slate-500 truncate">
-                        {currentUser.businessName} • {currentUser.taluk}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="text-xs font-black text-amber-600 hover:text-amber-700 cursor-pointer shrink-0"
-                  >
-                    மாற்று
-                  </button>
-                </div>
+              {/* Business Growth Widget Preview (Top Right from Mockup) */}
+              <InsightsView
+                posts={posts}
+                onOpenCreateReel={() => setIsCreateModalOpen(true)}
+              />
 
-                <div className="p-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-purple-50 border border-amber-200 text-xs font-bold text-slate-800 flex items-center justify-between">
-                  <span>⏳ வேலிடிட்டி டைமர்:</span>
-                  <span className="font-mono text-amber-900 font-black">
-                    {currentUser.validityDaysLeft || 364}D : 23H : 59M
-                  </span>
-                </div>
-              </div>
-
-              {/* Suggested Businesses in your Taluk */}
-              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+              {/* Discover Businesses Nearby Card (Bottom Left from Mockup) */}
+              <div className="p-5 rounded-3xl bg-[#0e1428]/90 border border-white/10 space-y-3.5 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-black text-xs text-slate-700 uppercase tracking-wider">
-                    தாலுகா பரிந்துரைக்கப்பட்ட வணிகங்கள்
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-300">
+                    Discover Verified Businesses
                   </h4>
-                  <button 
+                  <button
                     onClick={() => setActiveTab('explore')}
-                    className="text-xs font-bold text-slate-500 hover:text-slate-900 cursor-pointer"
+                    className="text-xs font-bold text-blue-400 hover:text-blue-300 cursor-pointer"
                   >
-                    அனைத்தும்
+                    View All ›
                   </button>
                 </div>
 
                 <div className="space-y-3">
-                  {publicPosts.slice(0, 4).map((p) => (
-                    <div key={p.id} className="flex items-center justify-between gap-3">
+                  {publicPosts.slice(2, 6).map((p) => (
+                    <div 
+                      key={p.id}
+                      onClick={() => handleSendEnquiry(p)}
+                      className="p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition flex items-center justify-between gap-3 cursor-pointer"
+                    >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <img
                           src={p.avatar}
                           alt={p.businessName}
-                          className="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0"
+                          className="w-9 h-9 rounded-full object-cover border border-white/20 shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="font-bold text-xs text-slate-900 truncate">
-                            {p.businessName}
+                          <div className="font-bold text-xs text-white truncate flex items-center gap-1">
+                            <span>{p.businessName}</span>
+                            <CheckCircle2 className="w-3 h-3 text-blue-400 shrink-0" />
                           </div>
-                          <div className="text-[10px] text-slate-500 truncate">
+                          <div className="text-[10px] text-slate-400 truncate">
                             {p.category} • {p.taluk}
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleSendEnquiry(p)}
-                        className="px-3 py-1 bg-slate-100 hover:bg-amber-400 hover:text-slate-950 text-slate-700 text-xs font-bold rounded-full transition cursor-pointer shrink-0"
-                      >
-                        விசாரி
+                      <button className="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-[10px] rounded-full shrink-0 shadow-sm">
+                        Enquire
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Verified Categories Quick Links */}
-              <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-3">
-                <h4 className="font-black text-xs text-slate-700 uppercase tracking-wider">
-                  முன்னுரிமை வணிகப் பிரிவுகள்
-                </h4>
-                <div className="flex flex-wrap gap-1.5 text-xs">
-                  {['பட்டு & ஜவுளி', 'வேளாண் இயந்திரங்கள்', 'தங்க நகைகள்', 'கன்ஸ்ட்ரக்ஷன்', 'சாஃப்ட்வேர் & 3D', 'CNC & ஆட்டோமொபைல்'].map((cat) => (
-                    <span 
-                      key={cat}
-                      onClick={() => setActiveTab('explore')}
-                      className="px-2.5 py-1 rounded-full bg-slate-50 hover:bg-amber-100 border border-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer transition"
-                    >
-                      {cat}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
               {/* Clean Footer Info */}
-              <div className="text-[11px] text-slate-400 space-y-1 px-2">
-                <div>NBN BizGram • Tamil Nadu's Premier B2B Network</div>
-                <div>Powered by Nuvea Studio • 100% Verified Commercial Commerce</div>
+              <div className="text-[11px] text-slate-500 space-y-1 px-2">
+                <div>Shinegah™ • Connect • Collaborate • Grow</div>
+                <div>The Next-Gen Business Social Network • Tamil Nadu</div>
               </div>
 
             </div>
@@ -641,7 +600,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           </div>
         )}
 
-        {/* VIEW 2: EXPLORE / SEARCH (3x8 GRID = 24 AUTOPLAY MUTED VIDEOS) */}
+        {/* VIEW 2: EXPLORE / DISCOVER (MAP + 3x8 VIDEO GRID) */}
         {activeTab === 'explore' && (
           <ExploreView
             posts={posts}
@@ -666,7 +625,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           />
         )}
 
-        {/* VIEW 4: ENQUIRIES & CHAT */}
+        {/* VIEW 4: ENQUIRIES & CHAT (MESSAGES 5) */}
         {activeTab === 'messages' && (
           <EnquiryChat
             threads={threads}
@@ -693,7 +652,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           />
         )}
 
-        {/* VIEW 6: BUSINESS INSIGHTS */}
+        {/* VIEW 6: BUSINESS GROWTH (INSIGHTS) */}
         {activeTab === 'insights' && (
           <InsightsView
             posts={posts}
@@ -716,69 +675,76 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       </main>
 
       {/* ========================================================================= */}
-      {/* 4. MOBILE BOTTOM NAVIGATION BAR                                           */}
+      {/* 4. FLOATING CURVED FROSTED GLASS DOCK (EXACT MATCH FROM MOCKUP)          */}
       {/* ========================================================================= */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 h-16 flex items-center justify-around z-40 select-none shadow-lg">
-        
-        {/* Home */}
-        <button
-          onClick={() => setActiveTab('feed')}
-          className={`flex flex-col items-center gap-0.5 p-1 ${
-            activeTab === 'feed' ? 'text-amber-500 font-bold' : 'text-slate-500'
-          }`}
-        >
-          <Home className="w-5 h-5" />
-          <span className="text-[10px]">முகப்பு</span>
-        </button>
+      <nav className="md:hidden fixed bottom-4 inset-x-4 z-40 select-none">
+        <div className="bg-[#0d1226]/85 backdrop-blur-3xl border border-white/15 rounded-full px-5 py-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] flex items-center justify-between">
+          
+          {/* 1. Home */}
+          <button
+            onClick={() => setActiveTab('feed')}
+            className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
+              activeTab === 'feed' ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Home className="w-5 h-5" />
+            <span className="text-[9px]">Home</span>
+          </button>
 
-        {/* Explore */}
-        <button
-          onClick={() => setActiveTab('explore')}
-          className={`flex flex-col items-center gap-0.5 p-1 ${
-            activeTab === 'explore' ? 'text-amber-500 font-bold' : 'text-slate-500'
-          }`}
-        >
-          <Search className="w-5 h-5" />
-          <span className="text-[10px]">தேடல்</span>
-        </button>
+          {/* 2. Discover */}
+          <button
+            onClick={() => setActiveTab('explore')}
+            className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
+              activeTab === 'explore' ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Compass className="w-5 h-5" />
+            <span className="text-[9px]">Discover</span>
+          </button>
 
-        {/* Create (+) */}
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center font-black text-xl shadow-md -mt-4 cursor-pointer"
-        >
-          +
-        </button>
+          {/* 3. Center Glowing Plus Circle Button (Exact Mockup) */}
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="w-13 h-13 -my-5 rounded-full p-[2.5px] bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_25px_rgba(79,70,229,0.7)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95"
+          >
+            <div className="w-full h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-inner">
+              <Plus className="w-6 h-6 stroke-[3]" />
+            </div>
+          </button>
 
-        {/* Reels */}
-        <button
-          onClick={() => setActiveTab('reels')}
-          className={`flex flex-col items-center gap-0.5 p-1 ${
-            activeTab === 'reels' ? 'text-amber-500 font-bold' : 'text-slate-500'
-          }`}
-        >
-          <Film className="w-5 h-5" />
-          <span className="text-[10px]">ரீல்ஸ்</span>
-        </button>
+          {/* 4. Inbox (Badge 5) */}
+          <button
+            onClick={() => setActiveTab('messages')}
+            className={`relative flex flex-col items-center gap-0.5 transition cursor-pointer ${
+              activeTab === 'messages' ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-[9px]">Inbox</span>
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center">
+              5
+            </span>
+          </button>
 
-        {/* Profile */}
-        <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center gap-0.5 p-1 ${
-            activeTab === 'profile' ? 'text-amber-500 font-bold' : 'text-slate-500'
-          }`}
-        >
-          <User className="w-5 h-5" />
-          <span className="text-[10px]">புரொபைல்</span>
-        </button>
+          {/* 5. Profile */}
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
+              activeTab === 'profile' ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <User className="w-5 h-5" />
+            <span className="text-[9px]">Profile</span>
+          </button>
 
+        </div>
       </nav>
 
       {/* ========================================================================= */}
       {/* 5. MODALS                                                                 */}
       {/* ========================================================================= */}
       
-      {/* Create New Post / Reel Modal */}
+      {/* Create Modal */}
       <CreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -786,14 +752,14 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         currentUser={{
           businessName: currentUser.businessName,
           ownerName: currentUser.ownerName,
-          avatar: currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-          taluk: currentUser.taluk || 'சேலம் (Salem)',
-          category: currentUser.category || 'ஜவுளி & பட்டு',
-          phone: currentUser.phone || '919842109999',
+          avatar: currentUser.avatar,
+          taluk: currentUser.taluk,
+          category: currentUser.category,
+          phone: currentUser.phone,
         }}
       />
 
-      {/* Profile Security & Device Permissions Settings Modal */}
+      {/* Settings Modal */}
       <ProfileSettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}

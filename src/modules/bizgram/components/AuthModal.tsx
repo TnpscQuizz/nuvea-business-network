@@ -4,6 +4,7 @@ import {
   Tag, CheckCircle2, AlertCircle, ArrowRight, Sparkles 
 } from 'lucide-react';
 import type { BizUser } from '../../../types';
+import { ShinegahLogo } from './ShinegahLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -29,8 +30,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [signupBizName, setSignupBizName] = useState('');
   const [signupOwnerName, setSignupOwnerName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
-  const [signupTaluk, setSignupTaluk] = useState('சேலம் (Salem)');
-  const [signupCategory, setSignupCategory] = useState('ஜவுளி & பட்டு');
+  const [signupTaluk, setSignupTaluk] = useState('Chennai');
+  const [signupCategory, setSignupCategory] = useState('Technology');
   const [signupPassword, setSignupPassword] = useState('');
   
   const [errorMsg, setErrorMsg] = useState('');
@@ -38,42 +39,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   if (!isOpen) return null;
 
   const categories = [
+    'Technology',
+    'Manufacturing',
+    'Retail',
+    'Services',
+    'Digital',
     'ஜவுளி & பட்டு',
     'வேளாண் இயந்திரங்கள்',
     'தங்கம் & வெள்ளி',
     'இரும்பு & கட்டுமானம்',
-    'CNC & ஆட்டோமொபைல்',
-    'IT & மென்பொருள் சேவை',
-    'உணவு & பால்பண்ணை',
-    'லாஜிஸ்டிக்ஸ் & பேக்கிங்',
-    'பர்னிச்சர் & இன்டீரியர்'
+    'லாஜிஸ்டிக்ஸ் & பேக்கிங்'
   ];
 
   const taluks = [
-    'சேலம் (Salem)',
-    'தருமபுரி (Dharmapuri)',
-    'ஹரூர் (Harur)',
-    'ஓமலூர் (Omalur)',
-    'ஆத்தூர் (Attur)',
-    'மேட்டூர் (Mettur)'
+    'Chennai',
+    'Salem',
+    'Dharmapuri',
+    'Coimbatore',
+    'Harur',
+    'Mettur'
   ];
 
   // Preset demo accounts for quick testing
   const demoAccounts: BizUser[] = [
     {
-      id: 'usr_chandru',
-      username: 'chandru_nuvea',
-      businessName: 'நுவேவா பிசினஸ் நெட்வொர்க் (Nuvea Hub)',
+      id: 'usr_shinegah',
+      username: 'shinegah.in',
+      businessName: 'Shinegah™ Business Network',
       ownerName: 'சந்திரசேகர் (Chandru)',
-      email: 'chandru@nuvea.in',
-      phone: '919842109999',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      taluk: 'சேலம் (Salem)',
-      category: 'IT & மென்பொருள் சேவை (Software)',
-      bio: '🏢 அதிகாரப்பூர்வ NBN தொழில் நெட்வொர்க் ஹப்',
-      locationTag: 'சேலம், தமிழ்நாடு',
-      followersCount: 1420,
-      followingCount: 380,
+      email: 'connect@shinegah.in',
+      phone: '917548820641',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      taluk: 'Chennai',
+      category: 'Technology • Business Network',
+      bio: 'Empowering Businesses to Grow Together ✨',
+      locationTag: 'Chennai, Tamil Nadu',
+      followersCount: 12500,
+      followingCount: 245,
       postsCount: 24,
       validityDaysLeft: 364,
       isPrivateAccount: false,
@@ -88,7 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         notifications: true,
         talkBox: true,
       },
-      contentPreferences: ['ஜவுளி & பட்டு', 'வேளாண் இயந்திரங்கள்', 'IT & மென்பொருள் சேவை'],
+      contentPreferences: ['Technology', 'Manufacturing', 'Digital'],
     },
     {
       id: 'usr_salem_silks',
@@ -98,7 +100,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       email: 'ramesh@salemsilks.com',
       phone: '919842100001',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-      taluk: 'சேலம் (Salem)',
+      taluk: 'Salem',
       category: 'ஜவுளி & பட்டு',
       bio: '🧵 நேரடி தறி காஞ்சி பட்டு சேலை உற்பத்தியாளர்',
       locationTag: 'சேலம் மெயின் பஜார்',
@@ -118,7 +120,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         notifications: true,
         talkBox: true,
       },
-      contentPreferences: ['ஜவுளி & பட்டு', 'லாஜிஸ்டிக்ஸ் & பேக்கிங்'],
+      contentPreferences: ['ஜவுளி & பட்டு', 'Retail'],
     },
     {
       id: 'usr_harur_agro',
@@ -128,7 +130,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       email: 'murugan@haruragro.com',
       phone: '919842100002',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-      taluk: 'ஹரூர் (Harur)',
+      taluk: 'Harur',
       category: 'வேளாண் இயந்திரங்கள்',
       bio: '🌾 நவீன விவசாய தானியங்கி அறுவடை இயந்திரங்கள்',
       locationTag: 'ஹரூர் பைபாஸ் ரோடு',
@@ -148,7 +150,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         notifications: true,
         talkBox: true,
       },
-      contentPreferences: ['வேளாண் இயந்திரங்கள்', 'இயற்கை உரம் & அக்ரோ'],
+      contentPreferences: ['வேளாண் இயந்திரங்கள்', 'Manufacturing'],
     },
   ];
 
@@ -158,7 +160,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     const cleanId = signInIdentifier.trim().toLowerCase().replace(/^@/, '');
     
-    // Check demo accounts first
+    // Check demo accounts
     const matched = demoAccounts.find(
       (a) => a.username.toLowerCase() === cleanId || a.phone.includes(cleanId)
     );
@@ -169,33 +171,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    // Check localStorage registered users
-    try {
-      const savedUsers: BizUser[] = JSON.parse(localStorage.getItem('nbn_all_biz_users') || '[]');
-      const localMatched = savedUsers.find(
-        (a) => a.username.toLowerCase() === cleanId || a.phone.includes(cleanId)
-      );
-      if (localMatched) {
-        onLogin(localMatched);
-        onClose();
-        return;
-      }
-    } catch {
-      // ignore
-    }
-
-    // If identifier provided, allow instant sign in with generated profile
+    // Default auto-login with custom handle
     if (cleanId.length >= 3) {
       const newUser: BizUser = {
         id: `usr_${Date.now()}`,
         username: cleanId,
         businessName: `${cleanId.toUpperCase()} Enterprises`,
         ownerName: cleanId,
-        email: `${cleanId}@nbn.in`,
-        phone: '919842000000',
+        email: `${cleanId}@shinegah.in`,
+        phone: '917548820641',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-        taluk: 'சேலம் (Salem)',
-        category: 'வணிக உறுப்பினர்',
+        taluk: 'Chennai',
+        category: 'Technology',
         followersCount: 1,
         followingCount: 5,
         postsCount: 0,
@@ -212,14 +199,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           notifications: true,
           talkBox: true,
         },
-        contentPreferences: ['ஜவுளி & பட்டு', 'வேளாண் இயந்திரங்கள்'],
+        contentPreferences: ['Technology', 'Manufacturing'],
       };
       onLogin(newUser);
       onClose();
       return;
     }
 
-    setErrorMsg('தயவுசெய்து சரியான யூசர்நேம் (@username) அல்லது மொபைல் எண்ணை உள்ளிடவும்.');
+    setErrorMsg('தயவுசெய்து சரியான யூசர்நேம் (@username) உள்ளிடவும்.');
   };
 
   const handleSignUpSubmit = (e: React.FormEvent) => {
@@ -228,9 +215,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     const cleanHandle = signupHandle.trim().toLowerCase().replace(/^@/, '');
     
-    // Enforce alphanumeric + underscore (Instagram handle format)
     if (!/^[a-z0-9_]{3,24}$/.test(cleanHandle)) {
-      setErrorMsg('யூசர் ஐடி 3 முதல் 24 எழுத்துக்கள், எண்கள் மற்றும் அண்டர்ஸ்கோர் (_) மட்டுமே கொண்டிருக்க வேண்டும்.');
+      setErrorMsg('யூசர் ஐடி 3 முதல் 24 எழுத்துக்கள், எண்கள் மற்றும் அண்டர்ஸ்கோர் மட்டுமே கொண்டிருக்க வேண்டும்.');
       return;
     }
 
@@ -240,7 +226,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
 
     if (signupPhone.trim().length < 10) {
-      setErrorMsg('10 இலக்க மொபைல் எண்ணை உள்ளிடவும் (ஒரு எண்ணிற்கு ஒரு வணிகக் கணக்கு மட்டுமே அனுமதிக்கப்படும்).');
+      setErrorMsg('10 இலக்க மொபைல் எண்ணை உள்ளிடவும்.');
       return;
     }
 
@@ -249,12 +235,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       username: cleanHandle,
       businessName: signupBizName.trim(),
       ownerName: signupOwnerName.trim(),
-      email: `${cleanHandle}@nbn.in`,
+      email: `${cleanHandle}@shinegah.in`,
       phone: signupPhone.trim(),
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
       taluk: signupTaluk,
       category: signupCategory,
-      bio: `🏢 ${signupBizName} | சரிபார்க்கப்பட்ட B2B உறுப்பினர்`,
+      bio: `🏢 ${signupBizName} | Shinegah Verified B2B Member`,
       locationTag: signupTaluk,
       followersCount: 0,
       followingCount: 1,
@@ -275,76 +261,66 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       contentPreferences: [signupCategory],
     };
 
-    // Save to localStorage
-    try {
-      const existing: BizUser[] = JSON.parse(localStorage.getItem('nbn_all_biz_users') || '[]');
-      localStorage.setItem('nbn_all_biz_users', JSON.stringify([...existing, newUser]));
-    } catch {
-      // ignore
-    }
-
     onLogin(newUser);
-    alert(`வாழ்த்துக்கள் @${cleanHandle}! உங்கள் வணிகக் கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது.`);
+    alert(`வாழ்த்துக்கள் @${cleanHandle}! உங்கள் வணிகக் கணக்கு Shinegah-வில் உருவாக்கப்பட்டது.`);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs select-none">
-      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl select-none font-sans">
+      <div className="bg-[#0e1428] rounded-3xl w-full max-w-md overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/10 flex flex-col">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-[#0a0f20]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-sm shadow-xs">
-              N
-            </div>
+            <ShinegahLogo size="sm" showText={false} />
             <div>
-              <h3 className="font-black text-base text-slate-950 leading-none">
-                வணிகர் லாகின் & பதிவு
+              <h3 className="font-black text-base text-white leading-none">
+                Shinegah™ Business Login
               </h3>
-              <p className="text-[11px] text-slate-500 font-bold mt-0.5">
-                NBN BizGram • 100% Verified B2B Only
+              <p className="text-[11px] text-slate-400 font-bold mt-0.5">
+                Connect • Collaborate • Grow
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Mode Switch Tabs */}
-        <div className="flex border-b border-slate-200 text-xs font-black">
+        <div className="flex border-b border-white/10 text-xs font-black bg-[#080d1c]">
           <button
             onClick={() => { setMode('signin'); setErrorMsg(''); }}
             className={`flex-1 py-3 text-center transition cursor-pointer ${
               mode === 'signin'
-                ? 'border-b-2 border-amber-500 text-slate-950 bg-amber-50/50'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'border-b-2 border-blue-500 text-white bg-blue-600/15'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
-            உள்நுழை (Sign In)
+            Sign In
           </button>
           <button
             onClick={() => { setMode('signup'); setErrorMsg(''); }}
             className={`flex-1 py-3 text-center transition cursor-pointer ${
               mode === 'signup'
-                ? 'border-b-2 border-amber-500 text-slate-950 bg-amber-50/50'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'border-b-2 border-blue-500 text-white bg-blue-600/15'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
-            புதிய ஐடி பதிவு (Sign Up)
+            Sign Up (புதிய ஐடி)
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto bg-[#080d1c]">
           
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -353,52 +329,52 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode === 'signin' ? (
             <form onSubmit={handleSignInSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  யூசர்நேம் (@username) அல்லது போன் நம்பர்:
+                <label className="text-xs font-bold text-slate-300">
+                  Username (@username) / Phone:
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">
                     @
                   </span>
                   <input
                     type="text"
                     required
-                    placeholder="chandru_nuvea"
+                    placeholder="shinegah.in"
                     value={signInIdentifier}
                     onChange={(e) => setSignInIdentifier(e.target.value)}
-                    className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-8 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs sm:text-sm font-mono text-white focus:outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  பாஸ்வேர்ட் (Password):
+                <label className="text-xs font-bold text-slate-300">
+                  Password:
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     placeholder="••••••••"
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.4)] transition cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>உள்நுழைக (Sign In)</span>
+                <span>Sign In</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               {/* Quick Switch Demo Accounts */}
-              <div className="pt-2 border-t border-slate-100 space-y-2">
-                <div className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
-                  டெமோ கணக்குகளில் உடனடியாக உள்நுழைய:
+              <div className="pt-2 border-t border-white/10 space-y-2">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Quick Switch Accounts:
                 </div>
                 <div className="space-y-1.5">
                   {demoAccounts.map((acc) => (
@@ -409,7 +385,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         onLogin(acc);
                         onClose();
                       }}
-                      className="w-full p-2 rounded-xl bg-slate-50 hover:bg-amber-100/60 border border-slate-200 transition text-left flex items-center justify-between cursor-pointer"
+                      className="w-full p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition text-left flex items-center justify-between cursor-pointer"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <img
@@ -418,16 +394,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           className="w-6 h-6 rounded-full object-cover"
                         />
                         <div className="min-w-0">
-                          <div className="font-mono text-xs font-bold text-slate-900 truncate">
+                          <div className="font-mono text-xs font-bold text-white truncate">
                             @{acc.username}
                           </div>
-                          <div className="text-[10px] text-slate-500 truncate">
+                          <div className="text-[10px] text-slate-400 truncate">
                             {acc.businessName}
                           </div>
                         </div>
                       </div>
-                      <span className="text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0">
-                        உள்நுழை
+                      <span className="text-[10px] font-bold text-blue-400 bg-blue-600/20 px-2 py-0.5 rounded-full shrink-0">
+                        Login
                       </span>
                     </button>
                   ))}
@@ -438,72 +414,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             /* SIGN UP FORM */
             <form onSubmit={handleSignUpSubmit} className="space-y-3.5">
               
-              {/* Unique Handle */}
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  தனித்துவமான இன்ஸ்டா-ஐடி (Unique Username @handle):
+                <label className="text-xs font-bold text-slate-300">
+                  Unique Handle (@handle):
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">
                     @
                   </span>
                   <input
                     type="text"
                     required
-                    placeholder="salem_jewels (எழுத்துக்கள், எண், _ மட்டும்)"
+                    placeholder="my_company"
                     value={signupHandle}
                     onChange={(e) => setSignupHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                    className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-blue-400"
                   />
                 </div>
-                <p className="text-[10px] text-slate-400">
-                  ஒரு வணிகத்திற்கு ஒரு தனித்துவமான ஐடி மட்டுமே உருவாக்க முடியும்.
-                </p>
               </div>
 
-              {/* Business Name */}
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  வணிக / கடையின் பெயர் (Business Name):
+                <label className="text-xs font-bold text-slate-300">
+                  Business Name:
                 </label>
                 <div className="relative">
-                  <Building className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
-                    placeholder="சேலம் ராயல் சில்க்ஸ்"
+                    placeholder="Sri Venkateswara Traders"
                     value={signupBizName}
                     onChange={(e) => setSignupBizName(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
-              {/* Owner Name */}
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  உரிமையாளர் பெயர் (Owner Name):
+                <label className="text-xs font-bold text-slate-300">
+                  Owner Name:
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     required
                     placeholder="ரமேஷ் குமார்"
                     value={signupOwnerName}
                     onChange={(e) => setSignupOwnerName(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
-              {/* Phone */}
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  மொபைல் எண் (WhatsApp Phone):
+                <label className="text-xs font-bold text-slate-300">
+                  WhatsApp Phone:
                 </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="tel"
                     required
@@ -511,21 +480,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="9842100001"
                     value={signupPhone}
                     onChange={(e) => setSignupPhone(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
 
-              {/* Taluk and Category Row */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-black text-slate-700">
-                    தாலுகா:
-                  </label>
+                  <label className="text-[11px] font-bold text-slate-300">City / Taluk:</label>
                   <select
                     value={signupTaluk}
                     onChange={(e) => setSignupTaluk(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                    className="w-full p-2 bg-[#0a0f20] border border-white/10 rounded-xl text-xs text-white"
                   >
                     {taluks.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -534,13 +500,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-black text-slate-700">
-                    வணிகப் பிரிவு:
-                  </label>
+                  <label className="text-[11px] font-bold text-slate-300">Category:</label>
                   <select
                     value={signupCategory}
                     onChange={(e) => setSignupCategory(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
+                    className="w-full p-2 bg-[#0a0f20] border border-white/10 rounded-xl text-xs text-white"
                   >
                     {categories.map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -549,40 +513,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
 
-              {/* Password */}
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-700">
-                  ரகசிய கடவுச்சொல் (Password):
-                </label>
+                <label className="text-xs font-bold text-slate-300">Password:</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     required
                     placeholder="••••••••"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-amber-400"
+                    className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white"
                   />
                 </div>
               </div>
 
-              {/* Admin Approval Notice */}
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 space-y-0.5">
-                <div className="font-bold flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                  <span>சூப்பர் அட்மின் தணிக்கை & ஒப்புதல்:</span>
-                </div>
-                <p className="text-[10px] text-amber-800 leading-normal">
-                  நீங்கள் பதிவு செய்த பிறகு உங்கள் கணக்கு மற்றும் புதிய ரீல்ஸ்கள் சூப்பர் அட்மின் ஒப்புதலுக்குப் பிறகே பப்ளிக் எக்ஸ்ப்ளோரில் தெரியும்.
-                </p>
-              </div>
-
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>வணிகர் கணக்கை உருவாக்கு (Sign Up)</span>
+                <span>Create Shinegah Account</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 

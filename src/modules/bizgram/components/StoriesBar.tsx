@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, X, ChevronLeft, ChevronRight, Send, Sparkles } from 'lucide-react';
+import { 
+  Plus, X, ChevronLeft, ChevronRight, Send, 
+  Building2, Tag, Calendar, Users, Sparkles 
+} from 'lucide-react';
 import type { BizStory } from '../../../types';
 
 interface StoriesBarProps {
@@ -39,59 +42,75 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
     if (!replyText.trim() || !activeStory) return;
     if (onSendStoryReply) {
       onSendStoryReply(activeStory, replyText);
-    } else {
-      alert(`"${activeStory.businessName}" க்கு உங்கள் பதில் அனுப்பப்பட்டது: "${replyText}"`);
     }
     setReplyText('');
     setActiveStoryIndex(null);
   };
 
+  // Story icons map matching the mockup
+  const getStoryIcon = (name: string) => {
+    if (name.includes('Updates')) return <Building2 className="w-5 h-5 text-blue-400" />;
+    if (name.includes('Offers')) return <Tag className="w-5 h-5 text-amber-400" />;
+    if (name.includes('Events')) return <Calendar className="w-5 h-5 text-purple-400" />;
+    return <Users className="w-5 h-5 text-cyan-400" />;
+  };
+
+  const getStoryRingClass = (name: string) => {
+    if (name.includes('Updates')) return 'from-blue-500 via-indigo-500 to-cyan-400';
+    if (name.includes('Offers')) return 'from-amber-400 via-orange-500 to-yellow-300';
+    if (name.includes('Events')) return 'from-purple-500 via-pink-500 to-indigo-500';
+    return 'from-teal-400 via-cyan-500 to-blue-500';
+  };
+
   return (
     <>
-      {/* HORIZONTAL STORIES ROW */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs overflow-x-auto scrollbar-none flex items-center gap-4 sm:gap-5 select-none">
+      {/* HORIZONTAL STORIES ROW (EXACT MOCKUP) */}
+      <div className="bg-[#0c1224]/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-3.5 sm:p-4 shadow-[0_8px_30px_rgba(0,0,0,0.45)] overflow-x-auto scrollbar-none flex items-center gap-4 sm:gap-5 select-none">
         
-        {/* ADD MY STORY BUBBLE */}
+        {/* 1. + CREATE STORY BUBBLE */}
         <div 
           onClick={onOpenCreateStory}
           className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
         >
-          <div className="relative w-16 h-16 sm:w-17 sm:h-17 rounded-full p-[2px] border-2 border-dashed border-amber-400 group-hover:scale-105 transition">
-            <img 
-              src={currentUserAvatar} 
-              alt="My Avatar"
-              className="w-full h-full rounded-full object-cover"
-            />
-            <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-xs shadow-md border-2 border-white">
-              <Plus className="w-3.5 h-3.5" />
+          <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2.5px] bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 group-hover:scale-105 transition shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+            <div className="w-full h-full rounded-full overflow-hidden bg-slate-900 border border-black/40">
+              <img 
+                src={currentUserAvatar} 
+                alt="Create Story"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {/* Center Plus Badge */}
+            <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md border border-white/40 group-hover:scale-110 transition">
+              <Plus className="w-4 h-4 stroke-[3]" />
             </div>
           </div>
-          <span className="text-[11px] font-bold text-slate-700 max-w-[68px] truncate text-center">
-            என் ஸ்டோரி
+          <span className="text-[11px] font-semibold text-slate-300 max-w-[70px] truncate text-center">
+            Create Story
           </span>
         </div>
 
-        {/* STORIES LIST */}
+        {/* 2. STORY CHANNELS FROM MOCKUP */}
         {stories.map((story, idx) => (
           <div
             key={story.id}
             onClick={() => setActiveStoryIndex(idx)}
             className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
           >
-            <div className={`w-16 h-16 sm:w-17 sm:h-17 rounded-full p-[2.5px] transition transform group-hover:scale-105 ${
-              story.hasUnseen 
-                ? 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-xs' 
-                : 'border-2 border-slate-300'
-            }`}>
-              <div className="w-full h-full rounded-full p-[1.5px] bg-white">
-                <img 
-                  src={story.avatar} 
-                  alt={story.businessName}
-                  className="w-full h-full rounded-full object-cover"
-                />
+            <div className={`relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2.5px] bg-gradient-to-tr ${getStoryRingClass(story.businessName)} group-hover:scale-105 transition shadow-[0_0_15px_rgba(59,130,246,0.3)]`}>
+              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950/90 border border-black/60 flex items-center justify-center">
+                {story.avatar ? (
+                  <img 
+                    src={story.avatar} 
+                    alt={story.businessName}
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                  />
+                ) : (
+                  getStoryIcon(story.businessName)
+                )}
               </div>
             </div>
-            <span className="text-[11px] font-semibold text-slate-800 max-w-[72px] truncate text-center">
+            <span className="text-[11px] font-semibold text-slate-300 max-w-[75px] truncate text-center">
               {story.businessName}
             </span>
           </div>
@@ -101,103 +120,96 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
 
       {/* FULLSCREEN STORY VIEWER MODAL */}
       {activeStory && (
-        <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-          
-          {/* Close Button */}
-          <button 
-            onClick={() => setActiveStoryIndex(null)}
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 text-white hover:text-amber-400 p-2 rounded-full bg-slate-900/60 transition cursor-pointer z-50"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          {/* Left / Right Nav on Desktop */}
-          {activeStoryIndex > 0 && (
-            <button
-              onClick={handlePrev}
-              className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 text-white hover:text-amber-400 p-3 rounded-full bg-slate-900/60 transition cursor-pointer z-50"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-          )}
-
-          {activeStoryIndex < stories.length - 1 && (
-            <button
-              onClick={handleNext}
-              className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 text-white hover:text-amber-400 p-3 rounded-full bg-slate-900/60 transition cursor-pointer z-50"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          )}
-
-          {/* STORY CARD */}
-          <div className="relative w-full max-w-[420px] h-[80vh] sm:h-[85vh] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl p-0 sm:p-4">
+          <div className="relative w-full max-w-sm h-full sm:h-[85vh] sm:rounded-3xl overflow-hidden bg-slate-950 flex flex-col justify-between shadow-2xl border border-white/10">
             
-            {/* Top Progress Bars */}
-            <div className="absolute top-3 left-3 right-3 z-30 flex items-center gap-1.5">
-              {stories.map((_, i) => (
-                <div key={i} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+            {/* Top Progress bar */}
+            <div className="absolute top-0 inset-x-0 p-3 z-30 space-y-2 bg-gradient-to-b from-black/80 to-transparent">
+              <div className="flex gap-1 h-1 w-full">
+                {stories.map((_, i) => (
                   <div 
-                    className={`h-full bg-amber-400 transition-all duration-300 ${
-                      i < activeStoryIndex ? 'w-full' : i === activeStoryIndex ? 'w-full animate-pulse' : 'w-0'
+                    key={i} 
+                    className={`h-full flex-1 rounded-full ${
+                      i === activeStoryIndex ? 'bg-white' : i < (activeStoryIndex || 0) ? 'bg-white/60' : 'bg-white/20'
                     }`} 
                   />
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Top Story Header */}
-            <div className="absolute top-6 left-3 right-3 z-30 flex items-center justify-between text-white drop-shadow-md">
-              <div className="flex items-center gap-2.5">
-                <img 
-                  src={activeStory.avatar} 
-                  alt={activeStory.businessName}
-                  className="w-9 h-9 rounded-full object-cover border-2 border-amber-400"
-                />
-                <div>
-                  <div className="text-xs font-black flex items-center gap-1.5 text-white">
-                    <span>{activeStory.businessName}</span>
-                    <span className="bg-amber-400 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-bold">
-                      {activeStory.offerBadge || 'OFFER'}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-300 font-medium">
-                    {activeStory.expiresAt}
+              {/* Story Header */}
+              <div className="flex items-center justify-between text-white">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src={activeStory.avatar}
+                    alt={activeStory.businessName}
+                    className="w-9 h-9 rounded-full object-cover border border-white/40"
+                  />
+                  <div>
+                    <div className="text-xs font-bold leading-tight flex items-center gap-1">
+                      <span>{activeStory.businessName}</span>
+                      {activeStory.offerBadge && (
+                        <span className="text-[9px] font-black bg-blue-500 px-1.5 py-0.2 rounded-full">
+                          {activeStory.offerBadge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] text-slate-400">{activeStory.expiresAt}</div>
                   </div>
                 </div>
+
+                <button
+                  onClick={() => setActiveStoryIndex(null)}
+                  className="p-1 rounded-full bg-black/40 text-white hover:bg-white/20 transition cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             </div>
 
-            {/* Story Image / Background */}
-            <div className="relative w-full h-full">
-              <img 
-                src={activeStory.mediaUrl} 
-                alt="Story" 
+            {/* Media Image / Background */}
+            <div 
+              className="flex-1 w-full h-full relative cursor-pointer"
+              onClick={handleNext}
+            >
+              <img
+                src={activeStory.mediaUrl}
+                alt={activeStory.caption}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40" />
+
+              {/* Tap Left / Right Controls */}
+              <button
+                onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white hover:bg-black/70 transition"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white hover:bg-black/70 transition"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
 
             {/* Bottom Caption & Reply Bar */}
-            <div className="absolute bottom-3 left-3 right-3 z-30 space-y-3">
-              <div className="bg-slate-900/80 backdrop-blur-md p-3.5 rounded-2xl border border-slate-700/60 text-white">
-                <p className="text-xs sm:text-sm font-semibold leading-relaxed">
-                  {activeStory.caption}
-                </p>
-              </div>
+            <div className="p-4 bg-gradient-to-t from-black via-black/80 to-transparent space-y-3 z-30">
+              <p className="text-xs text-white leading-relaxed font-medium">
+                {activeStory.caption}
+              </p>
 
-              {/* Instant Reply Input */}
               <form onSubmit={handleSendReply} className="flex items-center gap-2">
                 <input
                   type="text"
-                  placeholder="விலை விவரம் கேட்க அல்லது மெசேஜ் அனுப்ப..."
+                  placeholder="விசாரணை செய்தி அனுப்பவும்..."
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="flex-1 bg-slate-900/80 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-full placeholder-slate-400 focus:outline-none focus:border-amber-400 backdrop-blur-xs"
+                  className="flex-1 px-4 py-2.5 rounded-full bg-white/10 border border-white/20 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 backdrop-blur-md"
                 />
                 <button
                   type="submit"
-                  className="w-10 h-10 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shrink-0 transition cursor-pointer shadow-md"
+                  className="p-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-md transition cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -205,7 +217,6 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
             </div>
 
           </div>
-
         </div>
       )}
     </>

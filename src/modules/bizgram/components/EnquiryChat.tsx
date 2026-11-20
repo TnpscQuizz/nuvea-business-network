@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Send, Phone, CheckCircle2, FileText, Tag, MessageCircle, 
-  MapPin, Sparkles, Plus, Image, ArrowRight, User 
+  MapPin, Sparkles, Plus, MoreHorizontal, ArrowLeft, User 
 } from 'lucide-react';
 import type { BizEnquiryMessage } from '../../../types';
 
@@ -14,6 +14,7 @@ interface Thread {
   lastMessage: string;
   lastTime: string;
   unreadCount: number;
+  verified?: boolean;
   messages: BizEnquiryMessage[];
 }
 
@@ -28,12 +29,13 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
   activeThreadId: initialActiveThreadId,
   onSendMessage,
 }) => {
+  const [activeFilter, setActiveFilter] = useState<'All' | 'Connections' | 'Enquiries' | 'Notifications'>('All');
   const [selectedThreadId, setSelectedThreadId] = useState<string>(
     initialActiveThreadId || threads[0]?.threadId || ''
   );
   const [inputText, setInputText] = useState('');
   const [showQuoteDrawer, setShowQuoteDrawer] = useState(false);
-  const [quoteItems, setQuoteItems] = useState('25 x பட்டு சேலைகள் (Pure Silk)');
+  const [quoteItems, setQuoteItems] = useState('25 x Pure Silk Sarees');
   const [quoteAmount, setQuoteAmount] = useState<number>(42500);
 
   const activeThread = threads.find((t) => t.threadId === selectedThreadId) || threads[0];
@@ -59,73 +61,102 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
 
     onSendMessage(
       activeThread.threadId,
-      'அதிகாரப்பூர்வ 18% GST விலைப்பட்டியல் (Quotation) கீழே சமர்ப்பிக்கப்பட்டுள்ளது:',
+      `அதிகாரப்பூர்வ 18% GST விலைப்பட்டியல் (Quotation): ${quoteItems}`,
       quotationData
     );
     setShowQuoteDrawer(false);
   };
 
-  if (!activeThread) {
-    return (
-      <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center text-slate-500 font-bold">
-        விசாரணை உரையாடல்கள் எதுவும் இல்லை.
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white border border-slate-200/90 rounded-3xl shadow-sm overflow-hidden h-[78vh] sm:h-[82vh] grid grid-cols-1 md:grid-cols-12">
+    <div className="max-w-5xl mx-auto h-[82vh] bg-[#0e1428]/95 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex flex-col md:flex-row select-none font-sans">
       
-      {/* LEFT COLUMN: CONVERSATION THREADS (4 COLS) */}
-      <div className="md:col-span-4 border-r border-slate-100 flex flex-col h-full bg-slate-50/50">
+      {/* ========================================================================= */}
+      {/* 1. LEFT THREADS COLUMN (EXACT MOCKUP)                                     */}
+      {/* ========================================================================= */}
+      <div className={`w-full md:w-80 lg:w-96 border-r border-white/10 flex flex-col bg-[#0a0f20]/90 ${selectedThreadId && 'hidden md:flex'}`}>
         
-        {/* Threads Header */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h3 className="font-black text-slate-900 text-sm">
-              விசாரணைகள் & சேட்கள் (Enquiries)
-            </h3>
-            <p className="text-[11px] text-slate-500">
-              வாங்குபவர்கள் & சாப்டர் நெட்வொர்க்
-            </p>
+        {/* Header: Messages (5) + Plus + More (Exact Mockup) */}
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-black text-white tracking-tight">
+              Messages
+            </h2>
+            <span className="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">
+              5
+            </span>
           </div>
-          <span className="bg-amber-400 text-slate-950 text-xs font-black px-2 py-0.5 rounded-full">
-            {threads.length}
-          </span>
+
+          <div className="flex items-center gap-1.5 text-slate-300">
+            <button className="p-1.5 hover:bg-white/10 rounded-full transition cursor-pointer">
+              <Plus className="w-4 h-4" />
+            </button>
+            <button className="p-1.5 hover:bg-white/10 rounded-full transition cursor-pointer">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+        {/* Filter Tabs: All | Connections | Enquiries | Notifications (Exact Mockup) */}
+        <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-xs font-bold text-slate-400">
+          {(['All', 'Connections', 'Enquiries', 'Notifications'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveFilter(tab)}
+              className={`px-2.5 py-1 rounded-full transition cursor-pointer ${
+                activeFilter === tab
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'hover:text-white'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Thread List Items (Ramesh Kumar, Priya Enterprises, etc.) */}
+        <div className="flex-1 overflow-y-auto divide-y divide-white/5">
           {threads.map((thread) => {
-            const isSelected = thread.threadId === activeThread.threadId;
+            const isSelected = thread.threadId === activeThread?.threadId;
             return (
               <div
                 key={thread.threadId}
                 onClick={() => setSelectedThreadId(thread.threadId)}
-                className={`p-3.5 flex items-start gap-3 cursor-pointer transition ${
-                  isSelected ? 'bg-amber-50/80 border-l-4 border-amber-400' : 'hover:bg-slate-100/70'
+                className={`p-3.5 sm:p-4 flex items-center gap-3 cursor-pointer transition ${
+                  isSelected
+                    ? 'bg-blue-600/15 border-l-4 border-blue-500'
+                    : 'hover:bg-white/5'
                 }`}
               >
-                <img
-                  src={thread.avatar}
-                  alt={thread.memberName}
-                  className="w-11 h-11 rounded-full object-cover shrink-0 border border-slate-200"
-                />
+                <div className="relative shrink-0">
+                  <img
+                    src={thread.avatar}
+                    alt={thread.memberName}
+                    className="w-11 h-11 rounded-full object-cover border border-white/15"
+                  />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center border border-black text-[9px]">
+                    <CheckCircle2 className="w-3 h-3" />
+                  </div>
+                </div>
+
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs sm:text-sm text-slate-900 truncate">
-                      {thread.memberName}
-                    </span>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <div className="font-bold text-xs sm:text-sm text-white truncate flex items-center gap-1">
+                      <span>{thread.memberName}</span>
+                    </div>
                     <span className="text-[10px] text-slate-400 shrink-0">
                       {thread.lastTime}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-600 truncate mt-0.5">
-                    {thread.lastMessage}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500">
-                    <MapPin className="w-2.5 h-2.5 text-amber-600" />
-                    <span>{thread.taluk}</span>
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-slate-400 truncate pr-2">
+                      {thread.lastMessage}
+                    </p>
+                    {thread.unreadCount > 0 && (
+                      <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                        {thread.unreadCount}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -135,119 +166,135 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
 
       </div>
 
-      {/* RIGHT COLUMN: ACTIVE CHAT THREAD (8 COLS) */}
-      <div className="md:col-span-8 flex flex-col h-full bg-white relative">
+      {/* ========================================================================= */}
+      {/* 2. RIGHT ACTIVE CHAT CONVERSATION VIEW                                   */}
+      {/* ========================================================================= */}
+      <div className={`flex-1 flex flex-col bg-[#080d1c] ${!selectedThreadId && 'hidden md:flex'}`}>
         
-        {/* Active Chat Header */}
-        <div className="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between">
+        {/* Top Active Chat Header */}
+        <div className="p-3.5 sm:p-4 border-b border-white/10 bg-[#0c1224]/80 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSelectedThreadId('')}
+              className="md:hidden p-1.5 text-slate-400 hover:text-white"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
             <img
-              src={activeThread.avatar}
-              alt={activeThread.memberName}
-              className="w-10 h-10 rounded-full object-cover border-2 border-amber-400"
+              src={activeThread?.avatar}
+              alt={activeThread?.memberName}
+              className="w-10 h-10 rounded-full object-cover border border-white/20"
             />
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-black text-sm text-slate-900">
-                  {activeThread.memberName}
-                </span>
-                <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-500/20" />
+              <div className="font-bold text-xs sm:text-sm text-white flex items-center gap-1.5">
+                <span>{activeThread?.memberName}</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
               </div>
-              <div className="text-[11px] text-slate-500 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-amber-600" />
-                <span>{activeThread.taluk}</span>
+              <div className="text-[10px] text-emerald-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Active B2B Member • {activeThread?.taluk}</span>
               </div>
             </div>
           </div>
 
-          <a
-            href="tel:917548820641"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200 text-xs font-bold transition"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            <span>நேரடி அழைப்பு</span>
-          </a>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowQuoteDrawer(!showQuoteDrawer)}
+              className="px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="hidden sm:inline">Quotation</span>
+            </button>
+            <a
+              href={`tel:917548820641`}
+              className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-slate-300 hover:text-white transition"
+            >
+              <Phone className="w-4 h-4 text-emerald-400" />
+            </a>
+          </div>
         </div>
 
-        {/* Message History */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50/30">
-          {activeThread.messages.map((msg) => {
-            const isMe = msg.senderId === 'buyer' || msg.senderId === 'my_biz';
+        {/* Quotation Generator Bar (Optional Slide Down) */}
+        {showQuoteDrawer && (
+          <div className="p-3.5 bg-indigo-950/40 border-b border-indigo-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex-1 w-full flex gap-2">
+              <input
+                type="text"
+                value={quoteItems}
+                onChange={(e) => setQuoteItems(e.target.value)}
+                placeholder="Product items..."
+                className="flex-1 px-3 py-1.5 bg-black/40 border border-white/10 rounded-xl text-white"
+              />
+              <input
+                type="number"
+                value={quoteAmount}
+                onChange={(e) => setQuoteAmount(Number(e.target.value))}
+                placeholder="Amount ₹"
+                className="w-28 px-3 py-1.5 bg-black/40 border border-white/10 rounded-xl text-white font-mono"
+              />
+            </div>
+            <button
+              onClick={handleSendOfficialQuotation}
+              className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-md cursor-pointer shrink-0"
+            >
+              Send GST Quote (₹{Math.round(quoteAmount * 1.18)})
+            </button>
+          </div>
+        )}
+
+        {/* Messages List Area */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
+          {activeThread?.messages.map((msg) => {
+            const isMe = msg.senderId.includes('shinegah') || msg.senderId === 'buyer' || msg.senderId.includes('chandru');
             return (
               <div
                 key={msg.id}
                 className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
               >
-                {/* Sender Name if Chapter Group */}
-                {!isMe && (
-                  <span className="text-[10px] text-slate-500 font-bold mb-1 ml-1">
-                    {msg.senderName}
-                  </span>
-                )}
-
-                {/* Attached Product / Reel Card if exists */}
-                {msg.attachedPostTitle && (
-                  <div className="mb-2 max-w-xs rounded-2xl overflow-hidden border border-amber-300 bg-amber-50/90 shadow-xs p-2.5 flex items-center gap-2.5">
-                    {msg.attachedPostThumb && (
-                      <img
-                        src={msg.attachedPostThumb}
-                        alt="Attached product"
-                        className="w-12 h-12 rounded-xl object-cover shrink-0"
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <div className="text-[10px] font-black text-amber-900 uppercase">
-                        விசாரிக்கப்படும் தயாரிப்பு:
-                      </div>
-                      <div className="text-xs font-bold text-slate-900 truncate">
-                        {msg.attachedPostTitle}
-                      </div>
-                      {msg.attachedPrice && (
-                        <div className="text-[11px] font-black text-slate-700">
-                          {msg.attachedPrice}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Main Message Bubble */}
                 <div
-                  className={`max-w-sm sm:max-w-md px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                  className={`max-w-[85%] sm:max-w-md p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed space-y-2 ${
                     isMe
-                      ? 'bg-[#0a1128] text-white rounded-br-xs'
-                      : 'bg-white text-slate-900 border border-slate-200 rounded-bl-xs'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                      : 'bg-[#12192e] text-slate-200 border border-white/10'
                   }`}
                 >
-                  <p>{msg.text}</p>
-
-                  {/* Formal Quotation Card if isQuotation */}
-                  {msg.isQuotation && msg.quotationData && (
-                    <div className="mt-2.5 p-3 rounded-xl bg-slate-900/10 border border-slate-200 text-slate-900 space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs font-black text-amber-800">
-                        <FileText className="w-3.5 h-3.5 text-amber-600" />
-                        <span>அதிகாரப்பூர்வ விலைப்பட்டியல் (Quotation)</span>
-                      </div>
-                      <div className="text-xs font-semibold">{msg.quotationData.items}</div>
-                      <div className="border-t border-slate-200 pt-1 text-[11px] space-y-0.5">
-                        <div className="flex justify-between">
-                          <span>அடிப்படை விலை:</span>
-                          <span>₹{msg.quotationData.amount.toLocaleString('en-IN')}</span>
+                  {/* Attached Post Card if enquiry */}
+                  {msg.attachedPostTitle && (
+                    <div className="p-2 rounded-xl bg-black/30 border border-white/15 flex items-center gap-2.5">
+                      {msg.attachedPostThumb && (
+                        <img
+                          src={msg.attachedPostThumb}
+                          alt="Post"
+                          className="w-9 h-9 rounded-lg object-cover"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <div className="font-bold text-[11px] truncate text-white">
+                          {msg.attachedPostTitle}
                         </div>
-                        <div className="flex justify-between text-slate-500">
-                          <span>18% GST வரி (9% CGST + 9% SGST):</span>
-                          <span>₹{msg.quotationData.gst.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div className="flex justify-between font-black text-xs text-emerald-700 pt-1 border-t border-slate-200">
-                          <span>மொத்த தொகை (Net Total):</span>
-                          <span>₹{msg.quotationData.total.toLocaleString('en-IN')}</span>
+                        <div className="text-[10px] text-amber-300 font-mono">
+                          {msg.attachedPrice}
                         </div>
                       </div>
                     </div>
                   )}
-                </div>
 
-                <span className="text-[10px] text-slate-400 mt-1 mx-1">
+                  {/* Quotation card */}
+                  {msg.isQuotation && msg.quotationData && (
+                    <div className="p-3 rounded-xl bg-indigo-950/80 border border-indigo-400/40 text-white space-y-1">
+                      <div className="font-bold text-xs text-amber-300">GST கொட்டேஷன்:</div>
+                      <div>{msg.quotationData.items}</div>
+                      <div className="font-mono text-xs pt-1 border-t border-white/10 flex justify-between">
+                        <span>மொத்த தொகை:</span>
+                        <span className="font-bold text-emerald-400">₹{msg.quotationData.total}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <p>{msg.text}</p>
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1 px-1">
                   {msg.timestamp}
                 </span>
               </div>
@@ -255,81 +302,21 @@ export const EnquiryChat: React.FC<EnquiryChatProps> = ({
           })}
         </div>
 
-        {/* Bottom Quotation Drawer (Toggleable) */}
-        {showQuoteDrawer && (
-          <div className="p-4 bg-amber-50/95 border-t border-amber-200 animate-in slide-in-from-bottom-2 duration-150 space-y-2">
-            <div className="flex items-center justify-between text-xs font-black text-slate-900">
-              <span className="flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-amber-600" />
-                <span>உடனடி 18% GST விலைப்பட்டியல் (Instant Quote Generator)</span>
-              </span>
-              <button
-                onClick={() => setShowQuoteDrawer(false)}
-                className="text-slate-500 hover:text-slate-800"
-              >
-                மறைக்க
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                type="text"
-                placeholder="பொருள் மற்றும் எண்ணிக்கை (எ.கா: 25 பட்டு சேலைகள்)"
-                value={quoteItems}
-                onChange={(e) => setQuoteItems(e.target.value)}
-                className="p-2 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none"
-              />
-              <input
-                type="number"
-                placeholder="அடிப்படை தொகை (₹)"
-                value={quoteAmount || ''}
-                onChange={(e) => setQuoteAmount(Number(e.target.value))}
-                className="p-2 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none"
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-slate-600 font-semibold">
-                GST (18%): ₹{Math.round((quoteAmount || 0) * 0.18).toLocaleString('en-IN')} | மொத்தம்: ₹{Math.round((quoteAmount || 0) * 1.18).toLocaleString('en-IN')}
-              </span>
-              <button
-                onClick={handleSendOfficialQuotation}
-                className="px-4 py-1.5 bg-slate-950 text-white rounded-full text-xs font-bold hover:bg-slate-800 transition cursor-pointer"
-              >
-                விலைப்பட்டியலை அனுப்பு ➔
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Input Bar */}
-        <form onSubmit={handleSend} className="p-3 sm:p-4 border-t border-slate-100 flex items-center gap-2">
-          
-          <button
-            type="button"
-            onClick={() => setShowQuoteDrawer(!showQuoteDrawer)}
-            className="p-2.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
-            title="விலைப்பட்டியல் உருவாக்க"
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">கொட்டேஷன்</span>
-          </button>
-
+        {/* Bottom Message Input Bar */}
+        <form onSubmit={handleSend} className="p-3 sm:p-4 border-t border-white/10 bg-[#0c1224]/80 flex items-center gap-2">
           <input
             type="text"
-            placeholder="விசாரணை செய்தி அல்லது பதில் எழுதவும்..."
+            placeholder="Type a message or price inquiry..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            className="flex-1 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-full text-xs text-slate-800 focus:outline-none focus:border-amber-400"
+            className="flex-1 px-4 py-2.5 bg-[#080d1c] border border-white/10 rounded-full text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
           />
-
           <button
             type="submit"
-            className="w-10 h-10 rounded-full bg-[#0a1128] hover:bg-slate-800 text-white flex items-center justify-center shrink-0 transition cursor-pointer shadow-md"
+            className="p-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition cursor-pointer"
           >
             <Send className="w-4 h-4" />
           </button>
-
         </form>
 
       </div>
