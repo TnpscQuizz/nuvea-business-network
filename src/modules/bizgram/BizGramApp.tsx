@@ -3,7 +3,8 @@ import {
   Home, Film, MessageCircle, Plus, BarChart3, 
   User, Shield, Settings, LogOut, Clock, CheckCircle2, 
   Sparkles, ExternalLink, Menu, X, ArrowRight, Phone, Tag, 
-  MapPin, Bell, Search, TrendingUp, ShieldCheck, Camera, Gift, Briefcase 
+  MapPin, Bell, Search, TrendingUp, ShieldCheck, Camera, Gift, Briefcase,
+  Eye, Users, Send, ChevronRight, ChevronDown
 } from 'lucide-react';
 import type { AppState, BizPost, BizStory, BizEnquiryMessage, BizUser } from '../../types';
 import { 
@@ -531,6 +532,121 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             {/* Right Desktop Sidebar (5 cols on lg) */}
             <div className="hidden lg:block lg:col-span-5 space-y-5 sticky top-6">
               
+              {/* Business Growth Executive Analytics Widget (Exact Reference Card) */}
+              <div className="apple-glass apple-specular-edge rounded-[32px] p-6 space-y-5 shadow-2xl">
+                {/* Header: Title + Period Pill */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-white/10 border border-white/20 text-white">
+                      <BarChart3 className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-white tracking-tight">Business Growth</h4>
+                      <p className="text-[10px] text-slate-400">Executive Performance</p>
+                    </div>
+                  </div>
+                  <div className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer">
+                    <span>This Month</span>
+                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </div>
+
+                {/* Big Stat & Trend */}
+                <div>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-3xl font-black text-white tracking-tight">12.4K</span>
+                    <span className="text-xs font-black text-emerald-400 flex items-center gap-0.5">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      +32%
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-400 font-medium mt-0.5">Profile Views</div>
+                </div>
+
+                {/* Growth Chart Wave Line */}
+                <div className="relative h-20 w-full overflow-hidden">
+                  <svg className="w-full h-full overflow-visible" viewBox="0 0 300 70" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Area fill */}
+                    <path
+                      d="M0,55 Q40,48 80,40 T160,25 T220,18 T300,8 L300,70 L0,70 Z"
+                      fill="url(#growthGrad)"
+                    />
+                    {/* Glowing Stroke line */}
+                    <path
+                      d="M0,55 Q40,48 80,40 T160,25 T220,18 T300,8"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    {/* Glowing dots */}
+                    <circle cx="80" cy="40" r="3.5" fill="#ffffff" />
+                    <circle cx="160" cy="25" r="3.5" fill="#ffffff" />
+                    <circle cx="220" cy="18" r="3.5" fill="#ffffff" />
+                    <circle cx="300" cy="8" r="4" fill="#ffffff" stroke="#000" strokeWidth="2" />
+                  </svg>
+                </div>
+
+                {/* 2x2 Metrics Grid */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                      <Eye className="w-3 h-3 text-white" />
+                      <span>Reach</span>
+                    </div>
+                    <div className="text-base font-black text-white">8.7K</div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                      <Users className="w-3 h-3 text-white" />
+                      <span>Connections</span>
+                    </div>
+                    <div className="text-base font-black text-white">1.2K</div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                      <Send className="w-3 h-3 text-white" />
+                      <span>Enquiries</span>
+                    </div>
+                    <div className="text-base font-black text-white">642</div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                      <TrendingUp className="w-3 h-3 text-emerald-400" />
+                      <span>Growth</span>
+                    </div>
+                    <div className="text-base font-black text-emerald-400">+32%</div>
+                  </div>
+                </div>
+
+                {/* AI Insights Banner */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-white/[0.08] to-white/[0.02] border border-white/15 flex items-center justify-between gap-3 cursor-pointer hover:border-white/30 transition shadow-lg">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-black text-white flex items-center gap-1">
+                        <span>AI Insights</span>
+                      </div>
+                      <div className="text-[11px] text-slate-300 truncate">
+                        Your post reach is 32% higher than last month!
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                </div>
+              </div>
+
               {/* Executive Network Overview Card */}
               <div className="apple-glass apple-specular-edge rounded-[32px] p-6 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
