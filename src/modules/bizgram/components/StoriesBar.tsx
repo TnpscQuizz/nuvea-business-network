@@ -60,28 +60,28 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
 
   return (
     <>
-      {/* HORIZONTAL STORIES ROW (APPLE LIQUID GLASS - NO BLUE) */}
-      <div className="apple-glass apple-specular-edge rounded-[36px] p-3.5 sm:p-4 overflow-x-auto scrollbar-none flex items-center gap-4 sm:gap-5 select-none shadow-2xl">
+      {/* HORIZONTAL STORIES ROW (APPLE WHITE GLOW TRANSPARENT GLASS) */}
+      <div className="apple-glass apple-specular-edge rounded-[36px] p-3.5 sm:p-4 overflow-x-auto scrollbar-none flex items-center gap-4 sm:gap-5 select-none shadow-sm">
         
         {/* 1. + CREATE STORY BUBBLE */}
         <div 
           onClick={onOpenCreateStory}
           className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
         >
-          <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-white/40 via-white/15 to-white/5 group-hover:scale-105 transition shadow-lg">
-            <div className="w-full h-full rounded-full overflow-hidden bg-black border border-white/20">
+          <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-white to-slate-200 border border-white group-hover:scale-105 transition shadow-sm">
+            <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 border border-white">
               <img 
                 src={currentUserAvatar} 
                 alt="Create Story"
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Center Plus Badge (White Apple Glass) */}
-            <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-white text-black flex items-center justify-center font-black text-sm shadow-md border border-white/40 group-hover:scale-110 transition">
+            {/* Center Plus Badge (Apple Obsidian Button) */}
+            <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-slate-950 text-white flex items-center justify-center font-black text-sm shadow-md border border-white group-hover:scale-110 transition">
               <Plus className="w-4 h-4 stroke-[3]" />
             </div>
           </div>
-          <span className="text-[11px] font-bold text-slate-300 max-w-[70px] truncate text-center">
+          <span className="text-[11px] font-bold text-slate-800 max-w-[70px] truncate text-center">
             {t.createStory}
           </span>
         </div>
@@ -93,8 +93,8 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
             onClick={() => setActiveStoryIndex(idx)}
             className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer group"
           >
-            <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-white/50 via-white/20 to-white/5 group-hover:scale-105 transition shadow-lg">
-              <div className="w-full h-full rounded-full overflow-hidden bg-black border border-white/15 flex items-center justify-center">
+            <div className="relative w-15 h-15 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-white to-slate-200 border border-white group-hover:scale-105 transition shadow-sm">
+              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 border border-white flex items-center justify-center">
                 {story.avatar ? (
                   <img 
                     src={story.avatar} 
@@ -106,7 +106,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({
                 )}
               </div>
             </div>
-            <span className="text-[11px] font-bold text-slate-300 max-w-[75px] truncate text-center">
+            <span className="text-[11px] font-bold text-slate-800 max-w-[75px] truncate text-center">
               {story.businessName}
             </span>
           </div>

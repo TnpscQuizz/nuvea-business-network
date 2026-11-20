@@ -238,16 +238,17 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   const publicReels = publicPosts.filter((p) => p.type === 'video');
 
   return (
-    <div className="bg-[#050508] text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-white selection:text-black font-sans relative overflow-x-hidden">
+    <div className="white-glow-canvas text-slate-900 min-h-screen flex flex-col md:flex-row selection:bg-black selection:text-white font-sans relative overflow-x-hidden">
       
-      {/* Ambient Platinum & Slate Glass Glow Orbs (Strictly No Blue) */}
-      <div className="fixed top-0 left-1/4 w-96 h-96 bg-white/[0.03] rounded-full blur-[150px] pointer-events-none -z-10" />
-      <div className="fixed bottom-10 right-10 w-96 h-96 bg-slate-500/[0.04] rounded-full blur-[170px] pointer-events-none -z-10" />
+      {/* Radiant White Ambient Glow Light Orbs (Pure White Glow Transparent) */}
+      <div className="fixed -top-20 left-1/4 w-[600px] h-[600px] bg-white rounded-full blur-[140px] pointer-events-none -z-10 opacity-95" />
+      <div className="fixed top-1/3 -right-20 w-[500px] h-[500px] bg-white rounded-full blur-[130px] pointer-events-none -z-10 opacity-90" />
+      <div className="fixed bottom-0 left-10 w-[550px] h-[550px] bg-slate-200/60 rounded-full blur-[160px] pointer-events-none -z-10" />
 
       {/* ========================================================================= */}
-      {/* 1. LEFT DESKTOP SIDEBAR (APPLE LIQUID OBSIDIAN GLASS)                     */}
+      {/* 1. LEFT DESKTOP SIDEBAR (APPLE WHITE GLOW TRANSPARENT GLASS)              */}
       {/* ========================================================================= */}
-      <aside className="hidden md:flex flex-col justify-between w-68 lg:w-72 h-screen sticky top-0 apple-glass border-r border-white/10 p-5 lg:p-6 shrink-0 z-40 select-none shadow-[4px_0_30px_rgba(0,0,0,0.85)]">
+      <aside className="hidden md:flex flex-col justify-between w-68 lg:w-72 h-screen sticky top-0 apple-glass border-r border-white/80 p-5 lg:p-6 shrink-0 z-40 select-none shadow-[0_10px_40px_rgba(15,23,42,0.06)]">
         
         {/* Brand Header */}
         <div className="space-y-6">
@@ -259,13 +260,13 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             <ShinegahLogo size="md" />
 
             {/* Pill: Built for Businesses. Designed for Growth */}
-            <div className="p-2.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center gap-2.5 shadow-inner">
-              <div className="w-7 h-7 rounded-lg bg-white/10 text-white flex items-center justify-center shrink-0">
-                <TrendingUp className="w-4 h-4" />
+            <div className="p-2.5 rounded-2xl bg-white/70 border border-white flex items-center gap-2.5 shadow-sm">
+              <div className="w-7 h-7 rounded-lg bg-slate-950 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <TrendingUp className="w-4 h-4 text-white" />
               </div>
-              <div className="text-[10px] leading-tight text-slate-300">
-                <span className="font-bold text-white block">Built for Businesses.</span>
-                <span className="text-slate-400">Designed for Growth.</span>
+              <div className="text-[10px] leading-tight text-slate-700">
+                <span className="font-bold text-slate-950 block">Built for Businesses.</span>
+                <span className="text-slate-500">Designed for Growth.</span>
               </div>
             </div>
           </div>
@@ -278,8 +279,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('feed')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'feed'
-                  ? 'bg-white text-black shadow-lg font-extrabold'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-slate-950 text-white shadow-md font-extrabold'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
               }`}
             >
               <Home className="w-5 h-5" />
@@ -291,8 +292,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('reels')}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'reels'
-                  ? 'bg-white text-black shadow-lg font-extrabold'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-slate-950 text-white shadow-md font-extrabold'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
               }`}
             >
               <div className="flex items-center gap-3.5">
@@ -309,15 +310,15 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('messages')}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'messages'
-                  ? 'bg-white text-black shadow-lg font-extrabold'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-slate-950 text-white shadow-md font-extrabold'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
               }`}
             >
               <div className="flex items-center gap-3.5">
                 <MessageCircle className="w-5 h-5" />
                 <span>{t.inbox}</span>
               </div>
-              <span className="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white/20">
+              <span className="bg-slate-950 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white">
                 5
               </span>
             </button>
@@ -327,8 +328,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('profile')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'profile'
-                  ? 'bg-white text-black shadow-lg font-extrabold'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-slate-950 text-white shadow-md font-extrabold'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
               }`}
             >
               <User className="w-5 h-5" />
@@ -340,7 +341,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => {
                 setActiveTab('profile');
               }}
-              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-400 hover:bg-white/5 hover:text-white transition cursor-pointer text-sm font-bold"
+              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-600 hover:bg-white/80 hover:text-slate-950 transition cursor-pointer text-sm font-bold"
             >
               <Settings className="w-5 h-5" />
               <span>{t.settings}</span>
@@ -351,8 +352,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               onClick={() => setActiveTab('admin')}
               className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl transition cursor-pointer text-sm font-bold ${
                 activeTab === 'admin'
-                  ? 'bg-white text-black shadow-lg font-extrabold'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  ? 'bg-slate-950 text-white shadow-md font-extrabold'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
               }`}
             >
               <Shield className="w-5 h-5" />
@@ -364,25 +365,25 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         </div>
 
         {/* Bottom Profile Summary Card & Validity Timer */}
-        <div className="pt-4 border-t border-white/10 space-y-3">
+        <div className="pt-4 border-t border-white/80 space-y-3">
           
           <div 
             onClick={() => setActiveTab('profile')}
-            className="flex items-center gap-3 p-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] transition cursor-pointer border border-white/10"
+            className="flex items-center gap-3 p-2 rounded-2xl bg-white/70 hover:bg-white/95 transition cursor-pointer border border-white shadow-sm"
           >
-            <div className="w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-white/40 to-white/10 shrink-0">
+            <div className="w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-white to-slate-200 shrink-0 shadow-sm">
               <img
                 src={currentUser.avatar}
                 alt="Profile"
-                className="w-full h-full rounded-full object-cover border border-black"
+                className="w-full h-full rounded-full object-cover border border-white"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-black text-white truncate flex items-center gap-1">
+              <div className="text-xs font-black text-slate-900 truncate flex items-center gap-1">
                 <span>@{currentUser.username}</span>
-                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-slate-900 fill-slate-200" />
               </div>
-              <div className="text-[10px] text-slate-400 truncate">
+              <div className="text-[10px] text-slate-500 truncate">
                 {currentUser.businessName}
               </div>
             </div>
@@ -391,7 +392,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 e.stopPropagation();
                 setIsAuthModalOpen(true);
               }}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-500 hover:text-slate-900 cursor-pointer"
               title="Switch Account"
             >
               <LogOut className="w-4 h-4" />
@@ -399,23 +400,23 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           </div>
 
           {/* 1-Year Validity Live Card */}
-          <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white text-[11px] font-bold flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-slate-300">
+          <div className="p-2.5 rounded-xl bg-white/70 border border-white text-slate-900 text-[11px] font-bold flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-1.5 text-slate-600">
               <span>⏳</span>
               <span>{t.validityLabel}</span>
             </div>
-            <span className="bg-white/10 text-white font-mono text-[10px] px-2 py-0.5 rounded-lg font-black border border-white/15">
+            <span className="bg-slate-950 text-white font-mono text-[10px] px-2 py-0.5 rounded-lg font-black shadow-sm">
               {currentUser.validityDaysLeft || 364} {t.daysLeft}
             </span>
           </div>
 
-          {/* Create Post Button (Apple Primary White Button) */}
+          {/* Create Post Button (Apple Obsidian Primary Button) */}
           <button
             onClick={() => {
               setModalAction('post');
               setIsCreateModalOpen(true);
             }}
-            className="w-full py-3 apple-btn-primary rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-3 apple-btn-primary rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>{t.create}</span>
@@ -426,9 +427,9 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       </aside>
 
       {/* ========================================================================= */}
-      {/* 2. MOBILE TOP NAVBAR (APPLE LIQUID GLASS)                                 */}
+      {/* 2. MOBILE TOP NAVBAR (APPLE WHITE GLOW TRANSPARENT GLASS)                 */}
       {/* ========================================================================= */}
-      <header className="md:hidden sticky top-0 z-40 apple-glass border-b border-white/10 px-4 h-16 flex items-center justify-between shadow-lg">
+      <header className="md:hidden sticky top-0 z-40 apple-glass border-b border-white/80 px-4 h-16 flex items-center justify-between shadow-sm">
         
         {/* Shinegah Logo */}
         <div 
@@ -436,8 +437,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           className="flex items-center gap-2 cursor-pointer"
         >
           <ShinegahLogo size="sm" showText={false} />
-          <span className="font-black text-lg text-white tracking-tight">
-            Shinegah<span className="text-slate-400 text-xs">™</span>
+          <span className="font-black text-lg text-slate-900 tracking-tight">
+            Shinegah<span className="text-slate-500 text-xs">™</span>
           </span>
         </div>
 
@@ -445,7 +446,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setActiveTab('reels')}
-            className="p-1.5 text-slate-300 hover:text-white transition"
+            className="p-1.5 text-slate-600 hover:text-slate-950 transition"
             title="Reels"
           >
             <Film className="w-5 h-5" />
@@ -453,22 +454,22 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
           <button
             onClick={() => setActiveTab('messages')}
-            className="relative p-1.5 text-slate-300 hover:text-white transition"
+            className="relative p-1.5 text-slate-600 hover:text-slate-950 transition"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-4 h-4 bg-white text-black text-[9px] font-black rounded-full flex items-center justify-center border border-black shadow-sm">
+            <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-sm">
               3
             </span>
           </button>
 
           <div 
             onClick={() => setActiveTab('profile')}
-            className="w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-white/40 to-white/10 cursor-pointer"
+            className="w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-white to-slate-200 cursor-pointer shadow-sm"
           >
             <img
               src={currentUser.avatar}
               alt="Avatar"
-              className="w-full h-full rounded-full object-cover border border-black"
+              className="w-full h-full rounded-full object-cover border border-white"
             />
           </div>
         </div>
@@ -490,10 +491,10 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               {/* TOP SEARCH BAR IN FEED */}
               <div 
                 onClick={() => setActiveTab('reels')}
-                className="apple-glass apple-specular-edge rounded-2xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:border-white/30 transition shadow-lg"
+                className="apple-glass apple-specular-edge rounded-2xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:border-white transition shadow-sm"
               >
-                <Search className="w-4 h-4 text-slate-400" />
-                <span className="text-xs sm:text-sm text-slate-400 font-medium">
+                <Search className="w-4 h-4 text-slate-500" />
+                <span className="text-xs sm:text-sm text-slate-600 font-medium">
                   {t.searchPlaceholder}
                 </span>
               </div>
@@ -533,34 +534,34 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             <div className="hidden lg:block lg:col-span-5 space-y-5 sticky top-6">
               
               {/* Business Growth Executive Analytics Widget (Exact Reference Card) */}
-              <div className="apple-glass apple-specular-edge rounded-[32px] p-6 space-y-5 shadow-2xl">
+              <div className="apple-glass apple-specular-edge rounded-[32px] p-6 space-y-5 shadow-xl">
                 {/* Header: Title + Period Pill */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-white/10 border border-white/20 text-white">
-                      <BarChart3 className="w-4 h-4 text-white" />
+                    <div className="p-2 rounded-xl bg-white border border-white text-slate-900 shadow-sm">
+                      <BarChart3 className="w-4 h-4 text-slate-900" />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-white tracking-tight">Business Growth</h4>
-                      <p className="text-[10px] text-slate-400">Executive Performance</p>
+                      <h4 className="font-extrabold text-sm text-slate-900 tracking-tight">Business Growth</h4>
+                      <p className="text-[10px] text-slate-500">Executive Performance</p>
                     </div>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer">
+                  <div className="px-3 py-1 rounded-full bg-white/80 hover:bg-white border border-white text-slate-800 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-sm">
                     <span>This Month</span>
-                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
                   </div>
                 </div>
 
                 {/* Big Stat & Trend */}
                 <div>
                   <div className="flex items-baseline gap-2.5">
-                    <span className="text-3xl font-black text-white tracking-tight">12.4K</span>
-                    <span className="text-xs font-black text-emerald-400 flex items-center gap-0.5">
+                    <span className="text-3xl font-black text-slate-900 tracking-tight">12.4K</span>
+                    <span className="text-xs font-black text-emerald-600 flex items-center gap-0.5">
                       <TrendingUp className="w-3.5 h-3.5" />
                       +32%
                     </span>
                   </div>
-                  <div className="text-xs text-slate-400 font-medium mt-0.5">Profile Views</div>
+                  <div className="text-xs text-slate-500 font-medium mt-0.5">Profile Views</div>
                 </div>
 
                 {/* Growth Chart Wave Line */}
@@ -568,8 +569,8 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 300 70" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#09090b" stopOpacity="0.08" />
+                        <stop offset="100%" stopColor="#09090b" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
                     {/* Area fill */}
@@ -581,64 +582,64 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                     <path
                       d="M0,55 Q40,48 80,40 T160,25 T220,18 T300,8"
                       fill="none"
-                      stroke="#ffffff"
+                      stroke="#09090b"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
                     {/* Glowing dots */}
-                    <circle cx="80" cy="40" r="3.5" fill="#ffffff" />
-                    <circle cx="160" cy="25" r="3.5" fill="#ffffff" />
-                    <circle cx="220" cy="18" r="3.5" fill="#ffffff" />
-                    <circle cx="300" cy="8" r="4" fill="#ffffff" stroke="#000" strokeWidth="2" />
+                    <circle cx="80" cy="40" r="3.5" fill="#09090b" />
+                    <circle cx="160" cy="25" r="3.5" fill="#09090b" />
+                    <circle cx="220" cy="18" r="3.5" fill="#09090b" />
+                    <circle cx="300" cy="8" r="4" fill="#09090b" stroke="#ffffff" strokeWidth="2" />
                   </svg>
                 </div>
 
                 {/* 2x2 Metrics Grid */}
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
-                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                      <Eye className="w-3 h-3 text-white" />
+                  <div className="p-3 rounded-2xl bg-white/70 border border-white hover:bg-white transition space-y-1 shadow-sm">
+                    <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                      <Eye className="w-3 h-3 text-slate-700" />
                       <span>Reach</span>
                     </div>
-                    <div className="text-base font-black text-white">8.7K</div>
+                    <div className="text-base font-black text-slate-900">8.7K</div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
-                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                      <Users className="w-3 h-3 text-white" />
+                  <div className="p-3 rounded-2xl bg-white/70 border border-white hover:bg-white transition space-y-1 shadow-sm">
+                    <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                      <Users className="w-3 h-3 text-slate-700" />
                       <span>Connections</span>
                     </div>
-                    <div className="text-base font-black text-white">1.2K</div>
+                    <div className="text-base font-black text-slate-900">1.2K</div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
-                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                      <Send className="w-3 h-3 text-white" />
+                  <div className="p-3 rounded-2xl bg-white/70 border border-white hover:bg-white transition space-y-1 shadow-sm">
+                    <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                      <Send className="w-3 h-3 text-slate-700" />
                       <span>Enquiries</span>
                     </div>
-                    <div className="text-base font-black text-white">642</div>
+                    <div className="text-base font-black text-slate-900">642</div>
                   </div>
 
-                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition space-y-1">
-                    <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                      <TrendingUp className="w-3 h-3 text-emerald-400" />
+                  <div className="p-3 rounded-2xl bg-white/70 border border-white hover:bg-white transition space-y-1 shadow-sm">
+                    <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                      <TrendingUp className="w-3 h-3 text-emerald-600" />
                       <span>Growth</span>
                     </div>
-                    <div className="text-base font-black text-emerald-400">+32%</div>
+                    <div className="text-base font-black text-emerald-600">+32%</div>
                   </div>
                 </div>
 
                 {/* AI Insights Banner */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-white/[0.08] to-white/[0.02] border border-white/15 flex items-center justify-between gap-3 cursor-pointer hover:border-white/30 transition shadow-lg">
+                <div className="p-3.5 rounded-2xl bg-white/80 border border-white flex items-center justify-between gap-3 cursor-pointer hover:bg-white transition shadow-sm">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shrink-0 shadow-sm">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-black text-white flex items-center gap-1">
+                      <div className="text-xs font-black text-slate-900 flex items-center gap-1">
                         <span>AI Insights</span>
                       </div>
-                      <div className="text-[11px] text-slate-300 truncate">
+                      <div className="text-[11px] text-slate-600 truncate">
                         Your post reach is 32% higher than last month!
                       </div>
                     </div>
@@ -650,12 +651,12 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
               {/* Executive Network Overview Card */}
               <div className="apple-glass apple-specular-edge rounded-[32px] p-6 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-extrabold text-xs uppercase tracking-wider text-white">
+                  <h4 className="font-extrabold text-xs uppercase tracking-wider text-slate-900">
                     Verified B2B Suppliers
                   </h4>
                   <button
                     onClick={() => setActiveTab('reels')}
-                    className="text-xs font-bold text-white/80 hover:text-white cursor-pointer hover:underline"
+                    className="text-xs font-bold text-slate-700 hover:text-slate-950 cursor-pointer hover:underline"
                   >
                     View Reels ›
                   </button>
@@ -666,25 +667,25 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                     <div 
                       key={p.id}
                       onClick={() => handleSendEnquiry(p)}
-                      className="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 transition flex items-center justify-between gap-3 cursor-pointer"
+                      className="p-3 rounded-2xl bg-white/70 hover:bg-white border border-white transition flex items-center justify-between gap-3 cursor-pointer shadow-sm"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <img
                           src={p.avatar}
                           alt={p.businessName}
-                          className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0"
+                          className="w-10 h-10 rounded-full object-cover border border-white shrink-0 shadow-sm"
                         />
                         <div className="min-w-0">
-                          <div className="font-extrabold text-xs text-white truncate flex items-center gap-1">
+                          <div className="font-extrabold text-xs text-slate-900 truncate flex items-center gap-1">
                             <span>{p.businessName}</span>
-                            <CheckCircle2 className="w-3 h-3 text-white shrink-0" />
+                            <CheckCircle2 className="w-3 h-3 text-slate-900 fill-slate-200 shrink-0" />
                           </div>
-                          <div className="text-[10px] text-slate-400 truncate">
+                          <div className="text-[10px] text-slate-500 truncate">
                             {p.category} • {p.taluk}
                           </div>
                         </div>
                       </div>
-                      <button className="px-3.5 py-1.5 bg-white text-black font-extrabold text-[10px] rounded-full shrink-0 shadow-sm hover:bg-slate-200 transition">
+                      <button className="px-3.5 py-1.5 bg-slate-950 text-white font-extrabold text-[10px] rounded-full shrink-0 shadow-sm hover:bg-black transition">
                         {t.enquire}
                       </button>
                     </div>
@@ -769,7 +770,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
       {/* FLOATING ACTION POPUP MENU (ABOVE DOCK CENTER) */}
       {isActionMenuOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-2xl flex items-end justify-center pb-24 px-4 select-none animate-in fade-in duration-200"
+          className="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-2xl flex items-end justify-center pb-24 px-4 select-none animate-in fade-in duration-200"
           onClick={() => setIsActionMenuOpen(false)}
         >
           <div 
@@ -783,14 +784,14 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 setModalAction('post');
                 setIsCreateModalOpen(true);
               }}
-              className="w-full p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.12] border border-white/10 flex items-center gap-3.5 transition cursor-pointer group"
+              className="w-full p-3 rounded-2xl bg-white/75 hover:bg-white border border-white flex items-center gap-3.5 transition cursor-pointer group shadow-sm"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 flex items-center justify-center group-hover:scale-110 transition shadow-inner shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center group-hover:scale-110 transition shadow-sm shrink-0">
                 <Camera className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="font-extrabold text-xs sm:text-sm text-white">{t.menuCreatePost}</div>
-                <div className="text-[10px] text-slate-400">{t.menuCreatePostSub}</div>
+                <div className="font-extrabold text-xs sm:text-sm text-slate-900">{t.menuCreatePost}</div>
+                <div className="text-[10px] text-slate-500">{t.menuCreatePostSub}</div>
               </div>
             </button>
 
@@ -801,14 +802,14 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 setModalAction('reel');
                 setIsCreateModalOpen(true);
               }}
-              className="w-full p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.12] border border-white/10 flex items-center gap-3.5 transition cursor-pointer group"
+              className="w-full p-3 rounded-2xl bg-white/75 hover:bg-white border border-white flex items-center gap-3.5 transition cursor-pointer group shadow-sm"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 flex items-center justify-center group-hover:scale-110 transition shadow-inner shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center group-hover:scale-110 transition shadow-sm shrink-0">
                 <Film className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="font-extrabold text-xs sm:text-sm text-white">{t.menuCreateReel}</div>
-                <div className="text-[10px] text-slate-400">{t.menuCreateReelSub}</div>
+                <div className="font-extrabold text-xs sm:text-sm text-slate-900">{t.menuCreateReel}</div>
+                <div className="text-[10px] text-slate-500">{t.menuCreateReelSub}</div>
               </div>
             </button>
 
@@ -819,14 +820,14 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 setModalAction('update');
                 setIsCreateModalOpen(true);
               }}
-              className="w-full p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.12] border border-white/10 flex items-center gap-3.5 transition cursor-pointer group"
+              className="w-full p-3 rounded-2xl bg-white/75 hover:bg-white border border-white flex items-center gap-3.5 transition cursor-pointer group shadow-sm"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 flex items-center justify-center group-hover:scale-110 transition shadow-inner shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center group-hover:scale-110 transition shadow-sm shrink-0">
                 <Briefcase className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="font-extrabold text-xs sm:text-sm text-white">{t.menuBusinessUpdate}</div>
-                <div className="text-[10px] text-slate-400">{t.menuBusinessUpdateSub}</div>
+                <div className="font-extrabold text-xs sm:text-sm text-slate-900">{t.menuBusinessUpdate}</div>
+                <div className="text-[10px] text-slate-500">{t.menuBusinessUpdateSub}</div>
               </div>
             </button>
 
@@ -837,14 +838,14 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
                 setModalAction('offer');
                 setIsCreateModalOpen(true);
               }}
-              className="w-full p-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.12] border border-white/10 flex items-center gap-3.5 transition cursor-pointer group"
+              className="w-full p-3 rounded-2xl bg-white/75 hover:bg-white border border-white flex items-center gap-3.5 transition cursor-pointer group shadow-sm"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/10 text-white border border-white/20 flex items-center justify-center group-hover:scale-110 transition shadow-inner shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-950 text-white flex items-center justify-center group-hover:scale-110 transition shadow-sm shrink-0">
                 <Gift className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="font-extrabold text-xs sm:text-sm text-white">{t.menuPostOffer}</div>
-                <div className="text-[10px] text-slate-400">{t.menuPostOfferSub}</div>
+                <div className="font-extrabold text-xs sm:text-sm text-slate-900">{t.menuPostOffer}</div>
+                <div className="text-[10px] text-slate-500">{t.menuPostOfferSub}</div>
               </div>
             </button>
 
@@ -854,13 +855,13 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
 
       {/* MOBILE BOTTOM DOCK (REELS REPLACES DISCOVER) */}
       <nav className="md:hidden fixed bottom-4 inset-x-4 z-40 select-none">
-        <div className="apple-glass apple-specular-edge rounded-full px-5 py-2.5 shadow-[0_15px_45px_rgba(0,0,0,0.9)] flex items-center justify-between">
+        <div className="apple-glass apple-specular-edge rounded-full px-5 py-2.5 shadow-[0_15px_40px_rgba(15,23,42,0.1),0_0_35px_rgba(255,255,255,0.9)] flex items-center justify-between">
           
           {/* 1. Home */}
           <button
             onClick={() => setActiveTab('feed')}
             className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
-              activeTab === 'feed' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              activeTab === 'feed' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
             }`}
           >
             <Home className="w-5 h-5" />
@@ -871,7 +872,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           <button
             onClick={() => setActiveTab('reels')}
             className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
-              activeTab === 'reels' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              activeTab === 'reels' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
             }`}
           >
             <Film className="w-5 h-5" />
@@ -881,10 +882,10 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           {/* 3. Center Glowing Apple Liquid Glass Sphere (No Blue) */}
           <button
             onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-            className="w-14 h-14 -my-5 rounded-full p-[2.5px] bg-gradient-to-tr from-white/40 via-white/15 to-white/5 border border-white/30 shadow-[0_0_25px_rgba(255,255,255,0.2),0_12px_40px_rgba(0,0,0,0.85)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95 z-50"
+            className="w-14 h-14 -my-5 rounded-full p-[2px] bg-gradient-to-tr from-white to-white/70 border border-white shadow-[0_0_35px_rgba(255,255,255,1),0_10px_25px_rgba(15,23,42,0.15)] flex items-center justify-center cursor-pointer transition transform hover:scale-105 active:scale-95 z-50"
             title="Create Post or Reel"
           >
-            <div className="w-full h-full rounded-full bg-white/10 backdrop-blur-2xl flex items-center justify-center text-white font-black text-2xl shadow-inner border border-white/20">
+            <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white font-black text-2xl shadow-md">
               <Plus className={`w-6 h-6 stroke-[3] text-white transition-transform duration-300 ${isActionMenuOpen ? 'rotate-45' : ''}`} />
             </div>
           </button>
@@ -893,12 +894,12 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           <button
             onClick={() => setActiveTab('messages')}
             className={`relative flex flex-col items-center gap-0.5 transition cursor-pointer ${
-              activeTab === 'messages' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              activeTab === 'messages' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
             }`}
           >
             <MessageCircle className="w-5 h-5" />
             <span className="text-[9px]">{t.inbox}</span>
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-white text-black text-[8px] font-black rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-sm">
               5
             </span>
           </button>
@@ -907,7 +908,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
           <button
             onClick={() => setActiveTab('profile')}
             className={`flex flex-col items-center gap-0.5 transition cursor-pointer ${
-              activeTab === 'profile' ? 'text-white font-black' : 'text-slate-400 hover:text-white'
+              activeTab === 'profile' ? 'text-slate-950 font-black' : 'text-slate-500 hover:text-slate-950'
             }`}
           >
             <User className="w-5 h-5" />

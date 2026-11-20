@@ -106,7 +106,7 @@ export const ReelsView: React.FC<ReelsViewProps> = ({
   };
 
   return (
-    <div className="relative w-full max-w-sm sm:max-w-md mx-auto h-[86vh] rounded-[36px] overflow-hidden apple-glass apple-specular-edge shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex flex-col justify-between select-none">
+    <div className="relative w-full max-w-sm sm:max-w-md mx-auto h-[86vh] rounded-[36px] overflow-hidden apple-glass apple-specular-edge shadow-[0_20px_50px_rgba(15,23,42,0.12),0_0_40px_rgba(255,255,255,1)] flex flex-col justify-between select-none border-2 border-white">
       
       {/* 1. TOP TABS: For You | Business | Trending | 🔍 */}
       <div className="absolute top-0 inset-x-0 p-4 pt-5 z-30 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/40 to-transparent">

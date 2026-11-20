@@ -267,38 +267,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-2xl select-none font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/35 backdrop-blur-2xl select-none font-sans">
       <div className="apple-glass apple-specular-edge rounded-[36px] w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+        <div className="p-4 sm:p-5 border-b border-white/80 flex items-center justify-between bg-white/50">
           <div className="flex items-center gap-2.5">
             <ShinegahLogo size="sm" showText={false} />
             <div>
-              <h3 className="font-black text-base text-white leading-none">
+              <h3 className="font-black text-base text-slate-900 leading-none">
                 Shinegah™ Enterprise Access
               </h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                 Connect • Collaborate • Grow
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition cursor-pointer"
+            className="p-1.5 text-slate-500 hover:text-slate-950 hover:bg-white rounded-full transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Mode Switch Tabs */}
-        <div className="flex border-b border-white/10 text-xs font-bold bg-white/[0.01]">
+        <div className="flex border-b border-white/80 text-xs font-bold bg-white/30">
           <button
             onClick={() => { setMode('signin'); setErrorMsg(''); }}
             className={`flex-1 py-3 text-center transition cursor-pointer ${
               mode === 'signin'
-                ? 'border-b-2 border-white text-white font-black bg-white/10'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-b-2 border-slate-950 text-slate-950 font-black bg-white/70'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Sign In
@@ -307,8 +307,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             onClick={() => { setMode('signup'); setErrorMsg(''); }}
             className={`flex-1 py-3 text-center transition cursor-pointer ${
               mode === 'signup'
-                ? 'border-b-2 border-white text-white font-black bg-white/10'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-b-2 border-slate-950 text-slate-950 font-black bg-white/70'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Sign Up (New ID)
@@ -316,11 +316,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto bg-black/40">
+        <div className="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto bg-white/20">
           
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 text-xs font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -329,11 +329,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode === 'signin' ? (
             <form onSubmit={handleSignInSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300">
+                <label className="text-xs font-bold text-slate-700">
                   Username (@username) / Phone:
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
                     @
                   </span>
                   <input
@@ -342,38 +342,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="shinegah.in"
                     value={signInIdentifier}
                     onChange={(e) => setSignInIdentifier(e.target.value)}
-                    className="w-full pl-8 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs sm:text-sm font-mono text-white focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-slate-900 focus:outline-none focus:border-slate-900 shadow-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300">
+                <label className="text-xs font-bold text-slate-700">
                   Password:
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     placeholder="••••••••"
                     value={signInPassword}
                     onChange={(e) => setSignInPassword(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-white"
+                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-slate-900 shadow-sm"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 apple-btn-primary rounded-xl text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3 apple-btn-primary rounded-xl text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2 shadow-md"
               >
                 <span>Sign In</span>
-                <ArrowRight className="w-4 h-4 text-black" />
+                <ArrowRight className="w-4 h-4 text-white" />
               </button>
 
               {/* Quick Switch Demo Accounts */}
-              <div className="pt-2 border-t border-white/10 space-y-2">
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="pt-2 border-t border-slate-200 space-y-2">
+                <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
                   Quick Switch Accounts:
                 </div>
                 <div className="space-y-1.5">

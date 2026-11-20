@@ -69,28 +69,28 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
-    <article className="apple-glass apple-specular-edge rounded-[36px] overflow-hidden transition select-none hover:shadow-[0_25px_60px_rgba(0,0,0,0.85)]">
+    <article className="apple-glass apple-specular-edge rounded-[36px] overflow-hidden transition select-none hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]">
       
       {/* 1. POST HEADER */}
       <div className="p-4 flex items-center justify-between">
         
         {/* Creator Info */}
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-white/40 via-white/20 to-white/5 shrink-0">
+          <div className="relative w-10 h-10 rounded-full p-[1.5px] bg-gradient-to-tr from-white to-slate-200 border border-white shadow-sm shrink-0">
             <img 
               src={post.avatar} 
               alt={post.businessName}
-              className="w-full h-full rounded-full object-cover border border-black"
+              className="w-full h-full rounded-full object-cover border border-white"
             />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-sm text-white tracking-tight leading-tight">
+              <span className="font-extrabold text-sm text-slate-900 tracking-tight leading-tight">
                 {post.businessName}
               </span>
-              <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/20" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-slate-900 fill-slate-200" />
             </div>
-            <div className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
+            <div className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
               <span>{post.createdAt}</span>
               {post.taluk && !post.createdAt.includes(post.taluk) && (
                 <>
@@ -105,7 +105,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         {/* 3-dots Menu */}
         <button 
           onClick={() => onShareWhatsApp(post)}
-          className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/10 transition cursor-pointer"
+          className="p-2 text-slate-400 hover:text-slate-900 rounded-full hover:bg-white/60 transition cursor-pointer"
         >
           <MoreHorizontal className="w-5 h-5" />
         </button>
@@ -114,14 +114,14 @@ export const PostCard: React.FC<PostCardProps> = ({
 
       {/* 2. POST CAPTION */}
       <div className="px-4 pb-3">
-        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+        <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-normal">
           {post.caption}
         </p>
       </div>
 
       {/* 3. POST MEDIA CONTAINER */}
       <div 
-        className="relative aspect-[4/3] sm:aspect-[16/10] bg-black overflow-hidden cursor-pointer"
+        className="relative aspect-[4/3] sm:aspect-[16/10] bg-slate-950 overflow-hidden cursor-pointer"
         onClick={handleMediaClick}
         onDoubleClick={handleDoubleTap}
       >
@@ -168,50 +168,50 @@ export const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* 4. POST ACTION BAR (❤️ 1.2K  💬 142  ↗️ 87  [✈️ Enquire]) */}
-      <div className="p-3.5 sm:p-4 flex items-center justify-between border-t border-white/5 bg-white/[0.02]">
+      <div className="p-3.5 sm:p-4 flex items-center justify-between border-t border-white/80 bg-white/40">
         
         {/* Left: Like, Comment, Share */}
-        <div className="flex items-center gap-4 text-slate-300 text-xs font-semibold">
+        <div className="flex items-center gap-4 text-slate-700 text-xs font-semibold">
           
           {/* Like */}
           <button
             onClick={() => onLike(post.id)}
-            className="flex items-center gap-1.5 hover:text-white transition cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-slate-950 transition cursor-pointer"
           >
             <Heart 
               className={`w-4 h-4 transition ${
-                post.isLiked ? 'text-rose-500 fill-rose-500' : 'text-slate-400 hover:text-rose-400'
+                post.isLiked ? 'text-rose-500 fill-rose-500' : 'text-slate-500 hover:text-rose-500'
               }`} 
             />
-            <span>{post.likes >= 1000 ? `${(post.likes / 1000).toFixed(1)}K` : post.likes}</span>
+            <span className="text-slate-800">{post.likes >= 1000 ? `${(post.likes / 1000).toFixed(1)}K` : post.likes}</span>
           </button>
 
           {/* Comment */}
           <button
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center gap-1.5 hover:text-white transition cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-slate-950 transition cursor-pointer"
           >
-            <MessageCircle className="w-4 h-4 text-slate-400 hover:text-white" />
-            <span>{post.commentsCount || 142}</span>
+            <MessageCircle className="w-4 h-4 text-slate-500 hover:text-slate-900" />
+            <span className="text-slate-800">{post.commentsCount || 142}</span>
           </button>
 
           {/* Share */}
           <button
             onClick={() => onShareWhatsApp(post)}
-            className="flex items-center gap-1.5 hover:text-white transition cursor-pointer"
+            className="flex items-center gap-1.5 hover:text-slate-950 transition cursor-pointer"
           >
-            <Share2 className="w-4 h-4 text-slate-400 hover:text-white" />
-            <span>87</span>
+            <Share2 className="w-4 h-4 text-slate-500 hover:text-slate-900" />
+            <span className="text-slate-800">87</span>
           </button>
 
         </div>
 
-        {/* Right: Crisp Apple White ENQUIRE Button (Strictly No Blue) */}
+        {/* Right: Crisp Apple Obsidian ENQUIRE Button */}
         <button
           onClick={() => onSendEnquiry(post)}
           className="px-5 py-2 apple-btn-primary rounded-full text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
         >
-          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5 text-black" />
+          <Send className="w-3.5 h-3.5 rotate-45 -mt-0.5 text-white" />
           <span>{t.enquire}</span>
         </button>
 
@@ -219,11 +219,11 @@ export const PostCard: React.FC<PostCardProps> = ({
 
       {/* 5. COMMENTS DRAWER */}
       {showComments && (
-        <div className="p-4 border-t border-white/10 bg-black/40 space-y-3">
+        <div className="p-4 border-t border-white/80 bg-white/60 space-y-3">
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {commentsList.map((c, i) => (
-              <div key={i} className="text-xs text-slate-300 flex items-start gap-2">
-                <span className="font-bold text-white">Member:</span>
+              <div key={i} className="text-xs text-slate-700 flex items-start gap-2">
+                <span className="font-bold text-slate-950">Member:</span>
                 <span>{c}</span>
               </div>
             ))}
@@ -235,11 +235,11 @@ export const PostCard: React.FC<PostCardProps> = ({
               placeholder="Write a comment or price inquiry..."
               value={quickComment}
               onChange={(e) => setQuickComment(e.target.value)}
-              className="flex-1 px-3.5 py-2 bg-white/5 border border-white/15 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-white"
+              className="flex-1 px-3.5 py-2 bg-white/80 border border-white rounded-xl text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-900 shadow-sm"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-white text-black font-extrabold rounded-xl text-xs transition cursor-pointer hover:bg-slate-200"
+              className="px-4 py-2 bg-slate-950 text-white font-extrabold rounded-xl text-xs transition cursor-pointer hover:bg-black shadow-sm"
             >
               Post
             </button>
