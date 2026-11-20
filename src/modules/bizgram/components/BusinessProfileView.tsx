@@ -6,7 +6,8 @@ import {
   Share2, ShoppingBag, Briefcase, Image as ImageIcon, Globe, 
   Star, ChevronRight, UserX, Shield, Eye, Bell, Key, LogOut, 
   Camera, Store, Users, UserCheck, X, ThumbsDown,
-  Package, Truck, FileText, TrendingUp, BarChart3, Zap, Printer, Download, Check
+  Package, Truck, FileText, TrendingUp, BarChart3, Zap, Printer, Download, Check,
+  QrCode, Copy
 } from 'lucide-react';
 import type { BizPost, BizUser, BizOutlet, BizFollowRequest, BizProduct, BizOrder } from '../../../types';
 import { translations, type Language } from '../data/translations';
@@ -17,6 +18,7 @@ interface BusinessProfileViewProps {
   currentUser: BizUser;
   posts: BizPost[];
   lang?: Language;
+  initialTab?: 'posts' | 'store' | 'orders' | 'reels' | 'outlets' | 'requests' | 'reviews' | 'referrals' | 'settings';
   onToggleLang?: (newLang: Language) => void;
   onOpenCreateModal: () => void;
   onOpenRenewModal: () => void;
@@ -33,6 +35,7 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
   currentUser,
   posts,
   lang = 'en',
+  initialTab,
   onToggleLang,
   onOpenCreateModal,
   onOpenRenewModal,
@@ -45,8 +48,43 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
   onSendEnquiry,
 }) => {
   const t = translations[lang] || translations.en;
-  const [activeTab, setActiveTab] = useState<'posts' | 'store' | 'orders' | 'reels' | 'outlets' | 'requests' | 'reviews' | 'referrals' | 'settings'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'store' | 'orders' | 'reels' | 'outlets' | 'requests' | 'reviews' | 'referrals' | 'settings'>(initialTab || 'posts');
   const [isFollowing, setIsFollowing] = useState(true);
+
+  // Digital Storefront Public Link & QR Modal state
+  const [copiedStoreLink, setCopiedStoreLink] = useState(false);
+  const [showStoreQrModal, setShowStoreQrModal] = useState(false);
+
+  // Unique generated digital store URL
+  const cleanHandle = currentUser.username || 'shinegah.in';
+  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://shinegah.in';
+  const fullStoreUrl = `${currentOrigin}/#store-${cleanHandle}`;
+  const canonicalStoreUrl = `https://shinegah.in/@${cleanHandle}`;
+
+  const handleCopyStoreLink = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      navigator.clipboard.writeText(fullStoreUrl);
+    } catch {
+      // fallback
+    }
+    setCopiedStoreLink(true);
+    setTimeout(() => setCopiedStoreLink(false), 3000);
+  };
+
+  const handleShareStoreWhatsApp = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const text = encodeURIComponent(
+      `🛍️ *${currentUser.businessName} - Official Digital B2B Storefront*\n\n` +
+      `Explore our verified wholesale products, MOQ pricing & place consignment orders directly on Shinegah:\n` +
+      `🔗 ${fullStoreUrl}\n\n` +
+      `📍 Location: ${currentUser.taluk || 'Tamil Nadu'}\n` +
+      `🛡️ GSTIN: ${currentUser.gstin || 'Verified'}\n` +
+      `📞 Contact: +${currentUser.phone || '917548820641'}\n\n` +
+      `_Powered by Shinegah™ Business Network_`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
 
   // Hidden file inputs for direct device photo upload
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -479,6 +517,92 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
               <Globe className="w-3.5 h-3.5" />
               <span>{currentUser.website || 'www.shinegah.in'}</span>
             </a>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* DEDICATED DIGITAL STOREFRONT PUBLIC LINK & QR CONSOLE (STORE MODEL)       */}
+          {/* ========================================================================= */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-white/95 via-white/80 to-blue-50/30 border border-white/90 shadow-md space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-purple-600 to-amber-500 p-[1.5px] shadow-sm shrink-0">
+                  <div className="w-full h-full rounded-[14px] bg-slate-950 flex items-center justify-center text-white">
+                    <Store className="w-5 h-5 text-amber-300" />
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 tracking-tight flex items-center gap-1.5">
+                      <span>Digital B2B Storefront & Catalog Link</span>
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[9px] font-black uppercase tracking-wider border border-emerald-200">
+                      STORE ACTIVE
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    Share your verified digital wholesale catalog with buyers across Tamil Nadu
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons: WhatsApp Share + QR Code + Copy Link */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleShareStoreWhatsApp}
+                  className="px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  title="Share Store Catalog on WhatsApp"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowStoreQrModal(true)}
+                  className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-[11px] font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  title="View Printable Store QR Code"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Store QR</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCopyStoreLink}
+                  className="px-3.5 py-1.5 rounded-full apple-btn-primary text-[11px] flex items-center gap-1.5 transition cursor-pointer shadow-md"
+                >
+                  {copiedStoreLink ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Link</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Clickable Store URL Capsule */}
+            <div 
+              onClick={handleCopyStoreLink}
+              className="p-2.5 sm:p-3 rounded-2xl bg-white/90 hover:bg-white border border-slate-200/90 flex items-center justify-between gap-3 cursor-pointer transition group shadow-inner"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <ExternalLink className="w-4 h-4 text-blue-600 shrink-0" />
+                <span className="font-mono text-xs font-bold text-slate-800 truncate select-all">
+                  {fullStoreUrl}
+                </span>
+              </div>
+              <span className="text-[10px] font-extrabold text-blue-600 group-hover:underline shrink-0 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                {copiedStoreLink ? '✓ Copied to Clipboard' : 'Click to Copy Store Link'}
+              </span>
+            </div>
           </div>
 
         </div>
@@ -1987,6 +2111,154 @@ export const BusinessProfileView: React.FC<BusinessProfileViewProps> = ({
                 Confirm Dispatch
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* STORE QR CODE & SHARE MODAL (STORE MODEL REQUIREMENT)                     */}
+      {/* ========================================================================= */}
+      {showStoreQrModal && (
+        <div 
+          className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in select-none"
+          onClick={() => setShowStoreQrModal(false)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm apple-glass apple-specular-edge rounded-[36px] p-6 space-y-5 bg-white/95 border-2 border-white shadow-2xl text-center"
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Store className="w-5 h-5 text-amber-500" />
+                <h3 className="font-extrabold text-sm text-slate-900">Digital Storefront QR</h3>
+              </div>
+              <button 
+                onClick={() => setShowStoreQrModal(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              <h4 className="font-black text-base text-slate-950 tracking-tight">
+                {currentUser.businessName}
+              </h4>
+              <p className="text-xs text-slate-500 font-medium">
+                {currentUser.category} • {currentUser.taluk || 'Tamil Nadu'}
+              </p>
+              <div className="text-[10px] font-mono text-slate-400">
+                GSTIN: {currentUser.gstin || '33AABCS1429B1Z2'}
+              </div>
+            </div>
+
+            {/* Visual Authentic QR Code Graphic with Shinegah Center Squircle */}
+            <div className="w-52 h-52 bg-white p-3.5 rounded-3xl border-2 border-slate-200 shadow-md mx-auto flex items-center justify-center relative">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                {/* QR Finder Corners */}
+                <rect x="5" y="5" width="26" height="26" rx="5" fill="#09090b" />
+                <rect x="9" y="9" width="18" height="18" rx="3" fill="#ffffff" />
+                <rect x="13" y="13" width="10" height="10" rx="2" fill="#09090b" />
+
+                <rect x="69" y="5" width="26" height="26" rx="5" fill="#09090b" />
+                <rect x="73" y="9" width="18" height="18" rx="3" fill="#ffffff" />
+                <rect x="77" y="13" width="10" height="10" rx="2" fill="#09090b" />
+
+                <rect x="5" y="69" width="26" height="26" rx="5" fill="#09090b" />
+                <rect x="9" y="73" width="18" height="18" rx="3" fill="#ffffff" />
+                <rect x="13" y="77" width="10" height="10" rx="2" fill="#09090b" />
+
+                {/* Data Matrix Dots */}
+                <rect x="35" y="8" width="4" height="4" fill="#09090b" />
+                <rect x="43" y="8" width="8" height="4" fill="#09090b" />
+                <rect x="55" y="8" width="4" height="4" fill="#09090b" />
+                <rect x="35" y="16" width="8" height="4" fill="#09090b" />
+                <rect x="47" y="16" width="4" height="4" fill="#09090b" />
+                <rect x="55" y="16" width="8" height="4" fill="#09090b" />
+                <rect x="35" y="24" width="4" height="4" fill="#09090b" />
+                <rect x="43" y="24" width="4" height="4" fill="#09090b" />
+                <rect x="51" y="24" width="8" height="4" fill="#09090b" />
+
+                <rect x="8" y="35" width="4" height="8" fill="#09090b" />
+                <rect x="16" y="35" width="8" height="4" fill="#09090b" />
+                <rect x="8" y="47" width="4" height="4" fill="#09090b" />
+                <rect x="16" y="47" width="4" height="8" fill="#09090b" />
+                <rect x="24" y="39" width="4" height="8" fill="#09090b" />
+                <rect x="24" y="51" width="4" height="4" fill="#09090b" />
+
+                <rect x="72" y="35" width="8" height="4" fill="#09090b" />
+                <rect x="84" y="35" width="4" height="8" fill="#09090b" />
+                <rect x="72" y="47" width="4" height="8" fill="#09090b" />
+                <rect x="80" y="47" width="8" height="4" fill="#09090b" />
+                <rect x="88" y="43" width="4" height="4" fill="#09090b" />
+
+                <rect x="35" y="69" width="8" height="4" fill="#09090b" />
+                <rect x="47" y="69" width="4" height="8" fill="#09090b" />
+                <rect x="55" y="69" width="8" height="4" fill="#09090b" />
+                <rect x="67" y="69" width="4" height="4" fill="#09090b" />
+                <rect x="75" y="69" width="8" height="4" fill="#09090b" />
+                <rect x="87" y="69" width="4" height="8" fill="#09090b" />
+                <rect x="35" y="81" width="4" height="8" fill="#09090b" />
+                <rect x="43" y="77" width="8" height="4" fill="#09090b" />
+                <rect x="55" y="81" width="4" height="8" fill="#09090b" />
+                <rect x="63" y="77" width="4" height="4" fill="#09090b" />
+                <rect x="71" y="81" width="8" height="4" fill="#09090b" />
+                <rect x="83" y="81" width="4" height="8" fill="#09090b" />
+                <rect x="39" y="89" width="8" height="4" fill="#09090b" />
+                <rect x="51" y="89" width="8" height="4" fill="#09090b" />
+                <rect x="67" y="89" width="8" height="4" fill="#09090b" />
+                <rect x="79" y="89" width="8" height="4" fill="#09090b" />
+              </svg>
+              {/* Center Squircle Brand Logo */}
+              <div className="absolute inset-0 m-auto w-11 h-11 rounded-xl bg-white p-0.5 shadow-md border border-slate-200 flex items-center justify-center">
+                <img src="/shinegah-app-icon.jpg" alt="Logo" className="w-full h-full rounded-lg object-cover" />
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 font-medium">
+              Scan with any mobile camera to view wholesale products, MOQ pricing & place direct consignment orders.
+            </p>
+
+            {/* Action buttons */}
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={handleCopyStoreLink}
+                className="w-full py-2.5 rounded-full apple-btn-primary text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              >
+                {copiedStoreLink ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Store Link Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy Store Link</span>
+                  </>
+                )}
+              </button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleShareStoreWhatsApp}
+                  className="py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print QR</span>
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

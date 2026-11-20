@@ -77,16 +77,33 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
     } catch {}
   }, [registeredUsers]);
 
-  // Listen to hashchange for direct #admin URL navigation
+  // Profile initial active tab (allows direct deep link into 'store' tab)
+  const [profileInitialTab, setProfileInitialTab] = useState<'posts' | 'store' | 'orders' | 'reels' | 'outlets' | 'requests' | 'reviews' | 'referrals' | 'settings'>('posts');
+
+  // Listen to hashchange for direct #admin or #store-<username> / #@<username> navigation
   useEffect(() => {
     const handleHash = () => {
-      if (window.location.hash === '#admin') {
+      const hash = window.location.hash;
+      if (hash === '#admin') {
         setIsSuperAdminView(true);
+        return;
+      }
+      if (hash.startsWith('#store-') || hash.startsWith('#@')) {
+        const targetUsername = hash.replace(/^#(store-|@)/, '').toLowerCase();
+        const found = registeredUsers.find(
+          (u) => u.username.toLowerCase() === targetUsername || u.id.toLowerCase() === targetUsername
+        );
+        if (found) {
+          setCurrentUser(found);
+          setProfileInitialTab('store');
+          setActiveTab('profile');
+        }
       }
     };
+    handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  }, [registeredUsers]);
 
   // Language State: English by default, togglable in Settings
   const [currentLang, setCurrentLang] = useState<Language>(() => {
@@ -432,23 +449,27 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
   }
 
   // Mandatory Business Authentication Gate (User must register/login before entering home screen)
+  // Exception: If a buyer or visitor arrives via direct public digital store link (#store- or #@), allow them to view the digital store!
   if (!isAuthenticated) {
-    return (
-      <BusinessAuthGate
-        lang={currentLang}
-        onOpenSuperAdmin={() => {
-          setIsSuperAdminView(true);
-          if (typeof window !== 'undefined') {
-            window.location.hash = 'admin';
-          }
-        }}
-        onAuthenticated={(user) => {
-          setCurrentUser(user);
-          setIsAuthenticated(true);
-          localStorage.setItem('nbn_biz_authenticated', 'true');
-        }}
-      />
-    );
+    const isDirectStoreVisit = typeof window !== 'undefined' && (window.location.hash.startsWith('#store-') || window.location.hash.startsWith('#@'));
+    if (!isDirectStoreVisit) {
+      return (
+        <BusinessAuthGate
+          lang={currentLang}
+          onOpenSuperAdmin={() => {
+            setIsSuperAdminView(true);
+            if (typeof window !== 'undefined') {
+              window.location.hash = 'admin';
+            }
+          }}
+          onAuthenticated={(user) => {
+            setCurrentUser(user);
+            setIsAuthenticated(true);
+            localStorage.setItem('nbn_biz_authenticated', 'true');
+          }}
+        />
+      );
+    }
   }
 
   return (
@@ -1016,6 +1037,7 @@ export const BizGramApp: React.FC<BizGramAppProps> = ({
             currentUser={currentUser}
             posts={posts}
             lang={currentLang}
+            initialTab={profileInitialTab}
             onToggleLang={handleToggleLang}
             onOpenCreateModal={() => {
               setModalAction('post');
